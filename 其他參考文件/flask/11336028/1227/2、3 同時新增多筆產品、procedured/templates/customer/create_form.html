@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>北風公司管理系統</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>      
+<!------------------------->
+</head>
+   
+<body>
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            <h2>客戶新增</h2>
+
+            <form action="/customer/create" method="post" enctype="multipart/form-data">
+                <div class="form">
+                    <span class="name">客戶編號</span>
+                    <span class="value">
+                        <input type="text" name="cusno" maxlength="4" required>
+                    </span>
+                    <br/>
+
+                    <span class="name">客戶名稱</span>
+                    <span class="value">
+                        <input type="text" name="cusname" size="30" maxlength="30" required>
+                    </span>
+                    <br/>
+
+                    <span class="name">地址</span>
+                    <span class="value">
+                        <input type="text" name="address" size="50" maxlength="50" required>
+                    </span>
+                    <br/>          
+                    
+                    <span class="name">圖片</span>
+                    <span class="value">
+                        <input type="file" name="photo">
+                    </span>
+                    <br/> 
+                    
+                    <span class="name"></span>
+                    <span class="value"><input type="submit" value="新增" style="width:80px"></span>
+                </div>
+            </form>
+               
+        </div>       
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2024.
+        </div>  
+    </div>
+</body>
+   
+</html>

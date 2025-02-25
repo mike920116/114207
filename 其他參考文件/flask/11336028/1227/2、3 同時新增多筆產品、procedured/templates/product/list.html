@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>北風公司管理系統</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>      
+</head>
+   
+<body>
+    <div class="container">    
+        <div class="header"></div>        
+        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <div class="content">
+            <h2>產品清單</h2>
+
+            <p>
+                {% if data %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>產品#</th>
+                                <th>產品名稱</th>
+                                <th>單價</th>
+                                <th>庫存量</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for d in data %}
+                                <tr>
+                                    <td>{{ d.prono }}</td>
+                                    <td>{{ d.proname }}</td>
+                                    <td>{{ d.price }}</td>
+                                    <td>{{ d.stockAmt }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>                    
+                    </table>
+                {% else %}
+                    <p>查無資料</p>
+                {% endif %}
+            </p>
+
+            <!-- 分頁控制 -->
+            <div class="pagination">
+                <!-- 上一頁 -->
+                {% if page > 1 %}
+                    <a href="{{ url_for('product_list', page=page-1) }}">上一頁</a>
+                {% else %}
+                    <span>上一頁</span>
+                {% endif %}
+
+                <!-- 頁碼 -->
+                {% for p in range(1, total_pages + 1) %}
+                    {% if p == page %}
+                        <span>{{ p }}</span>
+                    {% else %}
+                        <a href="{{ url_for('product_list', page=p) }}">{{ p }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- 下一頁 -->
+                {% if page < total_pages %}
+                    <a href="{{ url_for('product_list', page=page+1) }}">下一頁</a>
+                {% else %}
+                    <span>下一頁</span>
+                {% endif %}
+            </div>
+
+        </div>      
+        
+        <div class="footer">
+            NTUB imd, 2024.    
+        </div>  
+    </div>
+</body>
+</html>

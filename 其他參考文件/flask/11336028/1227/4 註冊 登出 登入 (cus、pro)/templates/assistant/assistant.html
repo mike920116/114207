@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 助手</title>
+    <link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+    <link href="/static/imgs/icon.jpg" rel="shortcut icon">
+    <link href="/static/css/color.css" rel="stylesheet"/>  
+    <link href="/static/css/main.css" rel="stylesheet"/>      
+</head>
+<body>
+    <div class="container">    
+        <div class="header"></div>        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        <div class="content">
+            <h1 class="main-title">您的AI小助手</h1>
+            <div class="ui-container">
+                <div class="sidebar">
+                    <!-- 側邊欄整合下拉式選單 -->
+                    <div class="label-dropdown">
+                        <button class="dropdown-btn">助手主題標籤</button>
+                        <div class="dropdown-content">
+                            <button class="tab">簡易互動</button>
+                            <button class="tab">日記</button>
+                            <button class="tab">個性化建議</button>
+                            <button class="tab">活動推薦</button>
+                        </div>
+                    </div>
+                    <div class="history">歷史紀錄</div>
+                </div>
+                <!-- AI 助手設定（點選後展開設定選單，主題配色由 CSS 控制） -->
+                <div class="assistant">
+                    <div class="avatar"><img src="/static/imgs/123.jpg"></div>
+                    <div class="settings">
+                        <button class="btn-background">背景主題</button>
+                        <button class="btn-setting">設定</button>
+                        <button class="btn-exit">退出</button>
+                    </div>                    
+                </div>
+            </div>
+            <div class="message-box">
+                <input type="text" placeholder="傳訊息給你的助手..." class="input-field">
+                <button class="send-btn">Enter</button>
+                <button class="voice-btn">🎙️</button>
+            </div>
+        </div>       
+        <div class="footer">
+            NTUB imd, 2024.    
+        </div>  
+    </div>    
+</body>   
+</html>

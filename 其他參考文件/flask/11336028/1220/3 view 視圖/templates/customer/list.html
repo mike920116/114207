@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>測試樣板</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>      
+<!------------------------->
+</head>
+   
+<body>
+    <!--**************************-->
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            <h2>清單樣板畫面</h2>
+
+            <p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>欄位1</th>
+                            <th>欄位2</th>
+                            <th>欄位3</th>
+                            <th>欄位4</th>
+                            <th>欄位5</th>
+                            <th>欄位6</th>
+                            <th>欄位7</th>
+                        </tr>
+                    </thead>
+                                                            <!------此處有重點--------->
+                    <tbody>
+                        {% for d in data%}
+                            <tr>
+                                <td>{{d.prono}}</td>
+                                <td>{{d.proname}}</td>
+                                <td>{{d.price}}</td>
+                                <td>{{d.supno}}</td>
+                                <td>{{d.supname}}</td>
+                                <td>{{d.typno}}</td>
+                                <td>{{d.typname}}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                                                            <!------此處有重點--------->
+                </table>
+            </p>       
+               
+        </div>       
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2023.    
+        </div>  
+    </div>
+    <!--**************************-->    
+</body>
+   
+</html>

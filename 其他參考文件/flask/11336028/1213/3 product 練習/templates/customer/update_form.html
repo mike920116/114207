@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>測試樣板</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>      
+<!------------------------->
+</head>
+   
+<body>
+    <!--**************************-->
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            <h2>客戶更改</h2>
+
+            <form action="/customer/update" method="post">                          <!--呼叫update服務-->
+                <div class="form">
+
+                    <span class="name">客戶編號</span>
+                    <span class="value">
+                        <input type="text" name="cusno" maxlength="4" value="{{data.cusno}}" readonly>
+                    </span>
+                    <br/>
+
+                    <span class="name">客戶名稱</span>
+                    <span class="value">
+                        <input type="text" name="cusname" value="{{data.cusname}}">
+                    </span>
+                    <br/>
+
+                    <span class="name">地址</span>
+                    <span class="value">
+                        <input type="text" name="address" value="{{data.address}}" size="50">
+                    </span>
+                    <br/>
+
+                    <span class="name">電話</span>
+                    <span class="value">
+                        <input type="text" name="tel" value="{{data.tel}}">
+                    </span>
+                    <br/>
+
+                    <span class="name"></span>
+                    <span class="value"><input type="submit" value="更改" style="width:80px"></span>
+                </div>
+            </form>
+               
+        </div>       
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2023.
+        </div>  
+    </div>
+    <!--**************************-->    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+   
+    <script>
+        function checkPW(){
+            var pw1 = document.getElementById("pw1").value;
+            var pw2 = document.getElementById("pw2").value;
+			
+            if (pw1!=pw2) {
+                swal('輸入錯誤', '[密碼]與[確認密碼]輸入的內容不同!', 'error');
+                return false;
+            }else{
+                return true;	
+            }
+        }
+    </script>    
+   <!--**************************-->       
+</body>
+   
+</html>

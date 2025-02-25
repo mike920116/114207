@@ -1,0 +1,174 @@
+@charset "utf-8";
+@import "color.css";
+
+/*---------------------------*/
+/* 編排網頁                   */
+/*---------------------------*/
+html, body{
+    font-family: 'Noto Sans TC', sans-serif; 
+    background: var(--color-primary-2);
+}
+
+/*---------------------------*/
+/* 編排<容器>區塊             */
+/*---------------------------*/
+div.container{
+    width: 1000px;
+    margin: 10px auto 10px auto;
+    background: var(--color-primary-5);
+    box-shadow: 0px 0px 10px 0px #000;
+}
+
+/*---------------------------*/
+/* 編排<標題>區塊             */
+/*---------------------------*/
+div.header{
+    height: 150px;
+    background: url(../imgs/header.jpg);
+}
+
+
+/*---------------------------*/
+/* 編排<內文>區塊             */
+/*---------------------------*/
+div.content{
+    padding: 20px 30px;    
+    line-height: 30px;
+    text-align: justify;
+}
+
+/*---------------------*/
+/* 修飾表格             */
+/*---------------------*/
+table{
+    width:100%;
+    border: 1px solid #666;
+    border-collapse: collapse;    
+}
+
+table tr td{
+    border: 1px dotted #666;    
+    text-align: center;
+}
+
+/* 修飾標題列 */
+table thead tr{
+    height: 32px;
+}
+
+table thead th{
+    border: 1px solid var(--color-primary-2); 
+    background: var(--color-primary-3); 
+    text-align: center;
+}
+
+/* 修飾資料列 */
+table tbody tr{
+    height: 40px;
+}
+
+table tbody tr:nth-child(even){
+    background: var(--color-primary-4);
+}
+
+/* 修飾超連結 */
+table tbody tr td a{
+    text-decoration: none;
+    color: #000;
+}
+
+table tbody tr td a:hover{
+    font-size: 19px;
+    color: #333;
+}
+
+
+/*---------------------*/
+/* 單一資料表格        */
+/*---------------------*/
+table.single tr td:nth-child(1){
+    width:30%;
+    background: #ddd;
+}
+
+table.single tr td:nth-child(2){
+    width:70%;
+    background: #fff;
+}
+
+
+/*---------------------*/
+/* 修飾分頁導覽列       */
+/*---------------------*/
+ul.pagination{
+    margin: 0;
+    margin-bottom: 5px;
+    padding: 0;    
+    height: 40px;
+    line-height: 40px;
+    list-style-type: none;    
+}
+
+ul.pagination li{
+    width: 30px;
+    float: left;
+}
+
+ul.pagination li a{
+    text-decoration: none;
+    color: var(--color-primary-0);
+}
+
+ul.pagination li a:hover{  
+    color: var(--color-primary-3);
+    font-size: 19px;
+}
+
+ul.pagination li:nth-child(1){
+    width: 80px;
+}
+
+ul.pagination:after{
+    display: block;
+    content: '';
+    clear: both;
+}
+
+/*---------------------*/
+/* 修飾表單             */
+/*---------------------*/
+div.form{
+    border: 1px dotted var(--color-primary-2);
+    padding: 10px 20px;
+    margin: 10px 0;
+}
+
+div.form span{
+    height: 40px;
+    line-height: 40px;
+}
+
+div.form select{
+    height: 27px;
+    line-height: 40px;
+}
+
+div.form span.name{
+    width: 80px;
+    display: inline-block;
+    text-align: right;
+    padding-right: 5px;	
+}
+
+/*---------------------------*/
+/* 編排<表尾>區塊             */
+/*---------------------------*/
+div.footer{
+    height: 50px;
+    line-height: 50px;
+    background: var(--color-primary-1);
+    color: var(--color-primary-5);
+    font-size: 13px;
+    text-align: center;
+    letter-spacing: 1px;
+}

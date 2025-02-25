@@ -1,0 +1,127 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>北風公司管理系統</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>      
+<!------------------------->
+
+<style>
+    .product-entry {
+        margin-bottom: 10px;
+    }
+</style>
+
+</head>
+   
+<body>
+    <!--**************************-->
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            <h2>進貨</h2>
+
+            <form id="buyForm" action="/transaction/buy" method="post">
+                <div class="form">
+                    <span class="name">訂單編號</span>
+                    <span class="value">
+                        <input type="text" maxlength="5" name="ordno" required>
+                    </span>
+                    <br/>
+
+                    <span class="name">客戶編號</span>
+                    <span class="value">
+                        <input type="text" maxlength="4" name="cusno" required>
+                    </span>
+                    <br/>
+
+                    <span class="name">員工編號</span>
+                    <span class="value">
+                        <input type="text" maxlength="4" name="empno" required>
+                    </span>
+                    <br/>
+
+                    <span class="name">訂貨日期</span>
+                    <span class="value">
+                        <input type="date" name="orddate" required>
+                    </span>
+                    <br/>                    
+
+                    <span class="name">運費</span>
+                    <span class="value">
+                        <input type="number" name="transfee" required>
+                    </span>
+                    <br/>                      
+
+                    <!-- 動態新增產品編號與數量 -->
+                    <div id="productContainer">
+                        <div class="product-entry">
+                            <span class="name">產品編號</span>
+                            <span class="value">
+                                <input type="text" maxlength="4" name="prono[]" required>
+                            </span>
+                            <span class="name">數量</span>
+                            <span class="value">
+                                <input type="number" name="amt[]" required>
+                            </span>
+                            <button type="button" onclick="removeProduct(this)">取消新增</button>
+                        </div>
+                    </div>
+                    <br/>
+                    <button type="button" id="addProductButton" style="margin-top: 10px;" onclick="addProduct()">新增產品</button>
+                    <br/>
+
+                    <span class="name"></span>
+                    <span class="value"><input type="submit" value="送出" style="width:80px"></span>
+                </div>
+            </form>
+               
+        </div>       
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2024.
+        </div>  
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 動態新增產品編號與數量欄位
+        function addProduct() {
+            const container = document.getElementById("productContainer");
+            const newEntry = document.createElement("div");
+            newEntry.className = "product-entry";
+            newEntry.innerHTML = `
+                <span class="name">產品編號</span>
+                <span class="value">
+                    <input type="text" maxlength="4" name="prono[]" required>
+                </span>
+                <span class="name">數量</span>
+                <span class="value">
+                    <input type="number" name="amt[]" required>
+                </span>
+                <button type="button" onclick="removeProduct(this)">取消新增</button>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        // 刪除某一組產品編號與數量欄位
+        function removeProduct(button) {
+            const entry = button.parentElement;
+            entry.remove();
+        }
+    </script>
+</body>
+</html>

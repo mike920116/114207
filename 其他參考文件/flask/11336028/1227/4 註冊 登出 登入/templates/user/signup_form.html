@@ -1,0 +1,86 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>北風公司管理系統</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>      
+<!------------------------->
+</head>
+   
+<body>
+    <!--**************************-->
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            <h2>使用者註冊</h2>
+
+            <form onsubmit="return checkPW()" action="/user/signup" method="post">
+                <div class="form">
+                    <span class="name">帳號</span>
+                    <span class="value">
+                        <input type="text" name="userno" maxlength="20" required>
+                    </span>
+                    <br/>
+
+                    <span class="name">姓名</span>
+                    <span class="value">
+                        <input type="text" name="username" size="30" maxlength="30" required>
+                    </span>
+                    <br/>
+
+                    <span class="name">密碼</span>
+                    <span class="value">
+                        <input type="password" id="password1" name="password1" size="15" maxlength="15" required>
+                    </span>
+                    <br/>     
+                    
+                    <span class="name">再輸入密碼</span>
+                    <span class="value">
+                        <input type="password" id="password2" name="password2" size="15" maxlength="15" required>
+                    </span>
+                    <br/>                    
+                    
+                    <span class="name"></span>
+                    <span class="value"><input type="submit" value="註冊" style="width:80px"></span>
+                </div>
+            </form>
+               
+        </div>       
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2024.
+        </div>  
+    </div>
+    <!--**************************-->         
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script>
+        function checkPW(){
+            var pw1 = document.getElementById("password1").value;
+            var pw2 = document.getElementById("password2").value;
+            
+            if (pw1!=pw2) {
+                swal('輸入錯誤', '二次輸入的密碼不同!', 'error');
+                return false;
+            }else{
+                return true;	
+            }
+        }
+    </script>    
+    <!--**************************-->  
+</body>  
+</html>

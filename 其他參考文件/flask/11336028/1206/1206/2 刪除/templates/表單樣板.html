@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>測試樣板</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="imgs/icon.jpg" rel="shortcut icon">
+<link href="css/menu.css" rel="stylesheet"/>  
+<link href="css/main.css" rel="stylesheet"/>      
+<!------------------------->
+</head>
+   
+<body>
+    <!--**************************-->
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            <h2>表單樣板</h2>
+
+            <form onsubmit="return checkPW()" action="#" method="get">
+                <div class="form">
+                    <span class="name">學號</span>
+                    <span class="value">
+                        <input type="text" name="stuno" maxlength="8" pattern="\d{6,}" title="至少6個數字" required>
+                    </span>
+                    <br/>
+
+                    <span class="name">姓名</span>
+                    <span class="value">
+                        <input type="text" name="name">
+                    </span>
+                    <br/>
+
+                    <span class="name">身份證號</span>
+                    <span class="value">
+                        <input type="text" name="id" pattern="[A-Z]{1}\d{9}" title="1碼大寫英文及9碼數字">
+                    </span>
+                    <br/>
+
+                    <span class="name">生日</span>
+                    <span class="value">
+                        <input type="date" name="birthday">
+                    </span>
+                    <br/>                    
+
+                    <span class="name">性別</span>
+                    <span class="value">
+                        <input type="radio" name="gender" value="M">男 
+                        <input type="radio" name="gender" value="F" checked>女 
+                    </span>
+                    <br/>
+
+                    <span class="name">科別</span>
+                    <span class="value"> 
+                        <select name="department" >
+                            <option value="1">會計資訊</option>
+                            <option value="2">財務金融</option>
+                            <option value="3">財政稅務</option>
+                            <option value="4">國際商務</option>
+                            <option value="5">企業管理</option>
+                            <option value="6">資訊管理</option>
+                            <option value="7">應用外語</option>
+                        </select>
+                    </span>
+                    <br/>
+
+                    <span class="name">年齡</span>
+                    <span class="value">
+                        <input type="number" name="age" min="15" max="50" placeholder="15~50">
+                    </span>
+                    <br/>
+
+                    <span class="name">專長</span>
+                    <span class="value"> 
+                        <input type="checkbox" name="exper1" value="1">程式設計
+                        <input type="checkbox" name="exper2" value="2">美工排版
+                        <input type="checkbox" name="exper3" value="3">文案編寫
+                    </span>
+                    <br/> 
+
+                    <span class="name">密碼</span>
+                    <span class="value"> 
+                        <input type="password" name="pw1" id="pw1" pattern="(?=.*\d)(?=.*[A-Z]).{8,}" title="至少8碼,其中至少包含1碼數字及1碼大寫英文">
+                    </span>
+                    <br/>
+
+                    <span class="name">確認密碼</span>
+                    <span class="value"> 
+                        <input type="password" name="pw2" id="pw2" placeholder="再輸入一次密碼">
+                    </span>
+                    <br/>
+
+                    <span class="name">密碼提示</span>
+                    <span class="value"> 
+                        <input type="text" name="text" placeholder="例:小白的生日">
+                    </span>
+                    <br/>
+                    
+                    <span class="name"></span>
+                    <span class="value"><input type="submit" value="新增" style="width:80px"></span>
+                </div>
+            </form>
+               
+        </div>       
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2023.
+        </div>  
+    </div>
+    <!--**************************-->    
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+   
+    <script>
+        function checkPW(){
+            var pw1 = document.getElementById("pw1").value;
+            var pw2 = document.getElementById("pw2").value;
+			
+            if (pw1!=pw2) {
+                swal('輸入錯誤', '[密碼]與[確認密碼]輸入的內容不同!', 'error');
+                return false;
+            }else{
+                return true;	
+            }
+        }
+    </script>    
+   <!--**************************-->       
+</body>
+   
+</html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>北風公司管理系統</title>
+<!-- 連結思源中文及css -->
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+TC" rel="stylesheet">
+<link href="/static/imgs/icon.jpg" rel="shortcut icon">
+<link href="/static/css/menu.css" rel="stylesheet"/>  
+<link href="/static/css/main.css" rel="stylesheet"/>      
+<!------------------------->
+</head>
+   
+<body>
+    <!--**************************-->
+    <div class="container">    
+        <!--~~~~~~~~~~~~~~~~~-->
+        <div class="header">           
+        </div>        
+        
+        <!--~~~~~~~~~~~~~~~~~-->        
+        <ul id="navigation">        
+            <li><a href="/">返回主頁</a></li> 
+        </ul>
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="content">
+            <h2>客戶查詢</h2>
+
+            <p>
+                {% if data %}
+                    <table class="single">
+                        <tr>
+                            <td>客戶編號</td>
+                            <td>{{data.cusno}}</td>
+                        </tr>
+                        <tr>
+                            <td>客戶名稱</td>
+                            <td>{{data.cusname}}</td>
+                        </tr>
+                        <tr>
+                            <td>地址</td>
+                            <td>{{data.address}}</td>
+                        </tr>
+                        <tr>
+                            <td>照片</td>
+                            <td><img src="/static/photos/{{data.photo}}"></td>
+                        </tr> 
+                    </table>
+                {% else %}
+                    <p> 查無資料 </p>
+                {% endif %}
+            </p>       
+               
+        </div>       
+        
+        <!--~~~~~~~~~~~~~~~~~--> 
+        <div class="footer">
+            NTUB imd, 2024.    
+        </div>  
+    </div>
+    <!--**************************-->    
+</body>
+   
+</html>

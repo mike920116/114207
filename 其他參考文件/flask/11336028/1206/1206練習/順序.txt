@@ -1,0 +1,2 @@
+mysql slient -> 密碼11056$$$
+show databases;
