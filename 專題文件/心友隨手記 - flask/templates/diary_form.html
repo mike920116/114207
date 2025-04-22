@@ -1,0 +1,387 @@
+{% extends "base.html" %}
+
+{% block title %}心情日記 | 撰寫日記{% endblock %}
+
+{% block custom_css %}
+<style>
+    /* 表單容器 */
+    .form-container {
+        max-width: 800px;
+        width: 90%;
+        margin: 30px auto;
+        padding: 40px;
+        background-color: rgba(25, 30, 33, 0.86);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+        transition: all 0.5s ease;
+    }
+    
+    /* 標題樣式 */
+    h2.form-title {
+        color: #ffffff;
+        text-shadow: 0 0 15px rgba(0, 183, 201, 0.5);
+        font-weight: 700;
+        font-size: 2.2rem;
+        margin-bottom: 2rem;
+        letter-spacing: 2px;
+        position: relative;
+        padding-bottom: 15px;
+        text-align: center;
+    }
+
+    h2.form-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, rgba(0,183,201,0), rgba(0,183,201,0.7), rgba(0,183,201,0));
+    }
+    
+    .input-wrapper {
+        width: 90%;
+        margin: 0 auto 25px auto;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+        position: relative;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px 18px;
+        border-radius: 8px;
+        border: 1px solid rgba(73, 80, 87, 0.5);
+        background-color: rgba(17, 18, 22, 0.68);
+        color: #fff;
+        transition: all 0.3s ease;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #17a2b8;
+        box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.2);
+        background-color: rgba(17, 18, 22, 0.8);
+    }
+    
+    /* 標籤樣式 */
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: #e0e0e0;
+        font-weight: 500;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .textarea-control {
+        min-height: 180px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+    
+    /* 情緒選擇區塊 */
+    .emotion-box {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 15px;
+    }
+    
+    .emotion-option {
+        background-color: rgba(17, 18, 22, 0.68);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        flex: 0 0 auto;
+        border: 2px solid transparent;
+        font-weight: 500;
+    }
+    
+    .emotion-option:hover {
+        background-color: rgba(23, 162, 184, 0.2);
+        transform: translateY(-3px);
+    }
+    
+    .emotion-option.selected {
+        background-color: rgba(0, 183, 201, 0.9);
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* 提醒訊息 */
+    .alert {
+        width: 90%;
+        margin: 0 auto 25px auto;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: 500;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    
+    .alert.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    
+    .alert-success {
+        background-color: rgba(40, 167, 69, 0.2);
+        border-left: 4px solid #28a745;
+        color: #a3e9b4;
+    }
+    
+    .alert-danger {
+        background-color: rgba(220, 53, 69, 0.2);
+        border-left: 4px solid #dc3545;
+        color: #f8b8bf;
+    }
+    
+    /* 按鈕樣式 */
+    .btn-submit {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        background: linear-gradient(45deg, #17a2b8, #20c997);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        letter-spacing: 1px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-submit:hover {
+        background: linear-gradient(45deg, #20c997, #17a2b8);
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* 心情提示文字 */
+    .mood-hint {
+        text-align: center;
+        margin-top: 10px;
+        color: #a8a8a8;
+        font-style: italic;
+        font-size: 0.9rem;
+    }
+    
+    /* 日期選擇器樣式 */
+    input[type="date"] {
+        cursor: pointer;
+    }
+    
+    /* 響應式調整 */
+    @media (max-width: 768px) {
+        .form-container {
+            width: 95%;
+            padding: 30px 20px;
+        }
+        
+        .input-wrapper {
+            width: 95%;
+        }
+        
+        h2.form-title {
+            font-size: 1.8rem;
+        }
+        
+        .emotion-option {
+            padding: 8px 12px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+    <!-- 日記表單容器 -->
+    <div class="form-container">
+        <h2 class="form-title">我的心理日記</h2>
+        
+        <!-- 儲存成功提示 -->
+        <div id="success-alert" class="alert alert-success" role="alert">
+            日記已成功儲存！
+        </div>
+        
+        <!-- 錯誤訊息提示 -->
+        <div id="error-alert" class="alert alert-danger" role="alert">
+            發生錯誤，請稍後再試。
+        </div>
+        
+        <!-- 日記表單 -->
+        <div>
+            <!-- 日期選擇 -->
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <label for="diary-date">日期</label>
+                    <input type="date" class="form-control" id="diary-date" value="{{ today_date }}" required>
+                </div>
+            </div>
+            
+            <!-- 日記內容輸入欄位 -->
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <label for="diary-content">今天的心情...</label>
+                    <textarea class="form-control textarea-control" id="diary-content" placeholder="今天發生了什麼？您的感受如何？有什麼特別的想法想記錄下來..." rows="6"></textarea>
+                </div>
+            </div>
+            
+            <!-- 情緒選擇 -->
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <label>您今天的主要情緒是？</label>
+                    <div class="emotion-box">
+                        <div class="emotion-option" data-emotion="快樂">快樂 😊</div>
+                        <div class="emotion-option" data-emotion="平靜">平靜 😌</div>
+                        <div class="emotion-option" data-emotion="感恩">感恩 🙏</div>
+                        <div class="emotion-option" data-emotion="焦慮">焦慮 😰</div>
+                        <div class="emotion-option" data-emotion="悲傷">悲傷 😢</div>
+                        <div class="emotion-option" data-emotion="憤怒">憤怒 😠</div>
+                        <div class="emotion-option" data-emotion="困惑">困惑 🤔</div>
+                        <div class="emotion-option" data-emotion="疲倦">疲倦 😴</div>
+                    </div>
+                    <p class="mood-hint">選擇最能代表您今天整體心情的情緒</p>
+                </div>
+            </div>
+            
+            <!-- 額外說明 -->
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <label for="emotion-detail">情緒詳細描述 (選填)</label>
+                    <textarea class="form-control" id="emotion-detail" placeholder="您可以更詳細地描述您的情緒、成因，或任何想法..." rows="3"></textarea>
+                </div>
+            </div>
+            
+            <!-- 提交按鈕 -->
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <button id="submit-diary" class="btn-submit">儲存日記</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block custom_js %}
+<script>
+    // 背景圖片
+    $.backstretch("{{ url_for('static', filename='imgs/ba1.jpg') }}", {speed: 500});
+    
+    // 頁面載入動畫
+    $(document).ready(function() {
+        $('.form-container').css('opacity', 0).animate({opacity: 1}, 800);
+    });
+    
+    // 情緒選擇
+    let selectedEmotion = '';
+    
+    document.querySelectorAll('.emotion-option').forEach(option => {
+        option.addEventListener('click', function() {
+            // 移除之前的選擇
+            document.querySelectorAll('.emotion-option').forEach(opt => opt.classList.remove('selected'));
+            
+            // 設置新的選擇
+            this.classList.add('selected');
+            selectedEmotion = this.dataset.emotion;
+        });
+    });
+    
+    // 表單元素動畫效果
+    document.querySelectorAll('.form-control').forEach(input => {
+        input.addEventListener('focus', function() {
+            // 獲取關聯的 label
+            const label = this.parentElement.querySelector('label');
+            if (label) {
+                label.style.color = '#17a2b8';
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            // 恢復 label 顏色
+            const label = this.parentElement.querySelector('label');
+            if (label) {
+                label.style.color = '#e0e0e0';
+            }
+        });
+    });
+    
+    // 提交日記
+    document.getElementById('submit-diary').addEventListener('click', function() {
+        // 獲取表單數據
+        const date = document.getElementById('diary-date').value;
+        const content = document.getElementById('diary-content').value;
+        const emotionDetail = document.getElementById('emotion-detail').value;
+        
+        // 合併情緒狀態
+        let emotionStatus = selectedEmotion;
+        if (emotionDetail) {
+            emotionStatus += ': ' + emotionDetail;
+        }
+        
+        // 檢查是否有內容
+        if (!content && !emotionStatus) {
+            document.getElementById('error-alert').textContent = '請輸入日記內容或選擇情緒狀態';
+            document.getElementById('error-alert').classList.add('show');
+            document.getElementById('success-alert').classList.remove('show');
+            return;
+        }
+        
+        // 發送到伺服器
+        fetch("{{ url_for('diary.save_diary') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                date: date,
+                content: content,
+                state: emotionStatus
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 顯示成功訊息
+                document.getElementById('success-alert').textContent = data.message || '日記已成功儲存！';
+                document.getElementById('success-alert').classList.add('show');
+                document.getElementById('error-alert').classList.remove('show');
+                
+                // 清空表單
+                document.getElementById('diary-content').value = '';
+                document.getElementById('emotion-detail').value = '';
+                document.querySelectorAll('.emotion-option').forEach(opt => opt.classList.remove('selected'));
+                selectedEmotion = '';
+                
+                // 表單提交成功動畫
+                $('.form-container').addClass('success');
+                setTimeout(() => $('.form-container').removeClass('success'), 1000);
+            } else {
+                // 顯示錯誤訊息
+                document.getElementById('error-alert').textContent = data.message || '發生錯誤，請稍後再試。';
+                document.getElementById('error-alert').classList.add('show');
+                document.getElementById('success-alert').classList.remove('show');
+            }
+        })
+        .catch(error => {
+            console.error('錯誤:', error);
+            document.getElementById('error-alert').textContent = '發生網路錯誤，請檢查連接。';
+            document.getElementById('error-alert').classList.add('show');
+            document.getElementById('success-alert').classList.remove('show');
+        });
+    });
+</script>
+{% endblock %} 
