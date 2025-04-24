@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+        <title>{% block title %}心情日記 | 記錄您的每一刻{% endblock %}</title>
+        <meta name="keywords" content="心情日記,情緒記錄,心理健康" />
+        <meta name="description" content="記錄並追蹤您的情緒變化，提升心理健康" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <!-- Google Web Font Embed -->
+        <link href='https://fonts.googleapis.com/css?family=Raleway:400,600,500,300,700&display=swap' rel='stylesheet' type='text/css'>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+        
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/templatemo_main.css') }}">
+        <style>
+            body {
+                font-family: 'Noto Sans TC', 'Raleway', sans-serif;
+            }
+            
+            .diary-btn {
+                display: inline-block;
+                padding: 10px 18px;
+                background-color: #17a2b8;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                margin-left: 10px;
+                font-weight: bold;
+                transition: all 0.3s ease;
+                border: none;
+                text-align: center;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            }
+            
+            .diary-btn:hover {
+                background-color: #138496;
+                color: white;
+                text-decoration: none;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            }
+            
+            .diary-btn-mobile {
+                display: block;
+                text-align: center;
+                padding: 12px;
+                margin: 8px 0;
+                background-color: #17a2b8;
+                color: white;
+                border-radius: 4px;
+                font-weight: 500;
+            }
+            
+            /* 為已登入使用者顯示的用戶區域 */
+            .user-area {
+                display: flex;
+                align-items: center;
+                margin-top: 15px;
+                background: rgba(0, 0, 0, 0.3);
+                padding: 8px 15px;
+                border-radius: 30px;
+                backdrop-filter: blur(5px);
+            }
+            
+            .welcome-message {
+                margin-right: 15px;
+                color: white;
+                font-weight: 500;
+            }
+            
+            /* 下拉菜单样式 */
+            .menu ul li {
+                position: relative;
+            }
+            
+            .menu ul li a {
+                display: block;
+                padding: 12px 18px;
+                font-weight: 500;
+            }
+            
+            .dropdown {
+                position: relative;
+            }
+            
+            .dropdown-toggle::after {
+                content: "\25BC";
+                font-size: 10px;
+                margin-left: 5px;
+                transition: transform 0.3s ease;
+            }
+            
+            .dropdown:hover .dropdown-toggle::after {
+                transform: rotate(180deg);
+            }
+            
+            .submenu {
+                display: none;
+                position: absolute;
+                left: 100%;
+                top: 0;
+                background-color: rgba(0, 0, 0, 0.85);
+                min-width: 180px;
+                box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+                border-radius: 0 8px 8px 8px;
+                z-index: 1000;
+                opacity: 0;
+                transform: translateY(10px);
+                transition: opacity 0.3s, transform 0.3s;
+                overflow: hidden;
+            }
+            
+            .menu ul li:hover > .submenu {
+                display: block;
+                opacity: 1;
+                transform: translateY(0);
+            }
+            
+            .submenu li {
+                width: 100%;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .submenu li:last-child {
+                border-bottom: none;
+            }
+            
+            .submenu li a {
+                padding: 12px 18px;
+                color: #fff;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                display: block;
+            }
+            
+            .submenu li a:hover {
+                background-color: rgba(23, 162, 184, 0.3);
+                padding-left: 24px;
+            }
+            
+            /* 移动端下拉菜单样式 */
+            #responsive {
+                background-color: rgba(0, 0, 0, 0.9);
+                border-radius: 0 0 15px 15px;
+                overflow: hidden;
+            }
+            
+            #responsive .submenu-mobile {
+                display: none;
+                padding-left: 20px;
+                background-color: rgba(0, 0, 0, 0.5);
+                overflow: hidden;
+                max-height: 0;
+                transition: max-height 0.5s ease;
+            }
+            
+            #responsive li a {
+                padding: 15px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .active-submenu .submenu-mobile {
+                display: block !important;
+                max-height: 500px;
+            }
+            
+            .dropdown-mobile::after {
+                content: "\25BC";
+                font-size: 10px;
+                margin-left: 5px;
+                transition: transform 0.3s ease;
+            }
+            
+            .rotate-icon::after {
+                content: "\25B2";
+            }
+
+            /* 內容區域樣式 */
+            .content-area {
+                padding: 30px 20px;
+                background-color: rgba(0, 0, 0, 0.4);
+                border-radius: 10px;
+                backdrop-filter: blur(10px);
+                margin: 20px;
+                box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* 登入註冊按鈕 */
+            .btn-login, .btn-signup {
+                padding: 8px 16px;
+                border-radius: 30px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+            }
+            
+            .btn-login {
+                background-color: #17a2b8;
+                border: 2px solid #17a2b8;
+                color: white;
+                margin-right: 10px;
+            }
+            
+            .btn-signup {
+                background-color: transparent;
+                border: 2px solid #17a2b8;
+                color: #17a2b8;
+            }
+            
+            .btn-login:hover {
+                background-color: #138496;
+                border-color: #138496;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            }
+            
+            .btn-signup:hover {
+                background-color: rgba(23, 162, 184, 0.1);
+                color: #17a2b8;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            }
+            
+            /* 網站標題 */
+            .templatemo-site-title a {
+                font-weight: 700;
+                letter-spacing: 3px;
+                text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+                padding: 15px;
+                transition: all 0.3s ease;
+                display: inline-block;
+            }
+            
+            .templatemo-site-title a:hover {
+                text-shadow: 0 0 15px rgba(23, 162, 184, 0.8);
+                transform: scale(1.05);
+            }
+            
+            .image-section {
+                position: relative;
+            }
+            
+            .image-container img {
+                transition: opacity 0.8s ease, transform 1s ease;
+            }
+            
+            .main-img {
+                opacity: 1;
+            }
+            
+            .main-img.inactive {
+                opacity: 0;
+            }
+            
+            /* 頁腳 */
+            .templatemo-footer {
+                background-color: rgba(0, 0, 0, 0.8);
+                color: #ccc;
+                padding: 20px 0;
+                text-align: center;
+                font-size: 0.9em;
+                position: relative;
+                z-index: 100;
+            }
+        </style>
+        {% block custom_css %}{% endblock %}
+    </head>
+    <body>
+        <div id="main-wrapper">
+            <!--[if lt IE 7]>
+                <p class="chromeframe">您使用的瀏覽器 <strong>過時</strong>了。請<a rel="nofollow" href="http://browsehappy.com">升級您的瀏覽器</a>以獲得更好的體驗。</p>
+            <![endif]-->
+
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 affix text-center" style="z-index: 1;">
+                <h1 class="templatemo-site-title">
+                        <a href="{{ url_for('index') }}">心情日記</a>
+                        <img src="{{ url_for('static', filename='imgs/btn-menu.png') }}" 
+                             alt="main menu" 
+                             id="m-btn" 
+                             class="pull-right visible-xs visible-sm" >
+                </h1>
+
+                <ul id="responsive" style="display:none" class="hidden-lg hidden-md">
+                    <li><a href="#" class="dropdown-mobile">心情日記</a>
+                        <ul class="submenu-mobile">
+                            <li><a href="{{ url_for('diary.diary_form') }}">新增日記</a></li>
+                            <li><a href="{{ url_for('diary.diary_list') }}">日記列表</a></li>
+                            <li><a href="#">情緒分析</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" class="dropdown-mobile">AI助手</a>
+                        <ul class="submenu-mobile">
+                            <li><a href="#">情緒AI</a></li>
+                            <li><a href="#">建議生成</a></li>
+                            <li><a href="#">心理測驗</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" class="dropdown-mobile">社群互動</a>
+                        <ul class="submenu-mobile">
+                            <li><a href="#">心情分享</a></li>
+                            <li><a href="#">心靈討論區</a></li>
+                            <li><a href="#">線上支持</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#" class="dropdown-mobile">問題反饋</a>
+                        <ul class="submenu-mobile">
+                            <li><a href="#">意見提交</a></li>
+                            <li><a href="#">常見問題</a></li>
+                            <li><a href="#">聯絡我們</a></li>
+                        </ul>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        <li><a href="#" class="dropdown-mobile">{{ current_user.username }}</a>
+                            <ul class="submenu-mobile">
+                                <li><a href="{{ url_for('user.logout') }}">登出</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li><a href="#" class="dropdown-mobile">用戶</a>
+                            <ul class="submenu-mobile">
+                                <li><a href="{{ url_for('user.user_login_form') }}">登入</a></li>
+                                <li><a href="{{ url_for('user.user_signup_form') }}">註冊</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="menu visible-md visible-lg">
+                <ul id="menu-list">
+                    <li class="active home-menu dropdown">
+                        <a href="#" class="dropdown-toggle">心情日記</a>
+                        <ul class="submenu">
+                            <li><a href="{{ url_for('diary.diary_form') }}">新增日記</a></li>
+                            <li><a href="{{ url_for('diary.diary_list') }}">日記列表</a></li>
+                            <li><a href="#">情緒分析</a></li>
+                        </ul>
+                    </li>
+                    <li class="about-menu dropdown">
+                        <a href="#" class="dropdown-toggle">AI助手</a>
+                        <ul class="submenu">
+                            <li><a href="#">情緒AI</a></li>
+                            <li><a href="#">建議生成</a></li>
+                            <li><a href="#">心理測驗</a></li>
+                        </ul>
+                    </li>
+                    <li class="services-menu dropdown">
+                        <a href="#" class="dropdown-toggle">社群互動</a>
+                        <ul class="submenu">
+                            <li><a href="#">心情分享</a></li>
+                            <li><a href="#">心靈討論區</a></li>
+                            <li><a href="#">線上支持</a></li>
+                        </ul>
+                    </li>
+                    <li class="testimonial-menu dropdown">
+                        <a href="#" class="dropdown-toggle">問題反饋</a>
+                        <ul class="submenu">
+                            <li><a href="#">意見提交</a></li>
+                            <li><a href="#">常見問題</a></li>
+                            <li><a href="#">聯絡我們</a></li>
+                        </ul>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle">{{ current_user.username }}</a>
+                            <ul class="submenu">
+                                <li><a href="{{ url_for('user.logout') }}">登出</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="dropdown">
+                            <a href="#" class="dropdown-toggle">用戶設定(尚未登入)</a>
+                            <ul class="submenu">
+                                <li><a href="{{ url_for('user.user_login_form') }}">登入</a></li>
+                                <li><a href="{{ url_for('user.user_signup_form') }}">註冊</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div><!-- /.menu -->
+
+            <div class="image-section">
+                <div class="image-container">
+                    <img src="{{ url_for('static', filename='imgs/nature1.jpg') }}" id="home-img" class="main-img inactive" alt="Home">
+                    <img src="{{ url_for('static', filename='imgs/nature2.jpg') }}" id="about-img" class="inactive" alt="About">
+                    <img src="{{ url_for('static', filename='imgs/nature3.jpg') }}" id="services-img" class="inactive" alt="Services">
+                    <img src="{{ url_for('static', filename='imgs/nature4.jpg') }}" id="testimonial-img" class="inactive" alt="Testimonial">
+                    <img src="{{ url_for('static', filename='imgs/nature5.jpg') }}" id="contact-img" class="inactive" alt="Contact">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 col-lg-offset-6 col-md-offset-6 templatemo-content-wrapper">
+                    <div class="templatemo-content">
+                        {% block content %}{% endblock %}
+                    </div><!-- /.templatemo-content -->  
+                </div><!-- /.templatemo-content-wrapper --> 
+            </div><!-- /.row --> 
+
+            <div class="row">
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 footer">
+                    <p class="footer-text">
+                        <span>Copyright © 2050 <a target="_parent" href="http://www.mobanwang.com/" title="网页模板">网页模板</a></span>
+                    </p>
+                </div><!-- /.footer --> 
+            </div>
+
+        </div><!-- /#main-wrapper -->
+        
+        <div id="preloader">
+            <div id="status">&nbsp;</div>
+        </div><!-- /#preloader -->
+        
+        <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/jquery.backstretch.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/templatemo_script.js') }}"></script>
+        <!-- templatemo 398 nature -->
+        <script>
+        $(document).ready(function() {
+            // 處理登入和註冊按鈕點擊事件
+            $('.btn-login, .btn-signup, .diary-btn, .diary-btn-mobile').on('click', function(e) {
+                e.preventDefault();
+                window.location.href = $(this).attr('href');
+            });
+            
+            // 處理手機版選單按鈕
+            $('#m-btn').on('click', function() {
+                $('#responsive').slideToggle();
+            });
+            
+            // 處理手機版下拉選單
+            $('.dropdown-mobile').on('click', function(e) {
+                e.preventDefault();
+                $(this).toggleClass('rotate-icon');
+                $(this).parent().toggleClass('active-submenu');
+                $(this).parent().find('.submenu-mobile').slideToggle();
+            });
+            
+            // 處理子選單項目點擊
+            $('.submenu li a, .submenu-mobile li a').on('click', function(e) {
+                // 如果連結不是"#"（即有實際的URL），就正常導航
+                if ($(this).attr('href') !== '#') {
+                    window.location.href = $(this).attr('href');
+                    return;
+                }
+                
+                // 只有當連結是"#"時才顯示開發中提示
+                e.preventDefault();
+                alert('此功能正在開發中...');
+            });
+        });
+        </script>
+        
+        {% block custom_js %}{% endblock %}
+    </body>
+</html> 

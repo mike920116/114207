@@ -1,0 +1,4 @@
+0424 ver.
+
+1. diary.py 已成功串接DIFY API (API KEY 請進.env自行更改)
+2. 已將diary_form.html的日記功能及API移植進diary.py
