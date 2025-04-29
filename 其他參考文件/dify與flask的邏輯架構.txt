@@ -1,0 +1,6 @@
+dify與flask的邏輯架構，dify也可以反過來再調用flask的API(資料庫)
+
+用戶在 Flask 前端輸入問題 → Flask 把問題傳給 Dify →
+Dify 根據問題類型決定是否要呼叫 API（Flask API  or 其他的Tools ） →
+Flask API 從 MySQL 查詢資料，將結果回傳給 Dify →
+Dify 的回應，回傳給 Flask → 最後呈現在使用者前端。
