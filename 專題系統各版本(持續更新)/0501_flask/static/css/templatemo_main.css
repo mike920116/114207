@@ -1,0 +1,203 @@
+/* 
+自然主題模板
+http://www.templatemo.com/tm-398-nature
+*/
+
+/* 基本設定 */
+body, html { 
+    overflow-x: hidden; /* 隱藏水平捲軸 */
+}
+
+body {
+    font-size: 1em;
+    line-height: 1.4;
+    font-family: 'Raleway', sans-serif;
+    font-style: normal; 
+    -webkit-font-smoothing: antialiased; /* 修正 webkit 渲染 */
+    -webkit-text-size-adjust: 100%;
+}
+
+/* 字體設定 */
+h1, h2, h3, h4, h5, h6, span, p { 
+    font-family: 'Raleway', sans-serif; 
+}
+
+/* 分隔線設定 */
+hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 1em 0;
+    padding: 0;
+}
+
+/* 圖片設定 */
+img {
+    vertical-align: middle;
+}
+
+/* 預載入動畫 */
+#preloader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #fff; /* 預載入背景顏色 */
+    z-index: 99; /* 確保顯示在最上層 */
+}
+
+/* 預載入狀態圖示 */
+#status {
+    width: 200px;
+    height: 200px;
+    position: absolute;
+    left: 50%; 
+    top: 50%; 
+    background-image: url(../images/status.gif);
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: -100px 0 0 -100px;
+}
+
+/* 主要容器設定 */
+#main-wrapper {
+     overflow: hidden;
+}
+
+/* 網站標題樣式 */
+.templatemo-site-title { 
+    color: #fff !important; 
+    text-shadow: 0px 2px 3px rgba(0, 0, 0, 1);
+    font-size: 48px;
+}
+
+/* 網站標題連結樣式 */
+.templatemo-site-title a, 
+.templatemo-site-title a:hover { 
+    color: #fff;
+    text-decoration: none;
+}
+
+/* 幻燈片圖片設定 */
+img.slide {
+    width: 100%; 
+    z-index: -9999999; 
+    position: absolute;
+}
+
+/* 活動狀態設定 */
+.active {
+    display: block;
+}
+
+.inactive {
+    left: 703px;
+    display: none;
+}
+
+/* 圖片區域設定 */
+.image-section {
+    position: fixed;
+}
+
+.image-container {
+    position: relative;
+}
+
+.image-container img {
+    position: absolute;
+}
+
+/* 內容區域設定 */
+.templatemo-content {
+    position: static;
+    overflow: hidden; 
+    margin-top: 36%;
+}
+
+/* 內容區塊設定 */
+.templatemo-content section {
+    font-family: 'Raleway', sans-serif;
+    position: relative; 
+    overflow: hidden;
+    top: 0; 
+    background-color: rgba(255,255,255,0.75);
+    padding-bottom: 20px;
+}
+
+/* 選單設定 */
+.menu {
+    position: fixed; 
+    width: 220px;
+    z-index: 1; 
+    top: 35px;
+}
+
+/* 選單列表設定 */
+#menu-list {
+    background-color: rgba(0, 0, 0,0.5);
+    font-size: 16px; 
+    padding: 0;
+}
+
+/* 選單項目設定 */
+#menu-list > li {
+    display: block;
+}
+
+/* 選單連結設定 */
+#menu-list > li > a {
+    font-family: 'Raleway', sans-serif; 
+    padding: 10px 0 10px 30px; 
+    text-decoration: none; 
+    display: block;
+    color: #fff; 
+}
+
+/* 選單互動效果 */
+#menu-list > .active > a,
+#menu-list > li > a:hover { 
+    background-color: rgba(255,255,255,0.25);
+}
+
+/* 響應式選單設定 */
+#responsive {
+    font-size: 16px;
+    padding: 0;
+    background-color: rgba(0,0,0,0.5);
+}
+
+/* 頁尾設定 */
+.footer {
+    overflow: hidden; 
+    position: fixed; 
+    bottom: 10px;
+}
+
+/* 頁尾文字設定 */
+.footer-text {
+    font-family: 'Raleway', sans-serif; 
+    color: #fff; 
+    text-shadow: 0px 2px 3px rgba(0, 0, 0, 1);
+    margin-left: 30px;
+    font-size: 14px;
+}
+
+/* 響應式設計 */
+@media (max-width: 991px) {
+    .footer {
+        position: static;
+        text-align: center;
+    }
+    .footer-text {
+        margin-left: 0;
+    }
+}
+
+/* 主要網站樣式保持不變 */
+/* 但建議加入命名空間 */
+.main-site {
+    /* 網站主要內容的樣式 */
+}
