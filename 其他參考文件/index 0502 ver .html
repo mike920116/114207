@@ -82,7 +82,6 @@
       background-size: 50px 50px;
       z-index: -1;
     }
-    /* 深色模式文字發亮效果 */
     body.dark-mode h1,
     body.dark-mode h2,
     body.dark-mode h3,
@@ -90,7 +89,6 @@
     body.dark-mode a {
       text-shadow: 0 0 3px rgba(173, 216, 230, 0.5);
     }
-    /* 導航欄 */
     .header {
       position: fixed;
       top: 0;
@@ -190,6 +188,8 @@
       background: #5B7F47;
       transition: left 0.3s ease, background 0.3s ease;
       z-index: 100;
+      display: flex;
+      flex-direction: column;
     }
     body.dark-mode .sidebar {
       background: #0A1C2B;
@@ -197,10 +197,19 @@
     .sidebar.active {
       left: 0;
     }
+    .sidebar-menu {
+      flex: 1;
+      overflow-y: auto;
+      margin-top: 60px;
+      padding: 15px;
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+    .sidebar-menu::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
     .sidebar ul {
       list-style: none;
-      padding: 15px;
-      margin-top: 60px;
       display: flex;
       flex-direction: column;
     }
@@ -261,7 +270,7 @@
     body.dark-mode .sub-menu a:hover {
       background: #4A7B9D;
     }
-    .sidebar-buttons {
+    .sidebar-icons {
       display: flex;
       position: absolute;
       bottom: 20px;
@@ -269,7 +278,9 @@
       gap: 5px;
       align-items: center;
     }
-    .sidebar-buttons .home-button, .sidebar-buttons .dark-mode-toggle {
+    .sidebar-icons .home-button,
+    .sidebar-icons .dark-mode-toggle,
+    .sidebar-icons .help-button {
       font-size: 24px;
       cursor: pointer;
       background: #5B7F47;
@@ -282,10 +293,11 @@
       border-radius: 50%;
       transition: background 0.3s ease;
     }
-    body.dark-mode .sidebar-buttons .home-button, body.dark-mode .sidebar-buttons .dark-mode-toggle {
+    body.dark-mode .sidebar-icons .home-button,
+    body.dark-mode .sidebar-icons .dark-mode-toggle,
+    body.dark-mode .sidebar-icons .help-button {
       background: #0A1C2B;
     }
-    /* 主畫面 */
     .hero {
       min-height: 100vh;
       display: flex;
@@ -321,7 +333,6 @@
     body.dark-mode .hero p {
       color: #E6F0FA;
     }
-    /* 功能介紹區塊 */
     .feature-section {
       padding: 80px 20px;
       min-height: 600px;
@@ -410,7 +421,6 @@
       from { transform: translateY(50px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
-    /* 註冊/登入區塊 */
     .auth-section {
       min-height: 100vh;
       display: flex;
@@ -463,7 +473,6 @@
     .auth-buttons a:hover {
       transform: scale(1.05);
     }
-    /* 底部區塊 */
     .footer {
       background: #5B7F47;
       color: #F5F5F5;
@@ -502,7 +511,6 @@
     .footer-content a:hover {
       text-decoration: underline;
     }
-    /* 響應式設計 */
     @media (max-width: 768px) {
       .header { display: none; }
       .hamburger {
@@ -526,68 +534,71 @@
       .sidebar.active {
         top: 0;
       }
-      .sidebar-buttons {
+      .sidebar-menu {
+        margin-top: 60px;
+        padding: 10px;
+        max-height: calc(50vh - 120px);
+      }
+      .sidebar-icons {
         position: absolute;
-        top: 60px;
-        left: auto;
-        right: 20px;
+        top: 10px;
+        left: 20px;
         bottom: auto;
       }
-      .sidebar-buttons .dark-mode-toggle {
+      .sidebar-icons .home-button,
+      .sidebar-icons .dark-mode-toggle,
+      .sidebar-icons .help-button {
         font-size: 18px;
         width: 36px;
         height: 36px;
       }
       .sidebar ul {
-        margin-top: 100px;
-        padding: 5px;
         display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 5px;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 10px;
       }
       .sidebar li {
-        margin: 0;
-        position: relative;
+        margin: 5px 0;
       }
       .sidebar a {
         font-size: 16px;
-        padding: 4px;
+        padding: 8px 12px;
+        display: block;
       }
       .menu-item {
         display: flex;
         align-items: center;
-        margin-right: 5px;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-radius: 4px;
       }
       .menu-item .arrow {
-        font-size: 10px;
-        margin-left: 2px;
+        font-size: 12px;
+        margin-left: 10px;
       }
       .sub-menu {
-        display: none;
+        height: 0;
         opacity: 0;
-        position: absolute;
-        top: 100%;
-        left: 0;
-        background: #5B7F47;
-        transition: opacity 0.3s ease;
-        display: block;
-        padding: 5px;
-        z-index: 1;
-        border-radius: 8px;
-        min-width: 100px;
+        overflow: hidden;
+        margin-top: 0;
+        padding: 0 0 0 20px;
+        transition: height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease, padding 0.3s ease;
+        position: static;
+        background: transparent;
       }
       body.dark-mode .sub-menu {
-        background: #0A1C2B;
+        background: transparent;
       }
       .sub-menu.active {
-        display: block;
+        height: auto;
         opacity: 1;
+        margin-top: 5px;
+        padding: 5px 0 5px 20px;
       }
       .sub-menu a {
         padding: 6px 10px;
-        font-size: 16px;
-        display: block;
+        font-size: 14px;
       }
       .feature-content, .feature-content.reverse {
         flex-direction: column;
@@ -657,65 +668,68 @@
     </nav>
   </header>
   <nav class="sidebar">
-    <ul>
-      <li>
-        <div class="menu-item" onclick="toggleSubMenu(this)">
-          <a href="#diary" data-scroll="#diary">心理日記</a>
-          <span class="arrow">▼</span>
-        </div>
-        <ul class="sub-menu">
-          <li><a href="#diary-add">新增日記</a></li>
-          <li><a href="#diary-list">日記列表</a></li>
-          <li><a href="#diary-analysis">情緒分析</a></li>
-        </ul>
-      </li>
-      <li>
-        <div class="menu-item" onclick="toggleSubMenu(this)">
-          <a href="#ai" data-scroll="#ai">AI助手</a>
-          <span class="arrow">▼</span>
-        </div>
-        <ul class="sub-menu">
-          <li><a href="#ai-quick">快速問答</a></li>
-          <li><a href="#ai-deep">深入對話</a></li>
-          <li><a href="#ai-suggest">建議生成</a></li>
-        </ul>
-      </li>
-      <li>
-        <div class="menu-item" onclick="toggleSubMenu(this)">
-          <a href="#community" data-scroll="#community">社群互動</a>
-          <span class="arrow">▼</span>
-        </div>
-        <ul class="sub-menu">
-          <li><a href="#community-post">發帖</a></li>
-          <li><a href="#community-comment">留言</a></li>
-          <li><a href="#community-event">活動參與</a></li>
-        </ul>
-      </li>
-      <li>
-        <div class="menu-item" onclick="toggleSubMenu(this)">
-          <a href="#feedback" data-scroll="#feedback">問題反饋</a>
-          <span class="arrow">▼</span>
-        </div>
-        <ul class="sub-menu">
-          <li><a href="#feedback-submit">提交反饋</a></li>
-          <li><a href="#feedback-view">查看回覆</a></li>
-        </ul>
-      </li>
-      <li>
-        <div class="menu-item" onclick="toggleSubMenu(this)">
-          <a href="#login" data-scroll="#login">用戶登入</a>
-          <span class="arrow">▼</span>
-        </div>
-        <ul class="sub-menu">
-          <li><a href="#login-signin">登入</a></li>
-          <li><a href="#login-signup">註冊</a></li>
-          <li><a href="#login-profile">個人資料</a></li>
-        </ul>
-      </li>
-    </ul>
-    <div class="sidebar-buttons">
+    <div class="sidebar-menu">
+      <ul>
+        <li>
+          <div class="menu-item" onclick="toggleSubMenu(this)">
+            <a href="#diary" data-scroll="#diary">心理日記</a>
+            <span class="arrow">▼</span>
+          </div>
+          <ul class="sub-menu">
+            <li><a href="#diary-add">新增日記</a></li>
+            <li><a href="#diary-list">日記列表</a></li>
+            <li><a href="#diary-analysis">情緒分析</a></li>
+          </ul>
+        </li>
+        <li>
+          <div class="menu-item" onclick="toggleSubMenu(this)">
+            <a href="#ai" data-scroll="#ai">AI助手</a>
+            <span class="arrow">▼</span>
+          </div>
+          <ul class="sub-menu">
+            <li><a href="#ai-quick">快速問答</a></li>
+            <li><a href="#ai-deep">深入對話</a></li>
+            <li><a href="#ai-suggest">建議生成</a></li>
+          </ul>
+        </li>
+        <li>
+          <div class="menu-item" onclick="toggleSubMenu(this)">
+            <a href="#community" data-scroll="#community">社群互動</a>
+            <span class="arrow">▼</span>
+          </div>
+          <ul class="sub-menu">
+            <li><a href="#community-post">發帖</a></li>
+            <li><a href="#community-comment">留言</a></li>
+            <li><a href="#community-event">活動參與</a></li>
+          </ul>
+        </li>
+        <li>
+          <div class="menu-item" onclick="toggleSubMenu(this)">
+            <a href="#feedback" data-scroll="#feedback">問題反饋</a>
+            <span class="arrow">▼</span>
+          </div>
+          <ul class="sub-menu">
+            <li><a href="#feedback-submit">提交反饋</a></li>
+            <li><a href "#feedback-view">查看回覆</a></li>
+          </ul>
+        </li>
+        <li>
+          <div class="menu-item" onclick="toggleSubMenu(this)">
+            <a href="#login" data-scroll="#login">用戶登入</a>
+            <span class="arrow">▼</span>
+          </div>
+          <ul class="sub-menu">
+            <li><a href="#login-signin">登入</a></li>
+            <li><a href="#login-signup">註冊</a></li>
+            <li><a href="#login-profile">個人資料</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+    <div class="sidebar-icons">
       <div class="home-button" data-scroll="#home">🏠</div>
       <div class="dark-mode-toggle" onclick="toggleDarkMode()">🌙</div>
+      <div class="help-button" data-scroll="#footer">?</div>
     </div>
   </nav>
   <!-- 主畫面 -->
@@ -773,7 +787,7 @@
     </div>
   </section>
   <!-- 底部區塊 -->
-  <footer class="footer">
+  <footer class="footer" id="footer">
     <div class="footer-content">
       <div>
         <h3>關於我們</h3>
@@ -786,7 +800,7 @@
       </div>
       <div>
         <h3>聯絡我們</h3>
-        <p><a href="mailto:support@forestheart.com">support@forestheart.com</a></p>
+        <p><a href="/cdn-cgi/l/email-protection#35560005051a070135131a071006011d101407015 Equivalenceb161a18"><span class="__cf_email__" data-cfemail="c1b2b4b1b1aeb3b581a7aeb3a4b2b5a9a4a0b3b5efa2aeac">[email&#160;protected]</span></a></p>
         <p><a href="#contact">聯絡表單</a></p>
       </div>
       <div>
@@ -796,7 +810,39 @@
       </div>
     </div>
   </footer>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
   <script>
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+      return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
+      if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+        try {
+          var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+          var firstSheetName = workbook.SheetNames[0];
+          var worksheet = workbook.Sheets[firstSheetName];
+          var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+          var filteredData = jsonData.filter(row => row.some(filledCell));
+          var headerRowIndex = filteredData.findIndex((row, index) =>
+            row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+          );
+          if (headerRowIndex === -1 || headerRowIndex > 25) {
+            headerRowIndex = 0;
+          }
+          var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+          csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+          return csv;
+        } catch (e) {
+          console.error(e);
+          return "";
+        }
+      }
+      return gk_fileData[filename] || "";
+    }
+
     // 側拉選單
     const hamburger = document.querySelector('.hamburger');
     const sidebar = document.querySelector('.sidebar');
@@ -863,16 +909,13 @@
     }
 
     // 平滑滾動
-    document.querySelectorAll('a[data-scroll], .home-button').forEach(anchor => {
+    document.querySelectorAll('a[data-scroll], .home-button, .help-button').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
         e.preventDefault();
         const targetId = this.getAttribute('data-scroll') || '#home';
         const targetElement = document.querySelector(targetId);
         if (targetElement) {
-          window.scrollTo({
-            top: targetElement.offsetTop,
-            behavior: 'smooth'
-          });
+          targetElement.scrollIntoView({ behavior: 'smooth' });
         }
       });
     });
