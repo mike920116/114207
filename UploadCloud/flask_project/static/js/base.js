@@ -63,8 +63,22 @@ document.querySelectorAll('.nav-item').forEach(item=>{
   });
 });
 
-// 深色模式
-function toggleDarkMode(){document.body.classList.toggle('dark-mode')}
+// 深色模式開關與記憶
+function toggleDarkMode() {
+  const isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('theme', isDark ? 'dark' : 'light');
+}
+
+// 頁面載入時自動套用使用者偏好
+document.addEventListener("DOMContentLoaded", function () {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+
+  // 原本的登入驗證與彈窗初始化請保留
+});
+
 
 // 平滑滾動
 document.querySelectorAll('a[data-scroll],.home-button,.help-button').forEach(a=>{
