@@ -26,7 +26,7 @@ def load_user(user_id):
     # 從資料庫查詢使用者資料
     conn = db.get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT User_Email, User_name, password_hash FROM user WHERE User_Email = %s", (user_id,))
+    cursor.execute("SELECT User_Email, User_name, password_hash FROM User WHERE User_Email = %s", (user_id,))
     result = cursor.fetchone()
     conn.close()
 
@@ -64,7 +64,7 @@ def signup():
         conn = db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO user (User_Email, User_name, password_hash, Is_Anonymous, Created_at, Updated_at) 
+            INSERT INTO User (User_Email, User_name, password_hash, Is_Anonymous, Created_at, Updated_at) 
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (email, username, hashed_password, 0, current_time, current_time))
         conn.commit()
@@ -90,7 +90,7 @@ def login():
         # 查詢使用者資料
         conn = db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT User_Email, User_name, password_hash FROM user WHERE User_Email = %s", (email,))
+        cursor.execute("SELECT User_Email, User_name, password_hash FROM User WHERE User_Email = %s", (email,))
         result = cursor.fetchone()
         conn.close()
 

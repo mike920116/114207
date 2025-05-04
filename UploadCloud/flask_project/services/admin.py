@@ -24,7 +24,7 @@ def admin_dashboard():
 
     conn = db.get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM user")
+    cursor.execute("SELECT COUNT(*) FROM User")
     user_count = cursor.fetchone()[0]
     cursor.execute("SELECT COUNT(*) FROM DiaryRecords")
     diary_count = cursor.fetchone()[0]
@@ -45,7 +45,7 @@ def admin_users():
 
     conn = db.get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT User_Email, User_name, Created_at FROM user ORDER BY Created_at DESC")
+    cursor.execute("SELECT User_Email, User_name, Created_at FROM User ORDER BY Created_at DESC")
     users = cursor.fetchall()
     conn.close()
 
@@ -68,7 +68,7 @@ def admin_diaries():
                d.Emotion_status,
                d.Created_at
         FROM DiaryRecords d
-        LEFT JOIN user u ON d.User_Email = u.User_Email
+        LEFT JOIN User u ON d.User_Email = u.User_Email
         ORDER BY d.Created_at DESC
     """)
     diaries = cursor.fetchall()
