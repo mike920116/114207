@@ -22,6 +22,11 @@
 
   {% include 'components/footer.html' %}
 
+
+  <script>
+    window.IS_AUTHENTICATED = {{ 'true' if current_user.is_authenticated else 'false' }};
+  </script>
+  
   <!-- 共用互動 JS -->
   <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 

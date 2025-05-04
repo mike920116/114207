@@ -3,9 +3,9 @@ import pymysql
 # MySQL 連線資訊
 DB_HOST = "localhost"
 DB_PORT = 3306  # MySQL 預設埠號
-DB_NAME = "mysql_114207_01"
+DB_NAME = "flaskdb"
 DB_USER = "root"
-DB_PASSWORD = "56985698"
+DB_PASSWORD = "NTUB"
 
 # 建立資料庫連線
 def get_connection():

@@ -75,3 +75,21 @@ document.querySelectorAll('a[data-scroll],.home-button,.help-button').forEach(a=
     if(tgt)tgt.scrollIntoView({behavior:'smooth'});
   });
 });
+
+// 登入驗證
+document.addEventListener("DOMContentLoaded", function () {
+  // 假設你的 base.html 有用 Jinja 傳入這個變數
+  const isAuthenticated = window.IS_AUTHENTICATED || false;
+
+  if (!isAuthenticated) {
+    const links = document.querySelectorAll('.auth-required');
+    links.forEach(link => {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        alert('請先登入');
+        window.location.href = '/user/login/form';
+      });
+    });
+  }
+});
+

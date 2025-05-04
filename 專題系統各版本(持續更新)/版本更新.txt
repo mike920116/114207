@@ -7,3 +7,6 @@
 0429 ver.
 
 更改資料庫 db_name=flaskdb、db_password=NTUB
+
+0504 ver.
+flask前後端邏輯重製

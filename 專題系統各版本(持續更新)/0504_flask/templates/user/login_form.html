@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}森林心靈 | 登入{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/module/user.css') }}">
+<script src="{{ url_for('static', filename='js/module/user.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>使用者登入</title>
+</head>
+
+<body>
+  <div class="user-page-wrapper">
+    <div class="auth-box">
+      <h2 class="text-center mb-4">使用者登入</h2>
+
+      {% if error_message %}
+      <div class="alert alert-danger" role="alert">
+        {{ error_message }}
+      </div>
+      {% endif %}
+
+      <form action="{{ url_for('user.login') }}" method="POST">
+        <label for="email">電子郵件</label>
+        <input type="email" class="form-control" id="email" name="email" required>
+
+        <label for="password">密碼</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+
+        <button type="submit" class="btn">登入</button>
+      </form>
+
+      <div class="text-center mt-3">
+        <a href="{{ url_for('user.user_signup_form') }}">還沒有帳號？立即註冊</a>
+      </div>
+    </div>
+  </div>
+</body>
+{% endblock %}
