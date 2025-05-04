@@ -1,0 +1,98 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/26.2.15 Chrome/134.0.6998.205 Electron/35.2.1 Safari/537.36" version="26.2.15">
+  <diagram id="Qkq9pe2DDC6BN5qTmQI-" name="查詢歷史日記活動圖">
+    <mxGraphModel dx="696" dy="1056" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="VAhCaEVph85gmRJZTaxG-1" value="" style="ellipse;shape=startState;fillColor=#000000;strokeColor=#000000;" parent="1" vertex="1">
+          <mxGeometry x="230" y="444" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-2" value="" style="edgeStyle=elbowEdgeStyle;elbow=horizontal;verticalAlign=bottom;endArrow=open;endSize=8;strokeColor=#000000;endFill=1;rounded=0;fillColor=#000000;" parent="1" source="VAhCaEVph85gmRJZTaxG-1" edge="1">
+          <mxGeometry x="100" y="40" as="geometry">
+            <mxPoint x="245.64285714285734" y="514" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-6" value="" style="endArrow=open;strokeColor=#000000;endFill=1;rounded=0" parent="1" target="VAhCaEVph85gmRJZTaxG-7" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="245" y="556" as="sourcePoint" />
+            <mxPoint x="244.75" y="616" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-8" value="使用者" style="swimlane;whiteSpace=wrap;startSize=30;fontSize=20;" parent="1" vertex="1">
+          <mxGeometry x="130" y="410" width="270" height="660" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-9" value="輸入查詢內容&#xa;或篩選情緒標籤" style="fontSize=20;" parent="VAhCaEVph85gmRJZTaxG-8" vertex="1">
+          <mxGeometry x="35" y="180" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-11" value="" style="ellipse;html=1;shape=endState;fillColor=#000000;strokeColor=#000000;" parent="VAhCaEVph85gmRJZTaxG-8" vertex="1">
+          <mxGeometry x="110" y="580" width="30" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-7" value="點選日記列表" style="fontSize=20;" parent="VAhCaEVph85gmRJZTaxG-8" vertex="1">
+          <mxGeometry x="45" y="105" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-14" value="系統" style="swimlane;whiteSpace=wrap;startSize=30;fontSize=20;" parent="1" vertex="1">
+          <mxGeometry x="400" y="410" width="280" height="660" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-15" value="根據條件查詢日記列表" style="fontSize=20;" parent="VAhCaEVph85gmRJZTaxG-14" vertex="1">
+          <mxGeometry x="35.629999999999995" y="260" width="209.75" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-16" value="是否符合" style="fontSize=20;" parent="VAhCaEVph85gmRJZTaxG-14" vertex="1">
+          <mxGeometry x="70" y="390" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-17" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="VAhCaEVph85gmRJZTaxG-14" source="VAhCaEVph85gmRJZTaxG-15" target="VAhCaEVph85gmRJZTaxG-16" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-79.69999999999999" y="266" as="sourcePoint" />
+            <mxPoint x="-79.69999999999999" y="316" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-18" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="VAhCaEVph85gmRJZTaxG-14" target="VAhCaEVph85gmRJZTaxG-19" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="135.5" y="440" as="sourcePoint" />
+            <mxPoint x="140.5" y="288" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="xjVK5D0XqWXWkn5PX8TJ-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="VAhCaEVph85gmRJZTaxG-14" source="VAhCaEVph85gmRJZTaxG-19" target="VAhCaEVph85gmRJZTaxG-23" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-19" value="&#xa;" style="rhombus;fillColor=#FFFFFF;strokeColor=#000000;" parent="VAhCaEVph85gmRJZTaxG-14" vertex="1">
+          <mxGeometry x="118" y="515" width="35" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-21" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;[是]&lt;/font&gt;" style="whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;" parent="VAhCaEVph85gmRJZTaxG-14" vertex="1">
+          <mxGeometry x="140" y="535" width="40" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-22" value="&lt;font style=&quot;font-size: 15px;&quot;&gt;[否]&lt;/font&gt;" style="whiteSpace=wrap;html=1;strokeColor=none;fillColor=none;" parent="VAhCaEVph85gmRJZTaxG-14" vertex="1">
+          <mxGeometry x="35.629999999999995" y="495" width="57.25" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-23" value="顯示日記日期、內容&#xa;與情緒分析結果" style="fontSize=20;" parent="VAhCaEVph85gmRJZTaxG-14" vertex="1">
+          <mxGeometry x="37.75" y="570" width="195.5" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="VAhCaEVph85gmRJZTaxG-12" value="顯示查詢表單" style="fontSize=20;" parent="VAhCaEVph85gmRJZTaxG-14" vertex="1">
+          <mxGeometry x="75" y="105" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="xjVK5D0XqWXWkn5PX8TJ-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="VAhCaEVph85gmRJZTaxG-7" target="VAhCaEVph85gmRJZTaxG-12" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="xjVK5D0XqWXWkn5PX8TJ-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="VAhCaEVph85gmRJZTaxG-12" target="VAhCaEVph85gmRJZTaxG-9" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="540" y="615" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="xjVK5D0XqWXWkn5PX8TJ-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="VAhCaEVph85gmRJZTaxG-9" target="VAhCaEVph85gmRJZTaxG-15" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="245" y="695" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="xjVK5D0XqWXWkn5PX8TJ-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.325;entryY=1.04;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="VAhCaEVph85gmRJZTaxG-19" target="VAhCaEVph85gmRJZTaxG-9" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="xjVK5D0XqWXWkn5PX8TJ-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="VAhCaEVph85gmRJZTaxG-23" target="VAhCaEVph85gmRJZTaxG-11" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
