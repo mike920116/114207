@@ -202,3 +202,70 @@ body.dark-mode .footer-content p,body.dark-mode .footer-content a{color:#E6F0FA}
   .auth-buttons{flex-direction:column;gap:20px}
   .footer-content{grid-template-columns:1fr}
 }
+
+/* 功能尚未開通彈窗樣式 */
+.feature-modal-overlay {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.feature-modal-overlay.active {
+  display: flex;
+}
+
+.feature-modal-box {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 300px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.feature-modal-box h3 {
+  margin-top: 0;
+  color: #5B7F47;
+}
+
+.feature-modal-box p {
+  margin: 15px 0;
+  color: #333;
+}
+
+.feature-modal-box button {
+  background-color: #5B7F47;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.feature-modal-box button:hover {
+  background-color: #7F9A65;
+}
+
+body.dark-mode .feature-modal-box {
+  background-color: #1A3C5A;
+}
+
+body.dark-mode .feature-modal-box h3,
+body.dark-mode .feature-modal-box p {
+  color: #E6F0FA;
+}
+
+body.dark-mode .feature-modal-box button {
+  background-color: #2A4B7C;
+}
+
+body.dark-mode .feature-modal-box button:hover {
+  background-color: #4A7B9D;
+}
+

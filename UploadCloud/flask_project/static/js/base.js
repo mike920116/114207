@@ -93,3 +93,21 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+// 功能尚未開通彈窗觸發邏輯
+document.addEventListener("DOMContentLoaded", function () {
+  const featureModal = document.getElementById("feature-modal");
+  const unavailableLinks = document.querySelectorAll('a[href="#"]:not([data-scroll])');
+
+  unavailableLinks.forEach(link => {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+      featureModal.classList.add("active");
+    });
+  });
+});
+
+function closeFeatureModal() {
+  document.getElementById("feature-modal").classList.remove("active");
+}
+
+
