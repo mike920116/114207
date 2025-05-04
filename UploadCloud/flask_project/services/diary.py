@@ -16,7 +16,7 @@ diary_bp = Blueprint('diary', __name__)
 @diary_bp.route('/form')
 @login_required  # 需要登入才能存取
 def diary_form():
-    return render_template('diary_form.html')
+    return render_template('diary/diary_form.html')
 
 # 儲存日記
 @diary_bp.route('/save', methods=['POST'])
@@ -90,6 +90,6 @@ def diary_list():
         diaries = cursor.fetchall()
         conn.close()
         
-        return render_template('diary_list.html', diaries=diaries)
+        return render_template('diary/diary_list.html', diaries=diaries)
     except Exception as e:
-        return render_template('diary_list.html', error_message=f'發生錯誤: {str(e)}') 
+        return render_template('diary/diary_list.html', error_message=f'發生錯誤: {str(e)}') 

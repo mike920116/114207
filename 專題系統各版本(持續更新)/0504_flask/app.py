@@ -12,7 +12,7 @@ from datetime import datetime
 from services.user import user_bp  # 匯入使用者相關的藍圖
 from services.user import load_user as user_load_user  # 匯入使用者載入函數
 from services.diary import diary_bp  # 匯入日記相關的藍圖
-
+from services.admin import admin_bp
 
 #-----------------------
 # 產生 Flask 網站物件
@@ -26,6 +26,7 @@ app.secret_key = 'your-secret-key-here'  # 設定應用程式的密鑰，用於s
 #-------------------------
 app.register_blueprint(user_bp, url_prefix='/user')  # 註冊使用者藍圖，路由前綴為/user
 app.register_blueprint(diary_bp, url_prefix='/diary')  # 註冊日記藍圖，路由前綴為/diary
+app.register_blueprint(admin_bp, url_prefix='/admin')  # 註冊後台藍圖，路由前綴為/admin
 
 #-----------------------
 # 初始化 Flask-Login

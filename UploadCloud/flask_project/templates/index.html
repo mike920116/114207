@@ -1,206 +1,69 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
-{% block title %}心情日記 | 記錄您的每一刻{% endblock %}
+{% block title %}森林心靈 | 首頁{% endblock %}
 
-{% block custom_css %}
-<style>
-    .welcome-section {
-        text-align: center;
-        padding: 40px 20px;
-        max-width: 800px;
-        margin: 0 auto;
-        background-color: rgba(0, 0, 0, 0.6);
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(10px);
-    }
-    
-    .welcome-heading {
-        color: #ffffff;
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 20px;
-        text-shadow: 0 0 10px rgba(0, 183, 201, 0.5);
-        letter-spacing: 2px;
-    }
-    
-    .welcome-subheading {
-        color: #17a2b8;
-        font-size: 1.2rem;
-        font-weight: 500;
-        margin-bottom: 30px;
-        letter-spacing: 1px;
-    }
-    
-    .welcome-description {
-        color: #e0e0e0;
-        font-size: 1.1rem;
-        line-height: 1.8;
-        margin-bottom: 30px;
-    }
-    
-    .btn-start {
-        background: linear-gradient(45deg, #17a2b8, #20c997);
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 30px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        margin: 10px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        transition: all 0.3s ease;
-    }
-    
-    .btn-start:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        background: linear-gradient(45deg, #20c997, #17a2b8);
-        color: white;
-    }
-    
-    .btn-view {
-        background: transparent;
-        color: #17a2b8;
-        border: 2px solid #17a2b8;
-        padding: 10px 22px;
-        border-radius: 30px;
-        font-weight: 600;
-        letter-spacing: 1px;
-        margin: 10px;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-view:hover {
-        background: rgba(23, 162, 184, 0.1);
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-        color: #17a2b8;
-    }
-    
-    .features-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        margin-top: 50px;
-    }
-    
-    .feature-box {
-        flex: 1 1 300px;
-        margin: 15px;
-        padding: 25px;
-        background-color: rgba(255, 255, 255, 0.05);
-        border-radius: 10px;
-        text-align: center;
-        transition: all 0.3s ease;
-        border-top: 3px solid transparent;
-    }
-    
-    .feature-box:hover {
-        transform: translateY(-10px);
-        background-color: rgba(255, 255, 255, 0.1);
-        border-top: 3px solid #17a2b8;
-    }
-    
-    .feature-icon {
-        font-size: 2.5rem;
-        color: #17a2b8;
-        margin-bottom: 15px;
-    }
-    
-    .feature-title {
-        color: #ffffff;
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin-bottom: 15px;
-    }
-    
-    .feature-description {
-        color: #cccccc;
-        font-size: 0.95rem;
-        line-height: 1.6;
-    }
-    
-    @media (max-width: 768px) {
-        .welcome-heading {
-            font-size: 2rem;
-        }
-        
-        .welcome-description {
-            font-size: 1rem;
-        }
-        
-        .feature-box {
-            flex: 1 1 100%;
-        }
-    }
-</style>
+{% block extra_css %}
+
 {% endblock %}
 
 {% block content %}
-<section id="home-text" class="active templatemo-content-section">
-    <div class="welcome-section">
-        <h1 class="welcome-heading">記錄您的情緒旅程</h1>
-        <h2 class="welcome-subheading">每一刻情緒，都值得被傾聽</h2>
-        
-        <p class="welcome-description">
-            心情日記是一個幫助您追蹤、記錄和理解自己情緒變化的私人空間。
-            每天只需要幾分鐘，記錄您的情緒變化，長期堅持將幫助您更好地了解自己，
-            提升心理健康，開啟更平靜、更充實的生活。
-        </p>
-        
-        {% if current_user.is_authenticated %}
-        <div class="text-center">
-            <a href="{{ url_for('diary.diary_form') }}" class="btn btn-start">開始撰寫今日日記</a>
-            <a href="{{ url_for('diary.diary_list') }}" class="btn btn-view">查看我的日記列表</a>
-        </div>
-        {% else %}
-        <div class="text-center">
-            <a href="{{ url_for('user.user_login_form') }}" class="btn btn-start">登入並開始</a>
-            <a href="{{ url_for('user.user_signup_form') }}" class="btn btn-view">註冊新帳號</a>
-        </div>
-        {% endif %}
-        
-        <div class="features-container">
-            <div class="feature-box">
-                <div class="feature-icon">📝</div>
-                <h3 class="feature-title">簡單記錄</h3>
-                <p class="feature-description">
-                    輕鬆記錄每天的情緒和感受，界面簡潔直觀，操作便捷。
-                </p>
-            </div>
-            
-            <div class="feature-box">
-                <div class="feature-icon">📊</div>
-                <h3 class="feature-title">情緒分析</h3>
-                <p class="feature-description">
-                    通過圖表直觀展示您的情緒變化趨勢，幫助您更好地理解自己。
-                </p>
-            </div>
-            
-            <div class="feature-box">
-                <div class="feature-icon">🤖</div>
-                <h3 class="feature-title">AI 建議</h3>
-                <p class="feature-description">
-                    基於您的記錄，AI 會提供個性化的建議，幫助您改善情緒。
-                </p>
-            </div>
-        </div>
-    </div>
+<!-- Hero 區塊 -->
+<section class="hero" id="home">
+  <h1>在森林的懷抱中，找回內心的平靜</h1>
+  <p>心靈匠人是一個療癒系平台，幫助你記錄每日心情、與智慧 AI 互動、分享心聲故事，並在社群中找到共鳴。漫步我們的森林，探索屬於你的心靈角落。</p>
 </section>
-{% endblock %}
 
-{% block custom_js %}
-<script>
-    // 背景圖片設置
-    $.backstretch("{{ url_for('static', filename='imgs/nature1.jpg') }}", {speed: 500});
-    
-    // 添加頁面加載動畫
-    $(window).load(function() {
-        $('.welcome-section').hide().fadeIn(1200);
-        $('.feature-box').each(function(i) {
-            $(this).hide().delay(400 + i * 200).fadeIn(800);
-        });
-    });
-</script>
+<!-- 功能介紹（首頁獨有） -->
+<section class="feature-section" id="diary">
+  <div class="feature-content">
+    <div class="feature-text">
+      <h2>心理日記</h2>
+      <p>在森林的靜謐中記錄你的心情，透過書寫釋放壓力…</p>
+      <a href="/diary/form" class="auth-required">試試日記</a>
+    </div>
+    <div class="feature-icon">🌿</div>
+  </div>
+</section>
+
+<section class="feature-section" id="ai">
+  <div class="feature-content reverse">
+    <div class="feature-icon">🐦</div>
+    <div class="feature-text">
+      <h2>AI 助手</h2>
+      <p>你的智慧小助手，隨時為你解答疑惑…</p>
+      <a href="#" class="auth-required">與助手對話</a>
+    </div>
+  </div>
+</section>
+
+<section class="feature-section" id="community">
+  <div class="feature-content">
+    <div class="feature-text">
+      <h2>社群互動</h2>
+      <p>在森林的樹蔭下與朋友分享心聲…</p>
+      <a href="#" class="auth-required">加入社群</a>
+    </div>
+    <div class="feature-icon">🌳</div>
+  </div>
+</section>
+
+<section class="feature-section" id="feedback">
+  <div class="feature-content reverse">
+    <div class="feature-icon">🍂</div>
+    <div class="feature-text">
+      <h2>問題反饋</h2>
+      <p>像落葉傳遞訊息，告訴我們你的想法…</p>
+      <a href="#" class="auth-required">提交反饋</a>
+    </div>
+  </div>
+</section>
+
+<!-- 註冊 / 登入 -->
+<section class="auth-section" id="login">
+  <h2>加入森林心靈，開始你的旅程</h2>
+  <div class="auth-buttons">
+    <a href="/user/signup/form">註冊</a>
+    <a href="/user/login/form">登入</a>
+  </div>
+</section>
 {% endblock %}

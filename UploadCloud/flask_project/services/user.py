@@ -26,7 +26,7 @@ def load_user(user_id):
     # 從資料庫查詢使用者資料
     conn = db.get_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT User_Email, User_name, password_hash FROM User WHERE User_Email = %s", (user_id,))
+    cursor.execute("SELECT User_Email, User_name, password_hash FROM user WHERE User_Email = %s", (user_id,))
     result = cursor.fetchone()
     conn.close()
 
@@ -64,7 +64,7 @@ def signup():
         conn = db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO User (User_Email, User_name, password_hash, Is_Anonymous, Created_at, Updated_at) 
+            INSERT INTO user (User_Email, User_name, password_hash, Is_Anonymous, Created_at, Updated_at) 
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (email, username, hashed_password, 0, current_time, current_time))
         conn.commit()
@@ -90,13 +90,13 @@ def login():
         # 查詢使用者資料
         conn = db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT User_Email, User_name, password_hash FROM User WHERE User_Email = %s", (email,))
+        cursor.execute("SELECT User_Email, User_name, password_hash FROM user WHERE User_Email = %s", (email,))
         result = cursor.fetchone()
         conn.close()
 
         # 驗證使用者
         if result is None:
-            return render_template('user/login_form.html', error_message="帳號不存在")
+            return render_template('user/login.html', error_message="帳號不存在")
 
         user_email, username, hashed_password = result[0], result[1], result[2].encode('utf-8')
 
@@ -106,10 +106,10 @@ def login():
             login_user(user)  # 登入使用者
             return redirect('/')
         else:
-            return render_template('user/login_form.html', error_message="密碼錯誤")
+            return render_template('user/login.html', error_message="密碼錯誤")
 
     except Exception as e:
-        return render_template('user/login_form.html', error_message=f"發生錯誤: {str(e)}")
+        return render_template('user/login.html', error_message=f"發生錯誤: {str(e)}")
 
 #使用者登出
 @user_bp.route('/logout')
