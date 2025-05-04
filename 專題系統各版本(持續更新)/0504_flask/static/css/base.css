@@ -108,9 +108,9 @@ body.dark-mode .sidebar-icons>div{background:#0A1C2B}
 body.dark-mode .hero{
   background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%232A4B7C' fill-opacity='0.3' d='M0,192L48,197.3C96,203,192,213,288,192C384,171,480,117,576,106.7C672,96,768,128,864,154.7C960,181,1056,203,1152,192C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") bottom/cover no-repeat,#0A1C2B
 }
-.hero h1{font-size:36px;margin-bottom:15px;color:#F5F5F5;text-shadow:0 1px 1px rgba(0,0,0,.2)}
+.hero h1{font-size:36px;margin-bottom:15px;color:#f5f5f5;text-shadow:0 1px 1px rgba(0,0,0,.2)}
 body.dark-mode .hero h1{color:#E6F0FA}
-.hero p{font-size:18px;max-width:600px;line-height:1.6;color:#F5F5F5}
+.hero p{font-size:18px;max-width:600px;line-height:1.6;color:#f5f5f5}
 body.dark-mode .hero p{color:#E6F0FA}
 /* Feature */
 .feature-section{
@@ -119,7 +119,7 @@ body.dark-mode .hero p{color:#E6F0FA}
 }
 .feature-section:nth-child(odd){background:#A8C090}
 body.dark-mode .feature-section:nth-child(odd){background:#1A3C5A}
-.feature-section:nth-child(even){background:#F5F5F5}
+.feature-section:nth-child(even){background:rgb(238, 237, 237)}
 body.dark-mode .feature-section:nth-child(even){background:#2A4B7C}
 .feature-content{
   max-width:1400px;margin:auto;display:flex;align-items:center;gap:60px;
