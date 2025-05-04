@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}森林心靈 | 註冊結果{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/module/user.css') }}">
+<script src="{{ url_for('static', filename='js/module/user.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>註冊結果</title>
+</head>
+
+<body>
+  <div class="user-page-wrapper">
+    <div class="auth-box">
+      {% if success %}
+      <div class="success-message">
+        <h1>註冊成功！</h1>
+        <p>請前往登入</p>
+        <a href="{{ url_for('user.user_login_form') }}" class="btn btn-success">前往登入</a>
+      </div>
+      {% else %}
+      <div class="error-message">
+        <h1>⚠️ 這個 Email 已經被註冊過了，請直接登入或使用其他 Email。</h1>
+        <a href="{{ url_for('user.user_signup_form') }}" class="btn btn-danger">返回註冊</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+{% endblock %}
