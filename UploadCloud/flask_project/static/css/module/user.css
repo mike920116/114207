@@ -52,7 +52,7 @@
 }
 
 .user-page-wrapper .btn {
-  background-color: #6aad5b;
+  background: linear-gradient(135deg, #6aad5b, #89cc7c);
   color: #ffffff;
   border: none;
   padding: 12px;
@@ -65,26 +65,26 @@
 }
 
 .user-page-wrapper .btn:hover {
-  background-color: #89cc7c;
   transform: scale(1.03);
+  filter: brightness(1.1);
 }
 
 .user-page-wrapper .btn-success {
-  background-color: #8fcf8c;
+  background: linear-gradient(135deg, #8fcf8c, #b1e6ae);
   color: #2f3d2f;
 }
 
 .user-page-wrapper .btn-success:hover {
-  background-color: #b1e6ae;
+  filter: brightness(1.1);
 }
 
 .user-page-wrapper .btn-danger {
-  background-color: #e57373;
+  background: linear-gradient(135deg, #e57373, #f28b82);
   color: #fff;
 }
 
 .user-page-wrapper .btn-danger:hover {
-  background-color: #c75252;
+  filter: brightness(1.1);
 }
 
 .user-page-wrapper .success-message,
@@ -139,8 +139,6 @@
   display: block;
 }
 
-
-
 /* === 深色模式（dark-mode 類別啟用） === */
 body.dark-mode .user-page-wrapper {
   background: linear-gradient(to bottom right, #0a1c2b, #1a3c5a);
@@ -173,12 +171,22 @@ body.dark-mode .user-page-wrapper input.form-control:focus {
 }
 
 body.dark-mode .user-page-wrapper .btn {
-  background-color: #2a4b7c;
+  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
   color: #ffffff;
 }
 
 body.dark-mode .user-page-wrapper .btn:hover {
-  background-color: #4a7b9d;
+  filter: brightness(1.1);
+}
+
+body.dark-mode .user-page-wrapper .btn-success {
+  background: linear-gradient(135deg, #4c8da2, #6daec7);
+  color: #ffffff;
+}
+
+body.dark-mode .user-page-wrapper .btn-danger {
+  background: linear-gradient(135deg, #c75252, #e57373);
+  color: #ffffff;
 }
 
 body.dark-mode .user-page-wrapper a {

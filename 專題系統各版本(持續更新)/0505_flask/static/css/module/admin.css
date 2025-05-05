@@ -108,6 +108,12 @@ h1,h2,h3,h4,h5,h6{
   background:var(--surface);border-radius:var(--radius);
   box-shadow:var(--shadow);padding:1.2rem;margin-bottom:1.4rem;
 }
+.card:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
 
 /* ---------- Scrollable Table ---------- */
 .table-scroll{

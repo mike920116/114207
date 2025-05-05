@@ -155,7 +155,7 @@ body.dark-mode .mood-hint {
   display: block;
   width: 100%;
   padding: 15px;
-  background: linear-gradient(90deg, #3A8B55, #58D88B);
+  background: linear-gradient(90deg, #3A8B55, #58D88B); /* 淺色漸層 */
   color: #F5F5F5;
   border: none;
   border-radius: 16px;
@@ -163,16 +163,20 @@ body.dark-mode .mood-hint {
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
 }
+
 .btn-submit:hover {
-  background: linear-gradient(90deg, #5BBE80, #88F0AE);
+  background: linear-gradient(90deg, #5BBE80, #88F0AE); /* 淺色 hover */
   transform: scale(1.02);
 }
+
 body.dark-mode .btn-submit {
-  background: #4A7B9D;
+  background: linear-gradient(90deg, #2A4B7C, #4A6D99); /* 深色漸層 */
   color: #E6F0FA;
 }
+
 body.dark-mode .btn-submit:hover {
-  background: #8AB6D6;
+  background: linear-gradient(90deg, #4A6D99, #6A9FC4); /* 深色 hover */
+  transform: scale(1.02);
 }
 
 /* ---------- RWD ---------- */
