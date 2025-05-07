@@ -5,9 +5,9 @@ from datetime import datetime
 import os
 from dotenv import load_dotenv
 
-#DIFY_diary_API_TOKEN
+#DIFY_API_KEY_For_Diary
 load_dotenv() # 載入環境變數
-DIFY_diary_API_TOKEN = os.getenv("DIFY_diary_API_TOKEN")
+DIFY_API_KEY_For_Diary = os.getenv("DIFY_API_KEY_For_Diary")
 
 # 建立日記藍圖
 diary_bp = Blueprint('diary', __name__)
@@ -44,7 +44,7 @@ def save_diary():
 
         dify_headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {DIFY_diary_API_TOKEN}"
+            "Authorization": f"Bearer {DIFY_API_KEY_For_Diary}"
         }
 
         dify_response = requests.post("https://api.dify.ai/v1/chat-messages", json=dify_payload, headers=dify_headers)

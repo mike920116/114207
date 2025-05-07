@@ -3,8 +3,8 @@
 {% block title %}日記之森 | 註冊結果{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/module/user.css') }}">
-<script src="{{ url_for('static', filename='js/module/user.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/module/user/user.css') }}">
+<script src="{{ url_for('static', filename='js/module/user/user.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -20,8 +20,8 @@
       {% if success %}
       <div class="success-message">
         <h1>註冊成功！</h1>
-        <p>請前往登入</p>
-        <a href="{{ url_for('user.user_login_form') }}" class="btn btn-success">前往登入</a>
+        <p>我們已寄出一封驗證信到你的 Email，請於 1 小時內完成驗證後再登入。</p>
+        <a href="{{ url_for('user.user_login_form') }}" class="btn btn-success">我已完成驗證，前往登入</a>
       </div>
       {% else %}
       <div class="error-message">

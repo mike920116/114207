@@ -10,7 +10,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>{% block title %}Admin Panel{% endblock %}</title>
-  <link href="{{ url_for('static', filename='css/module/admin.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/module/admin/admin.css') }}" rel="stylesheet">
 </head>
 <body>
 
@@ -27,6 +27,8 @@
                  class="{% if request.endpoint == 'admin.admin_users' %}active{% endif %}">👥 使用者</a></li>
           <li><a href="{{ url_for('admin.admin_diaries') }}"
                  class="{% if request.endpoint == 'admin.admin_diaries' %}active{% endif %}">📔 日記紀錄</a></li>
+          <li><a href="{{ url_for('admin_chat.panel') }}"
+                class="{% if request.endpoint.startswith('admin_chat.') %}active{% endif %}">💬 客服面板</a></li>
         </ul>
       </nav>
 
@@ -43,6 +45,6 @@
     <main id="content">{% block content %}{% endblock %}</main>
   </div>
 
-  <script src="{{ url_for('static', filename='js/module/admin.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/module/admin/admin.js') }}"></script>
 </body>
 </html>

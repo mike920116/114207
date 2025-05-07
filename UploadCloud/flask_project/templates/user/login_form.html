@@ -3,8 +3,8 @@
 {% block title %}日記之森 | 登入{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/module/user.css') }}">
-<script src="{{ url_for('static', filename='js/module/user.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/module/user/user.css') }}">
+<script src="{{ url_for('static', filename='js/module/user/user.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -26,8 +26,8 @@
       {% endif %}
 
       <form action="{{ url_for('user.login') }}" method="POST">
-        <label for="email">電子郵件</label>
-        <input type="email" class="form-control" id="email" name="email" required>
+        <label for="account">電子郵件</label>
+        <input type="text" class="form-control" id="email" name="email" required>
 
         <label for="password">密碼</label>
         <input type="password" class="form-control" id="password" name="password" required>
@@ -38,6 +38,9 @@
       <div class="text-center mt-3">
         <a href="{{ url_for('user.user_signup_form') }}">還沒有帳號？立即註冊</a>
       </div>
+      <div class="text-end mt-2">
+        <a href="{{ url_for('user.forgot_form') }}" class="text-muted">忘記密碼？</a>
+      </div>      
     </div>
   </div>
 </body>

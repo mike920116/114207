@@ -90,8 +90,21 @@
 .user-page-wrapper .success-message,
 .user-page-wrapper .error-message {
   text-align: center;
-  color: #3a5335;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
+
+
+.user-page-wrapper .success-message {
+  color: #4b6a3e; /* 草地綠 */
+}
+
+.user-page-wrapper .error-message {
+  color: #b33a3a; /* 微紅棕，柔和錯誤提示色 */
+}
+
 
 .user-page-wrapper a {
   color: #6aad5b;
@@ -109,6 +122,15 @@
   transform: scale(0);
   animation: rippleEffect 0.6s linear;
 }
+
+.user-page-wrapper .auth-box .text-center,
+.user-page-wrapper .auth-box .text-end {
+  text-align: center !important;
+  margin-top: 15px; /* 往下移動 */
+  display: block;
+}
+
+
 
 @keyframes rippleEffect {
   to {
@@ -191,4 +213,12 @@ body.dark-mode .user-page-wrapper .btn-danger {
 
 body.dark-mode .user-page-wrapper a {
   color: #a7c0db;
+}
+
+body.dark-mode .user-page-wrapper .success-message {
+  color: #9bd4e1; /* 淡藍綠，代表成功 */
+}
+
+body.dark-mode .user-page-wrapper .error-message {
+  color: #f28b82; /* 淺紅色，錯誤風格與按鈕一致 */
 }

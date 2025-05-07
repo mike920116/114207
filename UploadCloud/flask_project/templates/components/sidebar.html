@@ -23,8 +23,8 @@
           <span class="arrow">▼</span>
         </div>
         <ul class="sub-menu">
+          <li><a href="/ai/chat" class="auth-required">AI助手</a></li>
           <li><a href="#" class="auth-required">情緒AI</a></li>
-          <li><a href="#" class="auth-required">建議生成</a></li>
           <li><a href="#" class="auth-required">心理測驗</a></li>
         </ul>
       </li>
@@ -59,12 +59,12 @@
       <li>
         {% if current_user.is_authenticated %}
           <div class="menu-item" onclick="toggleSubMenu(this)">
-            <a href="#">{{ current_user.username }}</a>
+            <a href="#login">{{ current_user.username }}</a>
             <span class="arrow">▼</span>
           </div>
           <ul class="sub-menu">
-            <li><a href="#">個人資料</a></li>
-            <li><a href="#">設定</a></li>
+            <li><a href="/settings/profile">個人資料</a></li>
+            <li><a href="/settings/acc_settings">設定</a></li>
             <li><a href="/user/logout">登出</a></li>
           </ul>
         {% else %}

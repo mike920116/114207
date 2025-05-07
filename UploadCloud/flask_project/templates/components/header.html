@@ -14,8 +14,8 @@
     <div class="nav-item">
       <a href="#ai" data-scroll="#ai">AI 助手</a>
       <div class="dropdown">
-        <a href="#" class="auth-required">情緒AI</a>
-        <a href="#" class="auth-required">建議生成</a>
+        <a href="/ai/chat" class="auth-required">AI 助手</a>
+        <a href="#" class="auth-required">情緒 AI</a>
         <a href="#" class="auth-required">心理測驗</a>
       </div>
     </div>
@@ -40,10 +40,10 @@
 
     <div class="nav-item">
       {% if current_user.is_authenticated %}
-        <a href="#">你好，{{ current_user.username }}</a>
+        <a href="#user">你好，{{ current_user.username }}</a>
         <div class="dropdown">
-          <a href="#">個人資料</a>
-          <a href="#">設定</a>
+          <a href="/settings/profile">個人資料</a>
+          <a href="/settings/acc_settings">設定</a>
           <a href="/user/logout">登出</a>
         </div>
       {% else %}

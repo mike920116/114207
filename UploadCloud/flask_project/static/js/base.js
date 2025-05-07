@@ -79,6 +79,66 @@ document.addEventListener("DOMContentLoaded", function () {
   // 原本的登入驗證與彈窗初始化請保留
 });
 
+// 頁面轉場效果
+document.addEventListener("DOMContentLoaded", function() {
+  // 添加一個頁面載入過渡元素
+  const transitionElement = document.createElement('div');
+  transitionElement.id = 'page-transition';
+  transitionElement.style.position = 'fixed';
+  transitionElement.style.top = '0';
+  transitionElement.style.left = '0';
+  transitionElement.style.width = '100%';
+  transitionElement.style.height = '100%';
+  transitionElement.style.backgroundColor = 'rgba(255, 255, 255, 0)';
+  transitionElement.style.zIndex = '9999';
+  transitionElement.style.pointerEvents = 'none';
+  transitionElement.style.transition = 'opacity 0.3s ease';
+  transitionElement.style.opacity = '0';
+  document.body.appendChild(transitionElement);
+
+  // 處理所有鏈接的點擊事件
+  document.querySelectorAll('a').forEach(link => {
+    // 排除外部鏈接、錨點鏈接及開發中功能
+    if (
+      link.getAttribute('href') && 
+      !link.getAttribute('href').startsWith('http') && 
+      !link.getAttribute('href').startsWith('#') && 
+      !link.classList.contains('auth-required')
+    ) {
+      link.addEventListener('click', function(e) {
+        const href = this.getAttribute('href');
+        
+        // 如果是需要登錄才能訪問的頁面，但用戶未登錄，則顯示提示
+        if (this.classList.contains('auth-required') && !window.IS_AUTHENTICATED) {
+          return; // 讓原始的授權檢查處理
+        }
+        
+        // 觸發頁面過渡動畫
+        e.preventDefault();
+        
+        transitionElement.style.backgroundColor = 
+          document.body.classList.contains('dark-mode') ? 
+          'rgba(25, 25, 35, 0.6)' : 'rgba(255, 255, 255, 0.6)';
+        transitionElement.style.opacity = '1';
+        
+        // 延遲跳轉，讓動畫有時間顯示
+        setTimeout(() => {
+          window.location.href = href;
+        }, 300);
+      });
+    }
+  });
+  
+  // 頁面加載完成後的動畫
+  window.addEventListener('load', function() {
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.3s ease';
+    
+    setTimeout(() => {
+      document.body.style.opacity = '1';
+    }, 50);
+  });
+});
 
 // 平滑滾動
 document.querySelectorAll('a[data-scroll],.home-button,.help-button').forEach(a=>{
@@ -123,5 +183,39 @@ document.addEventListener("DOMContentLoaded", function () {
 function closeFeatureModal() {
   document.getElementById("feature-modal").classList.remove("active");
 }
+
+// 波紋點擊效果
+document.addEventListener("DOMContentLoaded", function() {
+  // 為所有按鈕和連結添加波紋效果
+  const buttons = document.querySelectorAll('button, .button, [type="button"], [type="submit"], a.btn, .nav-item > a, .menu-item');
+  
+  buttons.forEach(button => {
+    button.addEventListener('click', function(e) {
+      // 檢查按鈕是否已定位 (position)
+      const position = getComputedStyle(this).position;
+      if (position === 'static') {
+        this.style.position = 'relative';
+      }
+      
+      // 創建波紋元素
+      const ripple = document.createElement('span');
+      ripple.classList.add('ripple');
+      this.appendChild(ripple);
+      
+      // 計算位置
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = e.clientX - rect.left - (size / 2) + 'px';
+      ripple.style.top = e.clientY - rect.top - (size / 2) + 'px';
+      
+      // 動畫結束後移除元素
+      setTimeout(() => {
+        ripple.remove();
+      }, 600); // 與動畫時間相符
+    });
+  });
+});
 
 

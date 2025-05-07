@@ -1,0 +1,145 @@
+/* —— 外框 —— */
+.chat-admin-wrapper{
+    max-width:1200px;margin:90px auto;display:flex;gap:24px;
+    font-family:'Segoe UI','Noto Sans TC',sans-serif;
+  }
+  body.dark-mode .chat-admin-wrapper{color:#e6f0fa;}
+  
+  /* 聊天面板主容器 */
+  .chat-wrapper {
+    display: flex; 
+    gap: 24px; 
+    padding: 1.5rem; 
+    min-height: 560px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  /* —— 會話清單 —— */
+  .session-list{
+    width: 280px;
+    min-height: 560px;
+    padding: 20px;
+    background: linear-gradient(135deg,#eef4f2,#d9eade);
+    border-radius: 20px;
+    box-shadow: 0 6px 18px rgba(0,0,0,.1);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column; /* 確保元素垂直排列 */
+  }
+  body.dark-mode .session-list{
+    background:#1e3248;box-shadow:0 6px 18px rgba(0,0,0,.4);
+  }
+  .session-list h3{margin-top:0;margin-bottom:15px;font-size:20px}
+  
+  /* 會話容器 - 新增以確保順序 */
+  #session-container {
+    margin-top: 10px;
+    order: 2; /* 確保在標題之後 */
+  }
+
+  .no-session {
+    color: #777;
+    text-align: center;
+    padding: 20px 0;
+  }
+  
+  .session-item{
+    padding:10px 14px;border-radius:12px;cursor:pointer;
+    display:flex;justify-content:space-between;align-items:center;
+    margin-bottom:10px;transition:.2s;
+    background-color: rgba(255, 255, 255, 0.5);
+  }
+  .session-item:hover{background:rgba(0,0,0,.05);}
+  body.dark-mode .session-item:hover{background:rgba(255,255,255,.08);}
+  .session-item.active{background:#b2e3bd;}
+  body.dark-mode .session-item.active{background:#345e87;}
+  
+  /* 用戶已離開標記 */
+  .session-item.user-left {
+    opacity: 0.7;
+  }
+  .left-mark {
+    font-size: 12px;
+    background: #6c757d !important;
+  }
+  
+  /* 修正用戶郵箱顯示 */
+  .user-mail {
+    max-width: 70%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  .badge{
+    background:#3a8b55;color:#fff;border-radius:8px;padding:0 6px;font-size:12px;
+  }
+  
+  /* —— 聊天區域 —— */
+  .chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 560px;
+  }
+  .log-box {
+    flex: 1;
+    border: 1px solid #c3e9c9;
+    border-radius: 20px;
+    padding: 24px;
+    background: rgba(255,255,255,.88);
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+  body.dark-mode .log-box{
+    background:#23354a;border-color:#4a7b9d;
+  }
+  
+  /* 空狀態提示 */
+  .empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #777;
+  }
+  
+  /* 系統通知樣式 */
+  .system-notification {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    padding: 8px;
+    margin: 10px 0;
+    border-radius: 5px;
+    text-align: center;
+  }
+  body.dark-mode .system-notification {
+    background-color: #343a40;
+    color: #adb5bd;
+  }
+  
+  /* —— 訊息泡泡 —— */
+  .msg{max-width:70%;padding:12px 18px;border-radius:18px;word-break:break-word;margin-bottom:14px;font-size:15px;line-height:1.6;position:relative}
+  .msg.admin{align-self:flex-end;background:#d6f4de;color:#2e6b40;border-bottom-right-radius:0}
+  .msg.user {align-self:flex-start;background:#eaf5ff;color:#34495e;border-bottom-left-radius:0}
+  .msg.ai   {align-self:flex-start;background:#f0f0f0;color:#333;border-bottom-left-radius:0}
+  body.dark-mode .msg.admin{background:#2a4b7c;color:#f5f5f5}
+  body.dark-mode .msg.user {background:#355f89;color:#e6f0fa}
+  body.dark-mode .msg.ai   {background:#4a6d99;color:#f5f5f5}
+  
+  /* 名稱（無底色） */
+  .msg .role{font-size:13px;font-weight:bold;margin-bottom:4px}
+  
+  /* —— 回覆輸入 —— */
+  .reply-area{margin-top:16px;display:flex;gap:10px}
+  .reply-area textarea{
+    flex:1;padding:12px;border:1px solid #8fcf8c;border-radius:12px;resize:vertical
+  }
+  body.dark-mode .reply-area textarea{background:#2c3f36;border-color:#4a7b9d;color:#e6f0fa}
+  .reply-area button{
+    padding:12px 24px;border:none;border-radius:12px;font-weight:bold;
+    background:linear-gradient(135deg,#3a8b55,#58d88b);color:#fff;cursor:pointer;transition:.2s
+  }
+  body.dark-mode .reply-area button {
+    background: linear-gradient(135deg, #2c5d8f, #3473a3);
+  }
+  .reply-area button:hover{transform:scale(1.03);filter:brightness(1.05)}

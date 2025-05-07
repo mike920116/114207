@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # 讀取 .env 檔案
 
-admin_bp = Blueprint('admin', __name__)
+admin_bp = Blueprint('admin', __name__,url_prefix='/admin')
 
 # 讀取環境變數中的管理員信箱
 ADMIN_EMAILS = set(email.strip() for email in os.getenv("ADMIN_EMAILS", "").split(","))
