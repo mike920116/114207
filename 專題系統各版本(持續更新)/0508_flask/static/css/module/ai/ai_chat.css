@@ -1,0 +1,162 @@
+.ai-chat-wrapper {
+  background: linear-gradient(to bottom, #ecf5ec, #cae8d2);
+  min-height: 90vh;
+  padding: 40px 10%;
+  font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+}
+
+body.dark-mode .ai-chat-wrapper {
+  background: linear-gradient(to bottom, #0c1e33, #1e3752);
+}
+
+/* 聊天框 */
+.chat-box {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 24px;
+  height: 520px;
+  overflow-y: auto;
+  box-shadow: 0 0 14px rgba(0,0,0,0.15);
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+body.dark-mode .chat-box {
+  background: rgba(28, 38, 58, 0.95);
+}
+
+/* 訊息樣式通用 */
+.chat-msg {
+  max-width: 75%;
+  padding: 14px 20px;
+  border-radius: 18px;
+  word-break: break-word;
+  font-size: 15.5px;
+  line-height: 1.6;
+  position: relative;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* 用戶訊息 */
+.user-msg {
+  align-self: flex-end;
+  background: linear-gradient(145deg, #d5f8e2, #b1eacb);
+  text-align: left;
+  border-bottom-right-radius: 0;
+}
+
+.user-msg::before {
+  content: "👤 你";
+  font-size: 13px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
+  color: #4c684c;
+}
+
+body.dark-mode .user-msg {
+  background: linear-gradient(145deg, #285b45, #3d7e66);
+  color: #e0f9f2;
+}
+
+body.dark-mode .user-msg::before {
+  color: #b8f8e3;
+}
+
+/* AI 訊息 */
+.ai-msg {
+  align-self: flex-start;
+  background: linear-gradient(145deg, #e4ecfa, #c3d8f3);
+  text-align: left;
+  border-bottom-left-radius: 0;
+}
+
+.ai-msg::before {
+  content: "🤖 AI 助手";
+  font-size: 13px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 6px;
+  color: #445a77;
+}
+
+body.dark-mode .ai-msg {
+  background: linear-gradient(145deg, #2e4268, #415f89);
+  color: #eef5ff;
+}
+
+body.dark-mode .ai-msg::before {
+  color: #b5d2ff;
+}
+
+/* 輸入欄位區塊 */
+.chat-input-area {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.chat-input-area input {
+  flex: 1;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: 1px solid #9fcdaf;
+  background: rgba(255, 255, 255, 0.95);
+  color: #2f3d2f;
+  transition: 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.chat-input-area input:focus {
+  outline: none;
+  border-color: #6dbb89;
+}
+
+body.dark-mode .chat-input-area input {
+  background: rgba(25, 30, 40, 0.95);
+  border: 1px solid #5d7ca0;
+  color: #dbefff;
+}
+
+/* 送出按鈕 */
+.chat-input-area button {
+  padding: 14px 26px;
+  background: linear-gradient(135deg, #6ec49d, #48a47c);
+  color: white;
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.chat-input-area button:hover {
+  transform: scale(1.04);
+  filter: brightness(1.07);
+}
+
+.chat-input-area button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+body.dark-mode .chat-input-area button {
+  background: linear-gradient(135deg, #2c5d8f, #3473a3);
+}
+
+body.dark-mode .chat-input-area button:disabled {
+  background: #444;
+}
+
+/* 叫真人客服按鈕 */
+.call-human{
+  padding:12px 16px;margin-left:6px;
+  background:#ffaf40;color:#fff;border:none;
+  border-radius:8px;font-weight:bold;
+}
+.call-human:hover{filter:brightness(1.1);}
+body.dark-mode .call-human{background:#d18d24;}
