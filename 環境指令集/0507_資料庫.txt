@@ -1,0 +1,135 @@
+-- 刪除資料庫（若存在）
+DROP DATABASE IF EXISTS flaskdb;
+
+-- 建立資料庫並使用
+CREATE DATABASE flaskdb;
+USE flaskdb;
+
+-- 使用者表
+CREATE TABLE User (
+    User_Email VARCHAR(255) PRIMARY KEY,
+    User_name VARCHAR(255) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    User_Avatar VARCHAR(255),
+    Is_Anonymous CHAR(1) DEFAULT 'N',
+    is_verified TINYINT DEFAULT 0,
+    email_verification_token VARCHAR(255),
+    token_expiry DATETIME,
+    reset_token TEXT NULL,
+    reset_token_expiry DATETIME NULL,
+    bio TEXT,
+    last_login_ip VARCHAR(255),
+    last_login_time DATETIME,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 日記記錄表
+CREATE TABLE DiaryRecords (
+    Diary_id INT PRIMARY KEY AUTO_INCREMENT,
+    User_Email VARCHAR(255),
+    Diary_Content TEXT,
+    Emotion_status VARCHAR(255),
+    AI_analysis_content TEXT,
+    AI_suggestions TEXT,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email)
+);
+
+-- 日記總結表
+CREATE TABLE DiarySummaries (
+    Summary_id INT PRIMARY KEY AUTO_INCREMENT,
+    User_Email VARCHAR(255),
+    Summary_start_period VARCHAR(255),
+    Summary_end_period VARCHAR(255),
+    Summary_content TEXT,
+    Generate_date DATE,
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email)
+);
+
+-- 日記互動表
+CREATE TABLE DiaryInteractions (
+    Interaction_id INT PRIMARY KEY AUTO_INCREMENT,
+    Diary_id INT,
+    User_message TEXT,
+    AI_response TEXT,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (Diary_id) REFERENCES DiaryRecords(Diary_id)
+);
+
+-- 社群貼文表
+CREATE TABLE Posts (
+    Post_id INT PRIMARY KEY AUTO_INCREMENT,
+    User_Email VARCHAR(255),
+    title VARCHAR(255),
+    Content TEXT,
+    Is_public BOOLEAN DEFAULT TRUE,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email)
+);
+
+-- 留言表
+CREATE TABLE Comments (
+    Comment_id INT PRIMARY KEY AUTO_INCREMENT,
+    Post_id INT,
+    User_Email VARCHAR(255),
+    Content TEXT,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (Post_id) REFERENCES Posts(Post_id),
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email)
+);
+
+-- 按讚表
+CREATE TABLE Likes (
+    Like_id INT PRIMARY KEY AUTO_INCREMENT,
+    User_Email VARCHAR(255),
+    Post_id INT,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email),
+    FOREIGN KEY (Post_id) REFERENCES Posts(Post_id)
+);
+
+-- 收藏日記表
+CREATE TABLE PostCollections (
+    Collection_id INT PRIMARY KEY AUTO_INCREMENT,
+    User_Email VARCHAR(255),
+    Post_id INT,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email),
+    FOREIGN KEY (Post_id) REFERENCES Posts(Post_id)
+);
+
+-- 舉報紀錄表
+CREATE TABLE Reports (
+    Report_id INT PRIMARY KEY AUTO_INCREMENT,
+    User_Email VARCHAR(255),
+    Post_id INT,
+    Report_reason TEXT,
+    Created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email),
+    FOREIGN KEY (Post_id) REFERENCES Posts(Post_id)
+);
+
+-- 1‑1 會話表：一位使用者一條紀錄（方便人類客服找到使用者）
+CREATE TABLE AIChatSessions (
+    session_id      INT AUTO_INCREMENT PRIMARY KEY,
+    user_email      VARCHAR(255),
+    is_open         TINYINT DEFAULT 1,          -- 1=會話進行中，0=已結束
+    need_human      TINYINT DEFAULT 0,          -- 1=使用者呼叫真人客服
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_email) REFERENCES User(User_Email)
+);
+
+-- 1‑2 訊息表：真正存每一句話
+CREATE TABLE AIChatLogs (
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    session_id  INT,
+    role        ENUM('user','ai','admin') NOT NULL,
+    message     TEXT,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES AIChatSessions(session_id)
+);
