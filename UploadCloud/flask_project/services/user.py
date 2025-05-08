@@ -116,7 +116,7 @@ def login():
 
             # 更新登入時間與IP
             login_time = datetime.now()
-            login_ip = request.remote_addr or "未知"
+            login_ip = request.headers.get("X-Forwarded-For", request.remote_addr) or "未知"
             cursor.execute("""
                 UPDATE User SET last_login_time = %s, last_login_ip = %s WHERE User_Email = %s
             """, (login_time, login_ip, email))
