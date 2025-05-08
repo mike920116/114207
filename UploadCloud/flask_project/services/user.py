@@ -1,11 +1,11 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from flask import Blueprint, render_template, request, redirect, url_for,current_app
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 import bcrypt
 from utils import db
 from datetime import datetime, timedelta
 from itsdangerous import URLSafeTimedSerializer
-import os
-import smtplib
+import os,smtplib
+from email.header import Header
 from email.mime.text import MIMEText
 from dotenv import load_dotenv
 load_dotenv()
@@ -244,20 +244,30 @@ def reset_password():
     return render_template("user/reser_success.html")
 
 # 寄驗證信共用方法
-def send_verification_email(to_email, token):
+def send_verification_email(to_email: str, token: str) -> None:
     verify_link = url_for("user.verify_email", token=token, _external=True)
-    subject = "請驗證您的帳號"
-    body = f"請點擊以下連結完成帳號驗證（1小時內有效）：\n{verify_link}"
 
-    msg = MIMEText(body)
-    msg["Subject"] = subject
-    msg["From"] = os.environ.get("MAIL_DEFAULT_SENDER")
+    subject = "【Soulcraft】請驗證您的帳號"
+    body = (
+        "您好，\n\n"
+        f"請在 1 小時內點擊以下連結完成帳號驗證：\n{verify_link}\n\n"
+        "若您並未申請註冊，請忽略此信。"
+    )
+
+    msg = MIMEText(body, "plain", "utf-8")
+    msg["Subject"] = Header(subject, "utf-8")
+    msg["From"] = os.environ["MAIL_DEFAULT_SENDER"]
     msg["To"] = to_email
 
     try:
-        with smtplib.SMTP(os.environ.get("MAIL_SERVER"), int(os.environ.get("MAIL_PORT"))) as server:
-            server.starttls()
-            server.login(os.environ.get("MAIL_USERNAME"), os.environ.get("MAIL_PASSWORD"))
+        with smtplib.SMTP(os.environ["MAIL_SERVER"], int(os.environ["MAIL_PORT"])) as server:
+            server.ehlo()
+            if os.environ.get("MAIL_USE_TLS", "True").lower() in ("true", "1"):
+                server.starttls()
+                server.ehlo()
+            server.login(os.environ["MAIL_USERNAME"], os.environ["MAIL_PASSWORD"])
             server.send_message(msg)
     except Exception as e:
-        print(f"❌ 寄信失敗：{e}")
+        # 建議寫入 logs，並在前端顯示友善提示
+        current_app.logger.exception(f"❌ 寄送驗證信給 {to_email} 失敗：{e}")
+        raise  # 讓呼叫端決定如何回應
