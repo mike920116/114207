@@ -11,7 +11,7 @@ def profile():
     if request.method == 'POST':
         new_name = request.form.get('username')
         bio = request.form.get('bio')
-        # 未實作圖片上傳，若要補請告知
+        # TODO: 圖片上傳未實作，可補上
 
         conn = db.get_connection()
         cursor = conn.cursor()
@@ -50,4 +50,8 @@ def account_settings():
     login_time = row[0].strftime("%Y-%m-%d %H:%M:%S") if row and row[0] else "無資料"
     login_ip = row[1] if row and row[1] else "無資料"
 
-    return render_template('settings/acc_settings.html', login_time=login_time, login_ip=login_ip)
+    return render_template(
+        'settings/acc_settings.html',
+        login_time=login_time,
+        login_ip=login_ip
+    )

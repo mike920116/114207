@@ -8,6 +8,7 @@
       <th scope="col">Email</th>
       <th scope="col">名稱</th>
       <th scope="col">註冊日期</th>
+      <th scope="col">登入 IP</th>
     </tr>
   </thead>
   <tbody>
@@ -16,6 +17,7 @@
       <td>{{ u[0] }}</td>
       <td>{{ u[1] or '-' }}</td>
       <td>{{ u[2] }}</td>
+      <td>{{ u[3] or '無紀錄' }}</td>
     </tr>
     {% endfor %}
   </tbody>
