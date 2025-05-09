@@ -53,7 +53,7 @@ def save_diary():
             return jsonify({'success': False, 'message': 'DIFY API 回傳錯誤', 'error': dify_response.text})
 
         dify_data = dify_response.json()
-        dify_emotion_result = dify_data.get('answer', '無法取得分析結果')
+        ai_result = dify_data.get('answer', '無法取得分析結果')
 
         current_time = datetime.now()
 
@@ -61,13 +61,13 @@ def save_diary():
         conn = db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            INSERT INTO DiaryRecords (User_Email, Diary_Content, Emotion_status, Created_at, Updated_at)
+            INSERT INTO DiaryRecords (User_Email, Diary_Content, AI_analysis_content, Created_at, Updated_at)
             VALUES (%s, %s, %s, %s, %s)
-        """, (current_user.id, content, dify_emotion_result, current_time, current_time))
+        """, (current_user.id, content, ai_result, current_time, current_time))
         conn.commit()
         conn.close()
 
-        return jsonify({'success': True, 'message': '日記與情緒分析已儲存成功', 'emotion_detail': dify_emotion_result})
+        return jsonify({'success': True, 'message': '日記與情緒分析已儲存成功', 'emotion_detail': ai_result})
     
     except Exception as e:
         return jsonify({'success': False, 'message': f'發生錯誤: {str(e)}'})
@@ -82,7 +82,7 @@ def diary_list():
         conn = db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT Diary_id, Diary_Content, Emotion_status, Created_at 
+            SELECT Diary_id, Diary_Content, AI_analysis_content, Created_at 
             FROM DiaryRecords 
             WHERE User_Email = %s 
             ORDER BY Created_at DESC

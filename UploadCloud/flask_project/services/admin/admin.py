@@ -65,7 +65,7 @@ def admin_diaries():
                d.User_Email,
                COALESCE(u.User_name, '') AS name,
                LEFT(d.Diary_Content, 80) AS snippet,
-               d.Emotion_status,
+               d.AI_analysis_content,
                d.Created_at
         FROM DiaryRecords d
         LEFT JOIN User u ON d.User_Email = u.User_Email
