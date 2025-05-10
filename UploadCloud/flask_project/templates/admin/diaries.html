@@ -15,11 +15,11 @@
   <tbody>
     {% for d in diaries %}
     <tr>
-      <td>{{ d[0] }}</td>
-      <td>{{ d[1] }} ({{ d[2] }})</td>
-      <td>{{ d[3] }}{% if d[3]|length == 80 %}...{% endif %}</td>
-      <td>{{ d[4] }}</td>
-      <td>{{ d[5] }}</td>
+      <td data-label="ID:">{{ d[0] }}</td>
+      <td data-label="Email / 名稱:">{{ d[1] }} ({{ d[2] }})</td>
+      <td data-label="內容摘要:">{{ d[3] }}{% if d[3]|length == 80 %}...{% endif %}</td>
+      <td data-label="情緒:">{{ d[4] }}</td>
+      <td data-label="日期:">{{ d[5] }}</td>
     </tr>
     {% endfor %}
   </tbody>

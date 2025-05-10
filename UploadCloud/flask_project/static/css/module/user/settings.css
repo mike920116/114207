@@ -155,3 +155,72 @@ body.dark-mode .settings-box .login-info {
   color: #e0ecf0;
   border-left: 5px solid #6ca2d5;
 }
+
+/* 新增：手機端響應式設計 */
+@media (max-width: 768px) {
+  .settings-page-wrapper {
+    padding-top: 80px; /* 減少頂部 padding，適應小螢幕 */
+    padding-bottom: 80px;
+  }
+
+  .settings-box {
+    padding: 20px; /* 減少內邊距 */
+    max-width: 100%; /* 適應手機全寬 */
+    width: 90%; /* 留一些邊距 */
+    border-radius: 12px; /* 稍微減小圓角 */
+  }
+
+  .settings-box h2,
+  .settings-box h3 {
+    font-size: 20px; /* 減小標題字體 */
+    margin-bottom: 16px;
+  }
+
+  .settings-box label {
+    font-size: 14px; /* 減小標籤字體 */
+    margin-bottom: 4px;
+  }
+
+  .settings-box input.form-control,
+  .settings-box textarea.form-control {
+    padding: 8px; /* 減小輸入框 padding */
+    font-size: 14px; /* 減小字體 */
+    margin-bottom: 16px; /* 減小間距 */
+    border-radius: 8px;
+  }
+
+  .settings-box textarea#bio {
+    height: 120px; /* 減小文字區域高度 */
+    font-size: 14px;
+  }
+
+  .settings-box #bio-counter {
+    font-size: 0.8rem;
+    margin-top: -10px;
+    margin-bottom: 12px;
+  }
+
+  .settings-box .avatar-wrapper {
+    margin-bottom: 16px;
+  }
+
+  .settings-box img#avatar-preview {
+    width: 100px; /* 減小頭像尺寸 */
+    height: 100px;
+    border-width: 1px;
+  }
+
+  .settings-box .btn {
+    padding: 8px 16px; /* 減小按鈕 padding */
+    font-size: 14px; /* 減小字體 */
+    width: 80%; /* 適應手機螢幕 */
+    margin-top: 20px;
+  }
+
+  .settings-box .login-info {
+    font-size: 13px; /* 減小字體 */
+    padding: 12px;
+    margin-bottom: 20px;
+    border-left-width: 4px;
+  }
+}

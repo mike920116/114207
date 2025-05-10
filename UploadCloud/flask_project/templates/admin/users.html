@@ -14,10 +14,10 @@
   <tbody>
     {% for u in users %}
     <tr>
-      <td>{{ u[0] }}</td>
-      <td>{{ u[1] or '-' }}</td>
-      <td>{{ u[2] }}</td>
-      <td>{{ u[3] or '無紀錄' }}</td>
+      <td data-label="Email:">{{ u[0] }}</td>
+      <td data-label="名稱:">{{ u[1] or '-' }}</td>
+      <td data-label="註冊日期:">{{ u[2] }}</td>
+      <td data-label="登入 IP:">{{ u[3] or '無紀錄' }}</td>
     </tr>
     {% endfor %}
   </tbody>

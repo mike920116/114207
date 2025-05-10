@@ -1,8 +1,12 @@
 .ai-chat-wrapper {
   background: linear-gradient(to bottom, #ecf5ec, #cae8d2);
-  min-height: 90vh;
-  padding: 40px 10%;
+  min-height: 100vh; /* 調整為 100vh，確保填滿整個視窗高度 */
+  padding: 80px 10% 0 10%; /* 保持頂部 padding，底部 padding 設為 0 由 flex 控制 */
   font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+  box-sizing: border-box;
+  display: flex; /* 使用 flex 佈局 */
+  flex-direction: column; /* 垂直排列子元素 */
+  gap: 20px; /* 子元素間距 */
 }
 
 body.dark-mode .ai-chat-wrapper {
@@ -14,10 +18,11 @@ body.dark-mode .ai-chat-wrapper {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 16px;
   padding: 24px;
-  height: 520px;
-  overflow-y: auto;
+  overflow-y: auto; /* 保持滾動功能 */
   box-shadow: 0 0 14px rgba(0,0,0,0.15);
-  margin-bottom: 30px;
+  flex: 1; /* 讓 chat-box 填滿剩餘空間 */
+  min-height: 200px; /* 設置最小高度，避免過小 */
+  max-height: calc(100vh - 200px); /* 動態計算最大高度，減去上padding、chat-input-area 和間距 */
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -74,7 +79,7 @@ body.dark-mode .user-msg::before {
 }
 
 .ai-msg::before {
-  content: "🤖 AI 助手";
+  content: "🦝AI心靈助手 - 小語";
   font-size: 13px;
   font-weight: bold;
   display: block;
@@ -92,10 +97,13 @@ body.dark-mode .ai-msg::before {
 }
 
 /* 輸入欄位區塊 */
+/* 輸入欄位區塊 */
 .chat-input-area {
   display: flex;
   justify-content: center;
   gap: 12px;
+  padding-bottom: 20px; /* 底部間距 */
+  min-height: 60px; /* 設置最小高度，根據實際需求調整 */
 }
 
 .chat-input-area input {
@@ -160,3 +168,63 @@ body.dark-mode .chat-input-area button:disabled {
 }
 .call-human:hover{filter:brightness(1.1);}
 body.dark-mode .call-human{background:#d18d24;}
+
+
+/* 手機端響應式設計 */
+@media (max-width: 768px) {
+  .ai-chat-wrapper {
+    padding: 60px 5% 0 5%;
+    gap: 15px;
+  }
+
+  .chat-box {
+    padding: 16px;
+    border-radius: 12px;
+    max-width: 100%;
+    margin: 10px 0;
+    min-height: 150px;
+    max-height: calc(100vh - 150px);
+  }
+
+  .chat-msg {
+    max-width: 85%;
+    padding: 10px 14px;
+    font-size: 14px;
+    border-radius: 14px;
+  }
+
+  .chat-input-area {
+    flex-direction: row; /* 改為水平排列 */
+    flex-wrap: wrap; /* 如果空間不足，允許換行 */
+    gap: 8px; /* 減少間距 */
+    padding-bottom: 15px;
+    min-height: auto; /* 移除固定高度，根據內容調整 */
+    align-items: center; /* 垂直居中對齊 */
+  }
+
+  .chat-input-area input {
+    padding: 8px;
+    font-size: 14px;
+    border-radius: 8px;
+    flex: 1; /* 輸入框佔據剩餘空間 */
+    min-width: 0; /* 避免輸入框過寬 */
+  }
+
+  .chat-input-area button {
+    padding: 8px 16px; /* 縮小按鈕尺寸 */
+    font-size: 13px;
+    border-radius: 6px;
+    width: auto; /* 取消全寬，按內容調整 */
+    min-width: 80px; /* 設置最小寬度，確保可點擊 */
+  }
+
+  .call-human {
+    padding: 8px 12px; /* 縮小按鈕尺寸 */
+    margin-left: 0;
+    font-size: 13px;
+    border-radius: 6px;
+    width: auto; /* 取消全寬，按內容調整 */
+    min-width: 80px; /* 設置最小寬度，確保可點擊 */
+  }
+}
+

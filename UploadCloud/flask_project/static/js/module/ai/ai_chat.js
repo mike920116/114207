@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on("need_human", d=> {
       // USER_EMAIL 應該是從後端模板傳入的變數
       if (typeof USER_EMAIL !== 'undefined' && d.email === USER_EMAIL) {
-          appendMsg("客服已收到訊息，請稍候…", "ai"); // 使用修正後的 appendMsg
+          appendMsg("客服已收到訊息，請稍候…（服務時段為9:00-21:00，若誤按請幫我重新整理頁面)", "ai"); // 使用修正後的 appendMsg
       }
     });
   
