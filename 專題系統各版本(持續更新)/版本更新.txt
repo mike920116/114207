@@ -22,3 +22,6 @@ flask前後端邏輯重製、新增後台
 
 0509 ver.
 修改UI/UX、新增手機版面
+
+0510 ver.
+更新DIFY回覆兩次、記憶功能conversation_id

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}日記之森 | 驗證失敗{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/module/user/user.css') }}">
+<script src="{{ url_for('static', filename='js/module/user/user.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="user-page-wrapper">
+  <div class="auth-box">
+    <div class="error-message">
+      <h1>❌ 驗證失敗</h1>
+      <p>{{ message or '驗證連結已過期或無效，請重新註冊帳號。' }}</p>
+      <a href="{{ url_for('user.user_signup_form') }}" class="btn btn-danger">重新註冊</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
