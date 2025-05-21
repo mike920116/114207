@@ -1,0 +1,46 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}客服聊天面板 | Admin{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">💬 客服聊天面板</h1>
+
+<div class="chat-wrapper">
+  <!-- 左側會話清單 -->
+  <aside class="session-list" id="session-list">
+    <h3>待回覆</h3>
+    <div id="session-container">
+      {% if sessions %}
+        {% for s in sessions %}
+          <div class="session-item" data-sid="{{ s.session_id }}">
+            <span class="user-mail">{{ s.user_email }}</span>
+            <span class="badge">{{ s.msg_total }}</span>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="no-session">目前沒有使用者呼叫真人客服</p>
+      {% endif %}
+    </div>
+  </aside>
+
+  <!-- 聊天對話區 -->
+  <section class="chat-area">
+    <!-- 訊息顯示區域 -->
+    <div id="log-box" class="log-box">
+      <div class="empty-state">← 請從左側選擇一個對話</div>
+    </div>
+
+    <!-- 回覆區域 -->
+    <div class="reply-area">
+      <textarea id="reply-input" rows="3" placeholder="輸入訊息並按 Enter 或點送出"></textarea>
+      <button id="reply-btn">送出</button>
+    </div>
+  </section>
+</div>
+ 
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+{% endblock %}
