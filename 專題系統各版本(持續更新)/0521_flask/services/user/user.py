@@ -18,16 +18,13 @@ from . import user_bp
 # 載入環境變數
 load_dotenv()
 
-# 設置日誌路徑
-log_dir = "logs"
-os.makedirs(log_dir, exist_ok=True)
-log_file = os.path.join(log_dir, "flaskapp.log")
-
-logging.basicConfig(
-    filename=log_file,
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s: %(message)s"
-)
+# 根據作業系統設置日誌路徑
+if platform.system() == "Windows":
+    log_dir = os.path.join(os.path.dirname(__file__), "logs")
+    log_file = os.path.join(log_dir, "flaskapp.log")
+else:
+    log_dir = "/var/log"
+    log_file = os.path.join(log_dir, "flaskapp.log")
 
 # 確保日誌目錄存在
 os.makedirs(log_dir, exist_ok=True)

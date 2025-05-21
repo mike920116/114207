@@ -123,23 +123,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // 不再自動載入任何會話訊息
   // if (currentId) loadLogs(currentId).then(subscribe);
 
-  async function loadLogs(sid) {
+    async function loadLogs(sid) {
     sid = toStr(sid);
     if (!sid) return;
     logBox.innerHTML = "<p>載入中…</p>";
-    const r = await fetch(`/admin/chat/logs/${sid}`);
-    const res = await r.json();
-    const arr = Array.isArray(res) ? res : (res.messages || []);
-    logBox.innerHTML = "";
-    arr.forEach(row =>
-      appendLog(
-        row.role,
-        row.message,
-        row.email || (row.role === 'user' ? '使用者' : 'AI/管理員')
-      )
-    );
-    logBox.scrollTop = logBox.scrollHeight;
+    try {
+      const r = await fetch(`/admin/chat/logs/${sid}`);
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const res = await r.json();
+      const arr = Array.isArray(res) ? res : (res.messages || []);
+      logBox.innerHTML = "";
+      arr.forEach(row =>
+        appendLog(
+          row.role,
+          row.message,
+          row.email || (row.role === 'user' ? '使用者' : 'AI/管理員')
+        )
+      );
+      logBox.scrollTop = logBox.scrollHeight;
+    } catch (err) {
+      logBox.innerHTML = "<p class='error'>❌ 無法載入訊息紀錄</p>";
+      console.error("loadLogs failed:", err);
+    }
   }
+
 
   function appendLog(role, msg, senderName) {
     const div = document.createElement("div");

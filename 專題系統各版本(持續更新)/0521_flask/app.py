@@ -1,6 +1,7 @@
 import eventlet
 eventlet.monkey_patch()
 
+from socketio import WSGIApp
 import os, logging
 from datetime import datetime
 from dotenv import load_dotenv
@@ -71,5 +72,8 @@ logging.basicConfig(
 )
 
 # ── 啟動 ───────────────────────────────────
+
 if __name__ == '__main__':
     socketio.run(app, debug=True)
+else:
+    application = app
