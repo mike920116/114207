@@ -1,10 +1,14 @@
 /* static/js/module/ai/ai_chat.js
    --------------------------------------------------
-   – 使用者端 AI 聊天前端  
+   – 使用者端 AI 聊天前端
    – ✅ 已修正：求助按鈕事件掛載不到的問題
+   – ✅ 新增：session_id 一律字串化，避免型別不一致
    -------------------------------------------------- */
 
 document.addEventListener("DOMContentLoaded", () => {
+    /* －－－ 工具：把任何值轉成字串或 null －－－ */
+    const toStr = v => (v != null ? String(v) : null);
+
     let isSending = false;
     /* －－－ DOM 變數 －－－ */
     const chatBox   = document.getElementById("chat-box");
@@ -12,14 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const sendBtn   = document.getElementById("send-btn");
     const helpBtn   = document.getElementById("call-human-btn");   // ← 求助按鈕
     let   sessionConvId = "";       // 若之後要串 Dify 的 conversation_id
-    let   currentSessionId = null; // 新增：用於儲存從後端獲取的 session_id
+    let   currentSessionId = toStr(localStorage.getItem("userCurrentSessionId"));
     
 
     // 新增：訂閱到 session 的函數
     const subscribeToCurrentSession = () => {
       if (socket.connected && currentSessionId) {
         console.log(`ai_chat.js: Subscribing to session_id: ${currentSessionId}`);
-        socket.emit("subscribe_to_session", { session_id: currentSessionId });
+        socket.emit("subscribe_to_session", { session_id: currentSessionId, role: "user" });
       } else {
         console.log("ai_chat.js: Cannot subscribe. Socket connected: " + socket.connected + ", currentSessionId: " + currentSessionId);
       }
@@ -53,14 +57,10 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on("msg_added", (data) => {
       const { role, message, session_id } = data;
       // 確保只處理與當前 session_id 相關的訊息
-      if (session_id === currentSessionId) {
+      if (toStr(session_id) === currentSessionId) {
         if (role === "admin") {
           appendMsg(message, "admin");
         } else if (role === "ai" || role === "system") { // 處理來自後端的 AI 或系統訊息
-          // 避免重複顯示由 sendMessage() 中 fetch API 已處理的 AI 回覆
-          // 這裡主要接收因 Dify 暫停而由後端直接發送的系統提示，或管理員操作觸發的系統訊息
-          // 如果 sendMessage 中的 fetch 也觸發了 msg_added (例如 Dify 正常回覆時)
-          // 需要確保不會重複 append。目前 sendMessage 的 fetch 不直接觸發 msg_added 給自己。
           appendMsg(message, "ai"); 
         }
       } else {
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     socket.on("need_human", d=> {
       // USER_EMAIL 應該是從後端模板傳入的變數
       if (typeof USER_EMAIL !== 'undefined' && d.email === USER_EMAIL) {
-          appendMsg("客服已收到訊息，請稍候…（服務時段為9:00-21:00，若誤按請幫我重新整理頁面)", "ai"); // 使用修正後的 appendMsg
+          appendMsg("客服已收到訊息，請稍候…（服務時段為9:00-21:00，若誤按請幫我重新整理頁面)", "ai");
       }
     });
   
@@ -107,7 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // ✅ 後續照原本邏輯處理即可
       if (data.session_id && !currentSessionId) {
-        currentSessionId = data.session_id;
+        currentSessionId = toStr(data.session_id);
+        localStorage.setItem("userCurrentSessionId", currentSessionId);
         subscribeToCurrentSession();
       }
 
@@ -132,8 +133,6 @@ document.addEventListener("DOMContentLoaded", () => {
   
     /* －－－ 求真人客服 －－－ */
     const callHuman = async () => {
-      // appendMsg("我需要真人客服協助，謝謝！", "user"); // 由後端 chat_api 處理 user 訊息的儲存和廣播
-  
       helpBtn.disabled = true;
       helpBtn.innerText = "已通知…";
   
@@ -142,16 +141,17 @@ document.addEventListener("DOMContentLoaded", () => {
         const data = await response.json(); // 假設後端會回傳 session_id
 
         if (data.session_id && !currentSessionId) {
-            currentSessionId = data.session_id;
+            currentSessionId = toStr(data.session_id);
+            localStorage.setItem("userCurrentSessionId", currentSessionId);
             console.log(`ai_chat.js: Received session_id from call_services: ${currentSessionId}`);
             subscribeToCurrentSession();
-        } else if (data.session_id && currentSessionId !== data.session_id) {
+        } else if (data.session_id && currentSessionId !== toStr(data.session_id)) {
             console.warn(`ai_chat.js: Mismatch in session_id from call_services. Current: ${currentSessionId}, Received: ${data.session_id}. Updating and re-subscribing.`);
-            currentSessionId = data.session_id;
+            currentSessionId = toStr(data.session_id);
+            localStorage.setItem("userCurrentSessionId", currentSessionId);
             subscribeToCurrentSession();
         }
 
-        // appendMsg("已為您轉接真人客服，請稍候…", "ai"); // 這條訊息應由後端透過 msg_added 發送
         console.log("ai_chat.js: call_human successful, message: ", data.message);
 
       } catch (err) {
@@ -174,20 +174,16 @@ document.addEventListener("DOMContentLoaded", () => {
         helpBtn .addEventListener("click",  callHuman);
     }
   
-    /* －－－ 離開頁面自動關閉會話 －－－ */
-    // window.addEventListener("beforeunload", ... ); // 這部分邏輯由後端 SocketIO disconnect 處理，前端無需主動 close_session
-
-    // 新增：嘗試從 HTML 中獲取初始 session_id (如果後端渲染時提供了)
+    /* －－－ 初始 session_id（若後端渲染）－－－ */
     const initialSessionIdElement = document.getElementById('initial-session-id');
     if (initialSessionIdElement && initialSessionIdElement.value) {
-        currentSessionId = initialSessionIdElement.value;
+        currentSessionId = toStr(initialSessionIdElement.value);
+        localStorage.setItem("userCurrentSessionId", currentSessionId);
         console.log(`ai_chat.js: Initial session_id from HTML: ${currentSessionId}`);
-        // 如果 socket 已連線，則訂閱；否則等待 'connect' 事件
         if (socket.connected) {
             subscribeToCurrentSession();
         }
     } else {
         console.log("ai_chat.js: No initial session_id found in HTML.");
-        // 如果沒有初始 session_id，則在第一次 sendMessage 或 callHuman 成功後獲取並訂閱
     }
-  });
+});

@@ -11,10 +11,10 @@ from flask_login import LoginManager, current_user
 from utils import db
 from services.socketio_setup import socketio, init_socketio   # ← 新增
 from services.user import user_bp, load_user as user_load_user
+from services.user.settings import settings_bp
 from services.diary import diary_bp
 from services.admin.admin import admin_bp
 from services.admin.admin_chat import admin_chat_bp
-from services.settings import settings_bp
 from services.ai.ai_chat import ai_chat_bp
 # ─────────────────────────────────────────
 

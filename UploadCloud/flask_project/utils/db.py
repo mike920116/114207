@@ -25,9 +25,12 @@ pool = PooledDB(
     password=DB_PASSWORD,
     database=DB_NAME,
     charset="utf8mb4",
-    autocommit=True # 建議在 Web 應用中設定為 True，或者確保手動管理事務
+    autocommit=True, # 建議在 Web 應用中設定為 True，或者確保手動管理事務
+    reset=True  # 在每次使用後重置連接
 )
 
 # 從連線池取得資料庫連線
 def get_connection():
-    return pool.connection()
+    conn = pool.connection()
+    conn.ping(reconnect=True)  # 檢查連線是否有效
+    return conn

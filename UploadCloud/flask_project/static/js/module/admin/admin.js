@@ -1,5 +1,12 @@
+/* static/js/module/admin/admin.js
+   --------------------------------------------------
+   – 後台客服面板
+   – 2025-05-18 fix:
+     1. user_left 後立即刪除列表項，並記到 localStorage
+     2. 重新整理時排除已關閉會話、自動選第一個
+   -------------------------------------------------- */
+
 (() => {
-  /* ==== 主題切換 ==== */
   const root = document.documentElement, key = 'admin-theme';
   const themeBtn = document.createElement('button');
   themeBtn.className = 'theme-toggle';
@@ -13,7 +20,6 @@
     render();
   };
 
-  /* ==== 側欄 / 把手 ==== */
   const sidebar = document.getElementById('sidebar');
   const handle = document.getElementById('sidebar-handle');
   const toggle = () => {
@@ -29,70 +35,63 @@
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("session-list")) return;
 
+  const toStr = v => (v != null ? String(v) : null);
+
   const socket = io("/chat");
 
   const listEls   = document.querySelectorAll(".session-item");
   const logBox    = document.getElementById("log-box");
   const replyBtn  = document.getElementById("reply-btn");
   const replyText = document.getElementById("reply-input");
-  let currentId   = null;
-
-  const sessionsExist = document.querySelectorAll('.session-item').length > 0;
   const noSessionMsg  = document.querySelector('.no-session');
-  const sessionItems  = document.querySelectorAll('.session-item');
 
-  if (sessionsExist && sessionItems.length > 0) {
-    if (noSessionMsg) noSessionMsg.style.display = 'none';
-  } else {
-    if (noSessionMsg) noSessionMsg.style.display = 'block';
-  }
+  listEls.forEach(el => {
+    const sid = toStr(el.dataset.sid);
+    if (localStorage.getItem(`closed_${sid}`) === '1') el.remove();
+  });
 
-  const subscribeToCurrentSession = () => {
+  updateSessionVisibility();
+
+  let currentId = null;
+  localStorage.removeItem("adminCurrentId");  // 不預先選擇任何會話
+
+  const subscribe = () => {
     if (socket.connected && currentId) {
-      socket.emit("subscribe_to_session", { session_id: currentId });
+      socket.emit("subscribe_to_session", { session_id: currentId, role: "admin" });
     }
   };
 
-  socket.on('connect', () => {
-    if (currentId) subscribeToCurrentSession();
-  });
-
-  socket.on('disconnect', reason => {
-    console.log(`chat_panel.js: Socket disconnected. Reason: ${reason}`);
-  });
+  // 不再自動執行 subscribe
+  // socket.on('connect', subscribe); ← 已移除
 
   socket.on("user_left", ({ session_id, email, message }) => {
-    const sessionItem = document.querySelector(`.session-item[data-sid='${session_id}']`);
-    if (sessionItem) {
-      sessionItem.classList.add("user-left");
-      let leftMark = sessionItem.querySelector(".left-mark");
-      if (!leftMark) {
-        leftMark = document.createElement("span");
-        leftMark.className = "left-mark badge bg-secondary";
-        leftMark.style.marginLeft = "5px";
-        sessionItem.appendChild(leftMark);
-      }
-      leftMark.innerText = "已離開";
+    session_id = toStr(session_id);
+    localStorage.setItem(`closed_${session_id}`, '1');
+    const item = document.querySelector(`.session-item[data-sid='${session_id}']`);
+    if (item) item.remove();
+    updateSessionVisibility();
 
-      if (currentId === session_id) {
-        const notificationDiv = document.createElement("div");
-        notificationDiv.className = "system-notification";
-        notificationDiv.innerText = message || `使用者 ${email} 已離開聊天`;
-        logBox.appendChild(notificationDiv);
-        logBox.scrollTop = logBox.scrollHeight;
-      }
+    if (currentId === session_id) {
+      logBox.innerHTML = "";
+      const note = document.createElement("div");
+      note.className = "system-notification";
+      note.innerText = message || `使用者 ${email} 已離開聊天`;
+      logBox.appendChild(note);
+      currentId = null;
+      localStorage.removeItem("adminCurrentId");
     }
   });
 
   socket.on("msg_added", ({ session_id, role, message, email }) => {
-    if (session_id != currentId) {
-      const sessionItem = document.querySelector(`.session-item[data-sid='${session_id}']`);
-      if (sessionItem) {
-        let badge = sessionItem.querySelector(".badge");
+    session_id = toStr(session_id);
+    if (session_id !== currentId) {
+      const item = document.querySelector(`.session-item[data-sid='${session_id}']`);
+      if (item) {
+        let badge = item.querySelector(".badge");
         if (!badge) {
           badge = document.createElement('span');
           badge.className = "badge bg-danger rounded-pill";
-          sessionItem.appendChild(badge);
+          item.appendChild(badge);
         }
         badge.innerText = parseInt(badge.innerText || '0') + 1;
       }
@@ -102,82 +101,79 @@ document.addEventListener("DOMContentLoaded", () => {
     logBox.scrollTop = logBox.scrollHeight;
   });
 
-  socket.on("receive_message", ({ role, message, email }) => {
-    if (!currentId) return;
-    appendLog(role, message, email);
-    logBox.scrollTop = logBox.scrollHeight;
-  });
-
   socket.on("need_human", d => {
-    prependSessionItem(d.session_id, d.email, d.message_count || 1);
+    localStorage.removeItem(`closed_${d.session_id}`);
+    prependSessionItem(toStr(d.session_id), d.email, d.message_count || 1);
     if (noSessionMsg) noSessionMsg.style.display = 'none';
   });
 
-  function prependSessionItem(sessionId, userEmail, messageCount = 1) {
-    const sessionContainer = document.getElementById("session-container");
-    let existingItem = document.querySelector(`.session-item[data-sid='${sessionId}']`);
-
-    if (existingItem) {
-      const badge = existingItem.querySelector(".badge");
-      if (badge) badge.innerText = parseInt(badge.innerText || '0') + messageCount;
-      sessionContainer.prepend(existingItem);
-      return;
-    }
-
-    const newItem = document.createElement("div");
-    newItem.className = "session-item";
-    newItem.dataset.sid = sessionId;
-    newItem.innerHTML = `
-      <span class="user-mail">${userEmail}</span>
-      <span class="badge">${messageCount}</span>
-    `;
-    newItem.addEventListener("click", async () => {
-      document.querySelectorAll(".session-item").forEach(o => o.classList.remove("active"));
-      newItem.classList.add("active");
-      currentId = sessionId;
-      await loadLogs(currentId);
-      const badge = newItem.querySelector(".badge");
-      if (badge) badge.innerText = "0";
-      subscribeToCurrentSession();
-    });
-    sessionContainer.prepend(newItem);
-    updateSessionVisibility();
-  }
-
-  function updateSessionVisibility() {
-    const hasItems = document.querySelectorAll('.session-item').length > 0;
-    if (hasItems && noSessionMsg) noSessionMsg.style.display = 'none';
-    else if (!hasItems && noSessionMsg) noSessionMsg.style.display = 'block';
-  }
-
-  listEls.forEach(el => {
-    el.addEventListener("click", async () => {
-      listEls.forEach(o => o.classList.remove("active"));
-      el.classList.add("active");
-      currentId = el.dataset.sid;
-      await loadLogs(currentId);
-      const badge = el.querySelector(".badge");
-      if (badge) badge.innerText = "0";
-      subscribeToCurrentSession();
-    });
+  document.addEventListener("click", async e => {
+    const el = e.target.closest(".session-item");
+    if (!el) return;
+    document.querySelectorAll(".session-item").forEach(o => o.classList.remove("active"));
+    el.classList.add("active");
+    currentId = toStr(el.dataset.sid);
+    localStorage.setItem("adminCurrentId", currentId);
+    await loadLogs(currentId);
+    const badge = el.querySelector(".badge");
+    if (badge) badge.innerText = "0";
+    subscribe();
   });
 
+  // 不再自動載入任何會話訊息
+  // if (currentId) loadLogs(currentId).then(subscribe);
+
   async function loadLogs(sid) {
+    sid = toStr(sid);
+    if (!sid) return;
     logBox.innerHTML = "<p>載入中…</p>";
     const r = await fetch(`/admin/chat/logs/${sid}`);
-    const arr = await r.json();
+    const res = await r.json();
+    const arr = Array.isArray(res) ? res : (res.messages || []);
     logBox.innerHTML = "";
-    arr.forEach(row => appendLog(row.role, row.message, row.email || (row.role === 'user' ? '使用者' : 'AI/管理員')));
+    arr.forEach(row =>
+      appendLog(
+        row.role,
+        row.message,
+        row.email || (row.role === 'user' ? '使用者' : 'AI/管理員')
+      )
+    );
     logBox.scrollTop = logBox.scrollHeight;
   }
 
   function appendLog(role, msg, senderName) {
     const div = document.createElement("div");
     div.className = `msg ${role}`;
-    let senderDisplay = role === 'user' ? (senderName || '使用者') :
-                        role === 'admin' ? '管理員' : 'AI';
-    div.innerHTML = `<div class="role">${senderDisplay}</div>${msg}`;
+    const who = role === 'user' ? (senderName || '使用者') :
+               role === 'admin' ? '管理員' : 'AI';
+    div.innerHTML = `<div class="role">${who}</div>${msg}`;
     logBox.appendChild(div);
+  }
+
+  function prependSessionItem(id, email, count = 1) {
+    id = toStr(id);
+    if (localStorage.getItem(`closed_${id}`) === '1') {
+      localStorage.removeItem(`closed_${id}`);
+    }
+    const container = document.getElementById("session-container");
+    let item = document.querySelector(`.session-item[data-sid='${id}']`);
+    if (item) {
+      const badge = item.querySelector(".badge");
+      if (badge) badge.innerText = parseInt(badge.innerText || "0") + count;
+      container.prepend(item);
+      return;
+    }
+    item = document.createElement("div");
+    item.className = "session-item";
+    item.dataset.sid = id;
+    item.innerHTML = `<span class="user-mail">${email}</span><span class="badge">${count}</span>`;
+    container.prepend(item);
+    updateSessionVisibility();
+  }
+
+  function updateSessionVisibility() {
+    const has = document.querySelectorAll('.session-item').length > 0;
+    if (noSessionMsg) noSessionMsg.style.display = has ? 'none' : 'block';
   }
 
   async function send() {
@@ -189,7 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ session_id: currentId, message: txt })
     });
-    logBox.scrollTop = logBox.scrollHeight;
   }
 
   replyBtn.addEventListener("click", send);
@@ -199,6 +194,4 @@ document.addEventListener("DOMContentLoaded", () => {
       send();
     }
   });
-
-  updateSessionVisibility();
 });
