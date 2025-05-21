@@ -37,11 +37,3 @@ def handle_message(event):
     if group_id:
         print(f"📣 群組 ID：{group_id}")
 
-    # 一定要回覆，避免跳 LINE 預設訊息
-    try:
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text="✅ 我們已收到您的訊息")
-        )
-    except Exception as e:
-        logging.exception("LINE 回覆失敗")
