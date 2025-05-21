@@ -1,7 +1,9 @@
 """使用者端 AI 聊天（整合 Dify + 聊天記錄 + 呼叫真人客服 + WebSocket）
-    ⚙️ 2025‑05‑10 修正：
+    ⚙️ 2025-05-10 修正：
     1. 在 AIChatSessions 增加 conversation_id，跨訊息沿用同一段 Dify 對話
     2. 每次呼叫 Dify 時帶入 conversation_id；若第一次取得則寫回資料庫
+    ⚙️ 2025-05-16 更新：
+    3. session_id 一律字串化，避免前後端型別不一致
 """
 import os, requests, logging
 from flask import Blueprint, render_template, request, jsonify, current_app
@@ -18,16 +20,24 @@ HEADERS = {
     "Content-Type": "application/json"
 }
 
+
+# ─── 公用：取 socketio 實例 ───────────────────────────────
 def get_socketio():
     return current_app.extensions.get("socketio")
 
-# ─── 取得（或新建）聊天 session，回傳 session_id ────────────
+
+# ─── 公用：將任何值轉成 str（None → None） ────────────────
+def to_str(v):
+    return str(v) if v is not None else None
+
+
+# ─── 取得（或新建）聊天 session，回傳 (session_id, conv_id) ──
 def _get_or_create_session():
     conn = db.get_connection()
     cur  = conn.cursor()
     cur.execute("""
-        SELECT session_id   -- 0
-             , conversation_id   -- 1
+        SELECT session_id         -- 0
+             , conversation_id    -- 1
         FROM   AIChatSessions
         WHERE  user_email = %s AND is_open = 1
         """, (current_user.id,))
@@ -43,7 +53,8 @@ def _get_or_create_session():
         conv_id    = None
         conn.commit()
     conn.close()
-    return session_id, conv_id  # ← 直接回傳 conversation_id
+    return session_id, conv_id
+
 
 # ────────────────────────────────────────────────────────────
 #  1. 前端頁面
@@ -52,6 +63,7 @@ def _get_or_create_session():
 @login_required
 def chat_page():
     return render_template("ai/ai_chat.html")
+
 
 # ────────────────────────────────────────────────────────────
 #  2. 主要 API：傳送訊息 → Dify → 回傳
@@ -68,7 +80,7 @@ def chat_api():
     session_id, conversation_id = _get_or_create_session()
     logging.info(f"[chat_api] session={session_id}, conversation_id={conversation_id}")
 
-    # ↓↓↓  === 儲存使用者訊息、廣播給管理端  ====================
+    # ↓↓↓  儲存使用者訊息、廣播給管理端  ↓↓↓
     conn = db.get_connection()
     cur  = conn.cursor()
     cur.execute("""
@@ -80,7 +92,7 @@ def chat_api():
     socketio = get_socketio()
     if socketio:
         socketio.emit("msg_added", {
-            "session_id": session_id,
+            "session_id": to_str(session_id),         # ← 字串化
             "role"      : "user",
             "message"   : query,
             "email"     : current_user.id
@@ -91,11 +103,9 @@ def chat_api():
     if is_paused:
         logging.info(f"[chat_api] session {session_id} in paused set, skip Dify")
         conn.close()
-        return jsonify({"reply": "", "session_id": session_id})
+        return jsonify({"reply": "", "session_id": to_str(session_id)})
 
-    # ↑↑↑  === 使用者層結束 =====================================
-
-    # ──  呼叫 Dify，帶入 conversation_id  ──────────────────────
+    # ──  呼叫 Dify，帶入 conversation_id  ───────────────────
     payload = {
         "inputs"        : {},
         "query"         : query,
@@ -107,14 +117,13 @@ def chat_api():
         r      = requests.post(DIFY_API_URL, headers=HEADERS, json=payload, timeout=30)
         r_json = r.json()
         reply  = r_json.get("answer", "（AI 無回應）")
-        conv_id_from_dify = r_json.get("conversation_id")  # ⚠️ Dify 會在首次回傳 conversation_id
+        conv_id_from_dify = r_json.get("conversation_id")  # 首次回傳 conversation_id
     except Exception as e:
         logging.exception("Dify API error")
         return jsonify({
             "reply": f"⚠️ AI 服務異常：{str(e)}",
-            "session_id": session_id
+            "session_id": to_str(session_id)
         }), 500
-
 
     # 第一次取得 conversation_id → 寫回資料庫
     if conv_id_from_dify and not conversation_id:
@@ -135,27 +144,26 @@ def chat_api():
     conn.commit()
     conn.close()
 
-    # 廣播 AI 回覆
-    # 嘗試找出自己對應的 WebSocket sid
-    sid = None
+    # 廣播 AI 回覆（不要再送給自己）
+    skip_sid = None
     for s, sess_id in current_app.active_chat_connections.items():
-        if sess_id == session_id:
-            sid = s
+        if sess_id == to_str(session_id):           # ← 比較字串
+            skip_sid = s
             break
 
     if socketio:
         socketio.emit("msg_added", {
-            "session_id": session_id,
+            "session_id": to_str(session_id),       # ← 字串化
             "role"      : "ai",
             "message"   : reply,
             "email"     : current_user.id
-        }, namespace="/chat",skip_sid=sid)
+        }, namespace="/chat", skip_sid=skip_sid)
 
     return jsonify({
-        "reply"        : reply,
-        "session_id"   : session_id
-        # 前端暫不需 conversation_id，若要用可一起回傳
+        "reply"      : reply,
+        "session_id" : to_str(session_id)
     })
+
 
 # ────────────────────────────────────────────────────────────
 #  3. 叫真人客服
@@ -185,17 +193,18 @@ def call_human():
     socketio = get_socketio()
     if socketio:
         socketio.emit("msg_added", {
-            "session_id": session_id,
+            "session_id": to_str(session_id),       # ← 字串化
             "role"      : "user",
             "message"   : help_msg,
             "email"     : current_user.id
         }, namespace="/chat")
         socketio.emit("need_human", {
-            "session_id": session_id,
+            "session_id": to_str(session_id),       # ← 字串化
             "email"     : current_user.id
         }, namespace="/chat")
 
-    return jsonify({"message": "已通知真人客服", "session_id": session_id})
+    return jsonify({"message": "已通知真人客服", "session_id": to_str(session_id)})
+
 
 # ────────────────────────────────────────────────────────────
 #  4. 關閉 / 刪除會話

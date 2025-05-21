@@ -93,7 +93,7 @@ def signup():
         logger.debug(f"處理註冊請求，Email: {email}")
         if password != password2:
             logger.warning(f"密碼不一致，Email: {email}")
-            return render_template('user/signup.html', success=False)
+            return render_template('user/signup.html', success=False, error_message="兩次密碼不一致")
 
         # 檢查 Email 是否已存在
         conn = db.get_connection()
@@ -103,7 +103,7 @@ def signup():
         logger.debug(f"Email {email} 計數: {count}")
         if count > 0:
             logger.warning(f"Email {email} 已存在")
-            return render_template('user/signup.html', success=False)
+            return render_template('user/signup.html', success=False, error_message="此信箱已被註冊")
 
         # 插入新使用者
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
@@ -125,12 +125,13 @@ def signup():
         return render_template("user/signup.html", success=True)
     except Exception as e:
         logger.error(f"[註冊錯誤] Email: {email}, 錯誤: {e}")
-        return render_template("user/signup.html", success=False)
+        return render_template("user/signup.html", success=False, error_message=str(e))
     finally:
         if cursor:
             cursor.close()
         if conn:
             conn.close()
+
 
 # 登入畫面
 @user_bp.route('/login/form')

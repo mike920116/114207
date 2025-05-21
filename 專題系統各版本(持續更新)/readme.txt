@@ -1,3 +1,5 @@
+版本更新
+
 0424 ver.
 
 1. diary.py 已成功串接DIFY API (API KEY 請進.env自行更改)
@@ -29,3 +31,6 @@ flask前後端邏輯重製、新增後台
 
 0519 ver.
 更新管理員端通話邏輯
+
+0521 ver.
+重構路徑、websocketio fixbug
