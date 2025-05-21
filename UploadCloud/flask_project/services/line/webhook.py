@@ -25,6 +25,10 @@ def webhook_callback():
 
 @handler.add(MessageEvent)
 def handle_message(event):
-    user_id = event.source.user_id
-    print(f"📌 LINE 使用者 ID：{user_id}")
-    logging.warning(f"📌 LINE 使用者 ID：{user_id}")
+    user_id = getattr(event.source, 'user_id', None)
+    group_id = getattr(event.source, 'group_id', None)
+
+    if user_id:
+        print(f"📌 LINE 使用者 ID：{user_id}")
+    if group_id:
+        print(f"📣 群組 ID：{group_id}")
