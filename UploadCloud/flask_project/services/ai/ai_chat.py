@@ -9,6 +9,7 @@ import os, requests, logging
 from flask import Blueprint, render_template, request, jsonify, current_app
 from flask_login import login_required, current_user
 from utils import db
+from services.line.line_bot import notify_admins
 
 ai_chat_bp = Blueprint("ai_chat", __name__, url_prefix="/ai")
 
@@ -202,6 +203,12 @@ def call_human():
             "session_id": to_str(session_id),       # ← 字串化
             "email"     : current_user.id
         }, namespace="/chat")
+
+    # 🔔 發送 LINE 通知給所有管理員
+    try:
+        notify_admins(f"📣 使用者 {current_user.id} 呼叫真人客服，請至後台查看")
+    except Exception as e:
+        logging.exception("LINE 通知失敗")
 
     return jsonify({"message": "已通知真人客服", "session_id": to_str(session_id)})
 

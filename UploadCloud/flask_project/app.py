@@ -17,6 +17,7 @@ from services.diary import diary_bp
 from services.admin.admin import admin_bp
 from services.admin.admin_chat import admin_chat_bp
 from services.ai.ai_chat import ai_chat_bp
+from services.line import line_webhook_bp
 # ─────────────────────────────────────────
 
 load_dotenv()
@@ -40,6 +41,7 @@ app.register_blueprint(ai_chat_bp,      url_prefix="/ai")
 app.register_blueprint(user_bp,         url_prefix="/user")
 app.register_blueprint(diary_bp,        url_prefix="/diary")
 app.register_blueprint(settings_bp,     url_prefix="/settings")
+app.register_blueprint(line_webhook_bp)            # ✅ 新增
 
 # ── 登入系統 ──────────────────────────────
 login_manager = LoginManager(app)
