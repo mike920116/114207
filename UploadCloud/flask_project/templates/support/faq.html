@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}日記之森 | 常見問題{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static',
+                       filename='css/module/support/support.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="support-hero">
+  <h1>常見問題</h1>
+  <p>彙整大家最關心的疑問，點擊展開查看解答。</p>
+</section>
+
+<section class="faq-list">
+
+  <div class="faq-item">
+    <button class="faq-question">Q1. 我可以匿名撰寫日記嗎？</button>
+    <div class="faq-answer">
+      <p>可以。在日記編輯頁面切換「匿名」開關，即可隱藏個人資訊。</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question">Q2. AI 會保存我的對話紀錄嗎？</button>
+    <div class="faq-answer">
+      <p>系統僅於本次會話期間暫存內容，離開頁面後即自動清除，保障隱私。</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question">Q3. 如何重設密碼？</button>
+    <div class="faq-answer">
+      <p>在登入頁點擊「忘記密碼」，輸入註冊信箱後依指示完成重設。</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-question">Q4. 是否支援深色模式？</button>
+    <div class="faq-answer">
+      <p>是的！點擊側欄月亮圖示即可在亮／暗模式間切換。</p>
+    </div>
+  </div>
+
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static',
+                        filename='js/module/support/faq.js') }}"></script>
+{% endblock %}
