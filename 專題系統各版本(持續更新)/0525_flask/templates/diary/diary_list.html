@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+
+{% block title %}日記之森 | 日記列表{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/module/diary/diary_list.css') }}">
+<script src="{{ url_for('static', filename='js/module/diary/diary_list.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+    <!-- 日記列表容器 -->
+    <div class="diary-container">
+        <h2 class="diary-title">我的日記列表</h2>
+        
+        <!-- 過濾選項 -->
+        <div class="filter-options">
+            <div class="filter-group">
+                <span class="filter-label">情緒篩選：</span>
+                <select class="filter-select" id="emotion-filter">
+                    <option value="all">全部情緒</option>
+                    <option value="快樂">快樂</option>
+                    <option value="平靜">平靜</option>
+                    <option value="感恩">感恩</option>
+                    <option value="焦慮">焦慮</option>
+                    <option value="悲傷">悲傷</option>
+                    <option value="憤怒">憤怒</option>
+                    <option value="困惑">困惑</option>
+                    <option value="疲倦">疲倦</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <span class="filter-label">排序方式：</span>
+                <select class="filter-select" id="sort-option">
+                    <option value="newest">最新優先</option>
+                    <option value="oldest">最舊優先</option>
+                </select>
+            </div>
+            
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="搜尋日記內容..." id="search-diary">
+                <span class="search-icon">🔍</span>
+            </div>
+        </div>
+        
+        <!-- 錯誤訊息提示 -->
+        {% if error_message %}
+        <div class="alert alert-danger" role="alert">
+            {{ error_message }}
+        </div>
+        {% endif %}
+        
+        <!-- 日記列表 -->
+        <div class="diary-list">
+            {% if diaries and diaries|length > 0 %}
+                {% for diary in diaries %}
+                    <div class="diary-item" data-emotion="{{ diary[2].split(':')[0] if diary[2] and ':' in diary[2] else diary[2] }}">
+                        <div class="diary-date">
+                            <i>📅</i> {{ diary[3].strftime('%Y-%m-%d %H:%M') }}
+                        </div>
+                        <div class="diary-content">{{ diary[1] }}</div>
+                        {% if diary[2] %}
+                            <div class="diary-emotion">{{ diary[2] }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-message">
+                    <div class="empty-icon">📝</div>
+                    <h3>您的日記旅程還未開始</h3>
+                    <p>記錄您的情緒和感受，開始追蹤您的心理健康。</p>
+                    <p>每天幾分鐘的心情筆記，就能幫助您更好地了解自己。</p>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- 頁碼控制 -->
+        {% if diaries and diaries|length > 10 %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" tabindex="-1">上一頁</a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">下一頁</a>
+                </li>
+            </ul>
+        </nav>
+        {% endif %}
+        
+        <!-- 操作按鈕 -->
+        <div class="action-buttons">
+            <a href="{{ url_for('diary.diary_form') }}" class="btn-add">新增日記</a>
+        </div>
+    </div>
+{% endblock %}
