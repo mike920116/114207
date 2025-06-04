@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <!-- 預載主題，避免切頁閃爍 --------------------------- -->
+  <script>
+    (()=>{if(localStorage.getItem('admin-theme')==='dark')
+      document.documentElement.classList.add('dark-mode');})();
+  </script>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}Admin Panel{% endblock %}</title>
+  <link href="{{ url_for('static', filename='css/module/admin/admin.css') }}" rel="stylesheet">
+</head>
+<body>
+
+  <div id="wrapper">
+    <!-- 側邊欄（首次載入展開） -->
+    <aside id="sidebar">
+      <h3 class="brand">🌲 心靈之森</h3>
+
+      <nav>
+        <ul>
+          <li><a href="{{ url_for('admin.admin_dashboard') }}"
+                 class="{% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">📊 儀表板</a></li>
+          <li><a href="{{ url_for('admin.admin_users') }}"
+                 class="{% if request.endpoint == 'admin.admin_users' %}active{% endif %}">👥 使用者</a></li>
+          <li><a href="{{ url_for('admin.admin_diaries') }}"
+                 class="{% if request.endpoint == 'admin.admin_diaries' %}active{% endif %}">📔 日記紀錄</a></li>
+          <li><a href="{{ url_for('admin_chat.panel') }}"
+                class="{% if request.endpoint.startswith('admin_chat.') %}active{% endif %}">💬 客服面板</a></li>
+        </ul>
+      </nav>
+
+      <footer>
+        <small>{{ current_user.username }}</small>
+        <span id="theme-anchor"></span>
+      </footer>
+    </aside>
+
+    <!-- 折疊把手（只在收合狀態顯示） -->
+    <div id="sidebar-handle" aria-label="展開側欄">⟩</div>
+
+    <!-- 主內容 -->
+    <main id="content">{% block content %}{% endblock %}</main>
+  </div>
+  {% block scripts %}
+  <script src="{{ url_for('static', filename='js/module/admin/admin.js') }}"></script>
+  {% endblock %}
+</body>
+
+</html>
