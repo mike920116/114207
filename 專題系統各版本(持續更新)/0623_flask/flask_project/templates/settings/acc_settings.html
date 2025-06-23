@@ -1,0 +1,26 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}帳號設定{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/user/settings.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="settings-page-wrapper">
+  <div class="settings-box">
+    <h2>帳號資訊</h2>
+
+    <div class="login-info">
+      <p>最近登入 IP：{{ login_ip or '無資料' }}</p>
+      <p>最近登入時間：{{ login_time or '無資料' }}</p>
+    </div>
+
+    <hr>
+
+    <h3>修改密碼</h3>
+    <a href="{{ url_for('user.forgot_form') }}" class="btn btn-success">🔑 前往修改密碼頁面</a>
+  </div>
+</div>
+{% endblock %}
+

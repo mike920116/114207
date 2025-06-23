@@ -1,0 +1,99 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}?��?之森 | 首�?{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block content %}
+<!-- Hero ?��?-->
+<section class="hero" id="home">
+  <h1>?�森?��??�抱中�??��??��??�平??/h1>
+  <p>?��?之森?��??��??�系平台，幫?��?記�?每日心�??��??�慧 AI 互�??��?享�??��?事�?並在社群中找?�共鳴。漫步�??��?森�?，探索屬?��??��??��??��?/p>
+</section>
+
+<!-- ========== ?��??� Feature ========== -->
+<!-- ?? ?��??� -->
+<section class="feature-section announcement-section" id="announcement">
+  <div class="feature-content">
+    <div class="announcement-board-home">
+      <h2 class="announcement-title">?? ?��??�</h2>
+      <div class="announcement-marquee">
+        <ul id="announce-scroll" class="scroll-list"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- 心�??��? -->
+<section class="feature-section" id="diary">
+  <div class="feature-content">
+    <div class="feature-text">
+      <h2>心�??��?</h2>
+      <p>?�森?��??��?中�??��??��??��??��??�寫?�放壓�???/p>
+      <a href="/diary/form" class="auth-required">試試?��?</a>
+    </div>
+    <div class="feature-icon">?��</div>
+  </div>
+</section>
+
+<!-- AI ?��? -->
+<section class="feature-section" id="ai">
+  <div class="feature-content reverse">
+    <div class="feature-icon">?��</div>
+    <div class="feature-text">
+      <h2>AI ?��?</h2>
+      <p>你�??�慧小助?��??��??��?�???��???/p>
+      <a href="/ai/chat" class="auth-required">?�助?��?�?/a>
+    </div>
+  </div>
+</section>
+
+<!-- 社群互�? -->
+<section class="feature-section" id="community">
+  <div class="feature-content">
+    <div class="feature-text">
+      <h2>社群互�?</h2>
+      <p>?�森?��?樹蔭下�??��??�享心聲??/p>
+      <a href="/social/main" class="auth-required">?�入社群</a>
+    </div>
+    <div class="feature-icon">?��</div>
+  </div>
+</section>
+
+<!-- ---------------------------------------- -->
+
+<!-- ?��??��? -->
+<section class="feature-section" id="feedback">
+  <div class="feature-content">
+    <div class="feature-icon">??</div>
+    <div class="feature-text">
+      <h2>?��??��?</h2>
+      <p>?�落?�傳?��??��??�訴?�們�??�想法�?/p>
+      <a href="#" class="auth-required">?�交?��?</a>
+    </div>
+  </div>
+</section>
+
+<!-- 註�? / ?�入 CTA -->
+<section class="auth-section" id="login">
+  {% if current_user.is_authenticated %}
+  <h2>?��?之森，�?待�??��?�?/h2>
+  <div class="auth-buttons">
+    <a href="/settings/profile">?�人資�?</a>
+    <a href="/user/logout">?�出</a>
+  </div>
+  {% else %}
+  <h2>?�入?��?之森，�?始�??��?�?/h2>
+  <div class="auth-buttons">
+    <a href="/user/signup/form">註�?</a>
+    <a href="/user/login/form">?�入</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+
+
+
