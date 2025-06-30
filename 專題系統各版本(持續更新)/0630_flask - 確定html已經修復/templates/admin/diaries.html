@@ -1,0 +1,27 @@
+﻿{% extends 'admin/layout.html' %}
+{% block title %}Admin ─ 日記紀錄{% endblock %}
+{% block content %}
+<h1 class="mb-4">日記紀錄</h1>
+<table class="table table-hover align-middle">
+  <thead class="table-dark">
+    <tr>
+      <th>ID</th>
+      <th>Email / 名稱</th>
+      <th>內容摘要</th>
+      <th>情緒</th>
+      <th>日期</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in diaries %}
+    <tr>
+      <td data-label="ID:">{{ d[0] }}</td>
+      <td data-label="Email / 名稱:">{{ d[1] }} ({{ d[2] }})</td>
+      <td data-label="內容摘要:">{{ d[3] }}{% if d[3]|length == 80 %}...{% endif %}</td>
+      <td data-label="情緒:">{{ d[4] }}</td>
+      <td data-label="日期:">{{ d[5] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
