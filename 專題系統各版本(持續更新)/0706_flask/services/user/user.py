@@ -299,34 +299,37 @@ def reset_password():
 
 def send_verification_email(recipient_email, verification_token):
     try:
-        sender_email = os.environ.get("GMAIL_USERNAME")
-        password = os.environ.get("GMAIL_PASSWORD")
+        sender_email = os.environ.get("MAIL_USERNAME")  # dify2025@soulcraftjournal.studio
+        password = os.environ.get("MAIL_PASSWORD")      # mEjA 9Snj xeMN
         
         if not sender_email or not password:
-            logger.error("Gmail 環境變數未設置")
+            logger.error("Zoho 環境變數未設置")
             return
         
         subject = "歡迎加入 - 請驗證您的電子信箱"
         verification_link = url_for("user.verify_email", token=verification_token, _external=True)
-        
-        # 嘗試使用 HTML 模板，失敗則使用純文字
+
+        # 嘗試使用 HTML 模板，失敗則用純文字
         try:
             html_content = render_template("user/verification_email.html",
-                                         username=recipient_email,
-                                         verification_link=verification_link)
+                                           username=recipient_email,
+                                           verification_link=verification_link)
             message = MIMEText(html_content, "html", "utf-8")
         except Exception:
             text_content = f"歡迎加入！請點擊以下連結驗證您的電子信箱：{verification_link}"
             message = MIMEText(text_content, "plain", "utf-8")
-        
+
         message["Subject"] = Header(subject, "utf-8")
         message["From"] = sender_email
         message["To"] = recipient_email
-        
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+
+        with smtplib.SMTP("smtp.zoho.com", 587) as server:
+            server.starttls()
             server.login(sender_email, password)
             server.sendmail(sender_email, recipient_email, message.as_string())
-            
+
+        logger.info(f"✅ 驗證信成功寄出：{recipient_email}")
+
     except Exception as e:
-        logger.error(f"發送驗證信件失敗: {e}")
+        logger.error(f"❌ 發送驗證信件失敗: {e}")
         raise
