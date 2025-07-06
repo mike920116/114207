@@ -1,5 +1,10 @@
 版本更新
 
+
+往後請直接採用 flask_project 有更新日誌直接打在fork
+
+
+
 0424 ver.
 
 1. diary.py 已成功串接DIFY API (API KEY 請進.env自行更改)
