@@ -3,15 +3,11 @@
 提供註冊、登入、驗證、密碼重設等功能
 """
 
-import logging
-import os
-import smtplib
-import platform
+import logging,os,smtplib,platform,base64,bcrypt
 from datetime import datetime, timedelta
 from email.header import Header
 from email.mime.text import MIMEText
 
-import bcrypt
 from dotenv import load_dotenv
 from flask import render_template, request, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
@@ -155,6 +151,12 @@ def login():
         if bcrypt.checkpw(password.encode('utf-8'), user_data[2].encode('utf-8')):
             user_object = User(id=user_data[0], username=user_data[1], password=user_data[2])
             login_user(user_object)
+            
+            # 產生金鑰並 base64 編碼後放入 session
+            aes_key = derive_key(password, email)
+            encoded_key = base64.b64encode(aes_key).decode('utf-8')
+            session['encryption_key'] = encoded_key
+
             
             # 記錄登入時間
             cursor.execute("UPDATE User SET last_login_time = %s, last_login_ip = %s WHERE User_Email = %s", 
