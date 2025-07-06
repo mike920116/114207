@@ -43,18 +43,18 @@ def main():
     # 取得所有貼文的基本資訊
     database_cursor.execute("""
         SELECT 
-            p.post_id,
-            p.user_email,
+            p.Post_id,
+            p.User_Email,
             u.User_name,
-            p.content,
-            p.is_anonymous,
-            p.created_at,
-            COUNT(l.like_id) AS likes_count
-        FROM posts p
-        LEFT JOIN User u ON p.user_email = u.User_Email
-        LEFT JOIN likes l ON p.post_id = l.post_id
-        GROUP BY p.post_id
-        ORDER BY p.created_at DESC
+            p.Content,
+            p.Is_public,
+            p.Created_at,
+            COUNT(l.Like_id) AS likes_count
+        FROM Posts p
+        LEFT JOIN User u ON p.User_Email = u.User_Email
+        LEFT JOIN Likes l ON p.Post_id = l.Post_id
+        GROUP BY p.Post_id
+        ORDER BY p.Created_at DESC
         """)
     
     raw_posts_data = database_cursor.fetchall()
@@ -67,16 +67,16 @@ def main():
         # 獲取該貼文的評論
         database_cursor.execute("""
             SELECT 
-                c.comment_id,
-                c.user_email,
+                c.Comment_id,
+                c.User_Email,
                 u.User_name,
-                c.content,
-                c.is_anonymous,
-                c.created_at
-            FROM comments c
-            LEFT JOIN User u ON c.user_email = u.User_Email
-            WHERE c.post_id = %s
-            ORDER BY c.created_at ASC
+                c.Content,
+                c.Is_public,
+                c.Created_at
+            FROM Comments c
+            LEFT JOIN User u ON c.User_Email = u.User_Email
+            WHERE c.Post_id = %s
+            ORDER BY c.Created_at ASC
         """, (post_id,))
         
         comments_data = database_cursor.fetchall()
@@ -87,16 +87,17 @@ def main():
             'user_email': post_item[1],
             'username': post_item[2],
             'content': post_item[3],
-            'is_anonymous': post_item[4],
+            'is_public': post_item[4],
             'created_at': post_item[5],
             'likes_count': post_item[6],
             'comments': [
                 {
                     'comment_id': comment_item[0],
+                    
                     'user_email': comment_item[1],
                     'username': comment_item[2],
                     'content': comment_item[3],
-                    'is_anonymous': comment_item[4],
+                    'is_public': comment_item[4],
                     'created_at': comment_item[5]
                 }
                 for comment_item in comments_data
@@ -107,5 +108,5 @@ def main():
     
     database_connection.close()
 
-    return render_template('social/main.html', posts=formatted_post_data)
+    return render_template('social/social_main.html', posts=formatted_post_data)
 
