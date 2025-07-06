@@ -23,14 +23,12 @@ from . import user_bp
 load_dotenv()
 
 # 設置日誌
-if platform.system() == "Windows":
-    log_dir = os.path.join(os.path.dirname(__file__), "logs")
-    log_file = os.path.join(log_dir, "flaskapp.log")
-else:
-    log_dir = "/var/log"
-    log_file = os.path.join(log_dir, "flaskapp.log")
-
+# 專案內 logs 目錄統一儲存，不用碰 /var/log
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 到 flask_project 資料夾
+log_dir = os.path.join(BASE_DIR, "logs")
 os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, "flaskapp.log")
+
 
 logging.basicConfig(
     level=logging.DEBUG,
