@@ -50,4 +50,103 @@ document.addEventListener('DOMContentLoaded', function () {
           button.style.transform = 'scale(1)';
       });
   });
+
+  // === 頭像彈出視窗功能 ===
+  let selectedAvatar = null;
+
+  // 開啟頭像選擇彈出視窗
+  window.openAvatarModal = function() {
+    const modal = document.getElementById('avatar-modal');
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden'; // 防止背景滾動
+  };
+
+  // 關閉頭像選擇彈出視窗
+  window.closeAvatarModal = function() {
+    const modal = document.getElementById('avatar-modal');
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // 恢復背景滾動
+  };
+
+  // 預覽選中的頭像
+  window.previewSelectedAvatar = function(radioElement) {
+    selectedAvatar = radioElement.value;
+    
+    // 移除其他選項的選中狀態視覺效果
+    document.querySelectorAll('.avatar-modal .avatar-img').forEach(img => {
+      img.style.transform = 'scale(1)';
+    });
+    
+    // 高亮選中的頭像
+    const selectedImg = radioElement.nextElementSibling;
+    selectedImg.style.transform = 'scale(1.1)';
+  };
+
+  // 確認頭像選擇
+  window.confirmAvatarSelection = function() {
+    if (selectedAvatar) {
+      // 更新當前頭像顯示
+      const currentAvatarImg = document.getElementById('current-avatar');
+      const newAvatarPath = `/static/icons/avatars/${selectedAvatar}`;
+      currentAvatarImg.src = newAvatarPath;
+      
+      // 創建隱藏的 input 來存儲選中的頭像值
+      let hiddenInput = document.getElementById('selected-avatar-input');
+      if (!hiddenInput) {
+        hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'avatar';
+        hiddenInput.id = 'selected-avatar-input';
+        document.querySelector('form').appendChild(hiddenInput);
+      }
+      hiddenInput.value = selectedAvatar;
+      
+      // 關閉彈出視窗
+      closeAvatarModal();
+      
+      // 顯示確認訊息
+      showMessage('頭像已更新，請點擊「儲存變更」按鈕來保存設定', 'success');
+    } else {
+      showMessage('請先選擇一個頭像', 'warning');
+    }
+  };
+
+  // 點擊彈出視窗外部區域關閉視窗
+  window.addEventListener('click', function(event) {
+    const modal = document.getElementById('avatar-modal');
+    if (event.target === modal) {
+      closeAvatarModal();
+    }
+  });
+
+  // ESC 鍵關閉彈出視窗
+  window.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      closeAvatarModal();
+    }
+  });
+
+  // 顯示訊息提示
+  function showMessage(message, type = 'info') {
+    // 移除舊的訊息提示
+    const oldMessage = document.querySelector('.message-toast');
+    if (oldMessage) {
+      oldMessage.remove();
+    }
+
+    // 創建新的訊息提示
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message-toast message-${type}`;
+    messageDiv.textContent = message;
+    
+    // 添加到頁面
+    document.body.appendChild(messageDiv);
+    
+    // 3秒後自動消失
+    setTimeout(() => {
+      if (messageDiv.parentNode) {
+        messageDiv.remove();
+      }
+    }, 3000);
+  }
 });

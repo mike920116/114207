@@ -4,8 +4,18 @@
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <!-- 預載主題，避免切頁閃爍 --------------------------- -->
   <script>
-    (()=>{if(localStorage.getItem('admin-theme')==='dark')
-      document.documentElement.classList.add('dark-mode');})();
+    (function() {
+      const theme = localStorage.getItem('admin-theme');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      } else if (theme === 'light') {
+        document.documentElement.classList.add('light-mode');
+      }
+      // 如果沒有設定主題，則依據系統偏好設定
+      else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
   </script>
 
   <meta charset="UTF-8">

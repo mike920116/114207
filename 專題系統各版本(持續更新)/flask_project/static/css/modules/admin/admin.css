@@ -1,3 +1,19 @@
+/* ========== 防閃爍處理 ========== */
+/* 這個CSS必須在頁面最早載入，配合內聯腳本使用 */
+/* 內聯腳本應該放在<head>中： */
+/*
+<script>
+(function() {
+  const theme = localStorage.getItem('admin-theme');
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark-mode');
+  } else if (theme === 'light') {
+    document.documentElement.classList.add('light-mode');
+  }
+})();
+</script>
+*/
+
 /* ========== 0. 色彩變數 ========== */
 :root{
   --bg:#e8f2ec; --surface:#fff; --surface-alt:#d9ece2;
@@ -7,7 +23,19 @@
   --header-start:#2c7d55; --header-end:#3eb072;
   --radius:20px; --sidebar-w:220px;
 }
-/* 深色 */
+
+/* 防閃爍：預先檢測localStorage中的主題設定 */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:#041019; --surface:#0f2332; --surface-alt:#163247;
+    --text:#c7e2ff; --text-muted:#85a8c6;
+    --secondary:#199191; --secondary-dk:#0f6a6a;
+    --primary:#1268a8;   --primary-dk:#094b7c;
+    --header-start:#042a49; --header-end:#0f6a6a;
+  }
+}
+
+/* 深色模式 - 優先級更高 */
 html.dark-mode{
   --bg:#041019; --surface:#0f2332; --surface-alt:#163247;
   --text:#c7e2ff; --text-muted:#85a8c6;
@@ -16,12 +44,33 @@ html.dark-mode{
   --header-start:#042a49; --header-end:#0f6a6a;
 }
 
+/* 強制淺色模式 - 當用戶明確選擇淺色時覆蓋系統偏好 */
+html.light-mode{
+  --bg:#e8f2ec; --surface:#fff; --surface-alt:#d9ece2;
+  --text:#244032; --text-muted:#668879;
+  --secondary:#3eb072; --secondary-dk:#2c7d55;
+  --primary:#1596c8;   --primary-dk:#0e7aa4;
+  --header-start:#2c7d55; --header-end:#3eb072;
+}
+
 /* ========== 1. 全域重置/版面 ========== */
 *{box-sizing:border-box;margin:0;padding:0}
+
+/* 防閃爍：平滑過渡但不影響初始載入 */
+html:not(.no-transitions) {
+  transition: none !important;
+}
+html.theme-loaded {
+  transition: all 0.3s ease;
+}
+html.theme-loaded * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
 body{
   background:var(--bg);color:var(--text);
   font-family:"Noto Sans TC","Segoe UI",Arial,sans-serif;
-  transition:.3s;overflow-x:hidden;
+  overflow-x:hidden;
 }
 h1,h2,h3,h4,h5,h6{
   margin:.35rem 0 1rem;color:var(--secondary-dk);
@@ -1194,6 +1243,21 @@ html.dark-mode .announcement-mobile-card .announcement-meta {
   color: #fff;
   background-color: var(--primary);
   border-color: var(--primary);
+}
+
+/* 加入這段樣式 */
+.log-loading-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: flex; justify-content: center; align-items: center;
+  background: rgba(255,255,255,0.85);
+  font-size: 1.2rem;
+  z-index: 10;
+}
+html.dark-mode .log-loading-overlay {
+  background: rgba(0,0,0,0.6);
+  color: #fff;
 }
 
 

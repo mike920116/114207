@@ -9,19 +9,49 @@
    -------------------------------------------------- */
 
 (() => {
-  const root = document.documentElement, key = 'admin-theme';
+  /* ---------- 主題切換 ---------- */
+  const root = document.documentElement;
+  const key  = 'admin-theme';
+
+  /* 🆕 ① 開頁立即還原主題（避免閃白） */
+  const savedTheme = localStorage.getItem(key);
+  if (savedTheme === 'dark') {
+    root.classList.add('dark-mode');
+    root.classList.remove('light-mode');
+  } else if (savedTheme === 'light') {
+    root.classList.add('light-mode');
+    root.classList.remove('dark-mode');
+  }
+
+  /* 建 button 與狀態 icon */
   const themeBtn = document.createElement('button');
   themeBtn.className = 'theme-toggle';
-  const icon = () => root.classList.contains('dark-mode') ? '🌞' : '🌜';
-  const render = () => themeBtn.innerHTML = `<span>${icon()}</span>`;
-  render();
+  const icon = () => (root.classList.contains('dark-mode') ? '🌞' : '🌜');
+  const renderIcon = () => (themeBtn.innerHTML = `<span>${icon()}</span>`);
+
+  renderIcon();
   document.getElementById('theme-anchor')?.appendChild(themeBtn);
+
+  // 啟用過渡效果（避免頁面載入時的閃爍）
+  setTimeout(() => {
+    document.documentElement.classList.add('theme-loaded');
+  }, 100);
+
   themeBtn.onclick = () => {
-    root.classList.toggle('dark-mode');
-    localStorage.setItem(key, root.classList.contains('dark-mode') ? 'dark' : 'light');
-    render();
+    const isDark = root.classList.contains('dark-mode');
+    if (isDark) {
+      root.classList.remove('dark-mode');
+      root.classList.add('light-mode');
+      localStorage.setItem(key, 'light');
+    } else {
+      root.classList.remove('light-mode');
+      root.classList.add('dark-mode');
+      localStorage.setItem(key, 'dark');
+    }
+    renderIcon();
   };
 
+  /* ---------- 側欄收合 ---------- */
   const sidebar = document.getElementById('sidebar');
   const handle  = document.getElementById('sidebar-handle');
   const toggle  = () => {
@@ -29,10 +59,11 @@
     handle.textContent = sidebar.classList.contains('collapsed') ? '⟩' : '⟨';
   };
   handle.onclick = toggle;
-  document.addEventListener('keydown', eventData => {
-    if (eventData.key === 'Escape' && !sidebar.classList.contains('collapsed')) toggle();
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !sidebar.classList.contains('collapsed')) toggle();
   });
 })();
+
 
 document.addEventListener("DOMContentLoaded", () => {
   if (!document.getElementById("session-list")) return;
@@ -62,8 +93,6 @@ document.addEventListener("DOMContentLoaded", () => {
       socket.emit("subscribe_to_session", { session_id: currentId, role: "admin" });
     }
   };
-
-  // socket.on('connect', subscribe); ← 已移除
 
   socket.on("user_left", ({ session_id, email, message }) => {
     session_id = toStr(session_id);
@@ -124,24 +153,26 @@ document.addEventListener("DOMContentLoaded", () => {
   async function loadLogs(sid) {
     sid = toStr(sid);
     if (!sid) return;
-    logBox.innerHTML = "<p>載入中…</p>";
+
+    // ✅ 改為顯示遮罩而不是清空
+    const overlay = document.createElement('div');
+    overlay.className = 'log-loading-overlay';
+    overlay.innerText = '載入中...';
+    logBox.appendChild(overlay);
+
     try {
-      const fetchResponse = await fetch(`/admin/chat/logs/${sid}`);
-      if (!fetchResponse.ok) throw new Error("HTTP " + fetchResponse.status);
-      const responseData = await fetchResponse.json();
-      const messagesArray = Array.isArray(responseData) ? responseData : (responseData.messages || []);
-      logBox.innerHTML = "";
-      messagesArray.forEach(row =>
-        appendLog(
-          row.role,
-          row.message,
-          row.email || (row.role === 'user' ? '使用者' : 'AI/管理員')
-        )
-      );
+      const res = await fetch(`/admin/chat/logs/${sid}`);
+      if (!res.ok) throw new Error("HTTP " + res.status);
+
+      const data = await res.json();
+      const messages = Array.isArray(data) ? data : (data.messages || []);
+
+      logBox.innerHTML = '';
+      messages.forEach(row => appendLog(row.role, row.message, row.email || '使用者'));
       logBox.scrollTop = logBox.scrollHeight;
     } catch (err) {
       logBox.innerHTML = "<p class='error'>❌ 無法載入訊息紀錄</p>";
-      console.error("loadLogs failed:", err);
+      console.error(err);
     }
   }
 

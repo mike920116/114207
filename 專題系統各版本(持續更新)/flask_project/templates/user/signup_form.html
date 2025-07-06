@@ -28,9 +28,33 @@
 
         <label for="password1">密碼</label>
         <input type="password" class="form-control" id="password1" name="password1" required>
+        
+        <!-- 密碼強度指示器 -->
+        <div class="password-strength-indicator" id="password-strength">
+          <div class="strength-title">密碼要求：</div>
+          <div class="strength-requirement" id="length-check">
+            <span class="check-icon">✗</span> 至少8個字元
+          </div>
+          <div class="strength-requirement" id="letter-check">
+            <span class="check-icon">✗</span> 包含英文字母
+          </div>
+          <div class="strength-requirement" id="number-check">
+            <span class="check-icon">✗</span> 包含數字
+          </div>
+          <div class="strength-requirement" id="account-check">
+            <span class="check-icon">✗</span> 與帳號不同
+          </div>
+        </div>
 
         <label for="password2">確認密碼</label>
         <input type="password" class="form-control" id="password2" name="password2" required>
+        
+        <!-- 密碼確認指示器 -->
+        <div class="password-match-indicator" id="password-match" style="display: none;">
+          <div class="strength-requirement" id="match-check">
+            <span class="check-icon">✗</span> 兩次密碼輸入一致
+          </div>
+        </div>
 
         <button type="submit" class="btn">註冊</button>
       </form>

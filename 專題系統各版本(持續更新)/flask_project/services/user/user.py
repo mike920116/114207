@@ -3,17 +3,18 @@
 提供註冊、登入、驗證、密碼重設等功能
 """
 
-import logging,os,smtplib,platform,base64,bcrypt
+import logging,os,smtplib,platform,base64,bcrypt,re
 from datetime import datetime, timedelta
 from email.header import Header
 from email.mime.text import MIMEText
 
 from dotenv import load_dotenv
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for,session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from itsdangerous import URLSafeTimedSerializer
 
 from utils.db import get_connection
+from utils.keygen import derive_key
 from . import user_bp
 
 load_dotenv()
@@ -66,6 +67,34 @@ def load_user(user_id):
         if conn:
             conn.close()
 
+def validate_password_strength(password, email):
+    """
+    驗證密碼強度
+    返回 (is_valid, error_message)
+    """
+    # 1. 檢查密碼長度（至少8個字元）
+    if len(password) < 8:
+        return False, "密碼長度必須至少8個字元"
+    
+    # 2. 檢查是否包含英文字母
+    if not re.search(r'[a-zA-Z]', password):
+        return False, "密碼必須包含至少一個英文字母"
+    
+    # 3. 檢查是否包含數字
+    if not re.search(r'[0-9]', password):
+        return False, "密碼必須包含至少一個數字"
+    
+    # 4. 檢查密碼是否與帳號（email）相同
+    if password.lower() == email.lower():
+        return False, "密碼不能與帳號相同"
+    
+    # 檢查密碼是否包含帳號的部分（例如 email 的用戶名部分）
+    email_username = email.split('@')[0] if '@' in email else email
+    if email_username.lower() in password.lower() or password.lower() in email_username.lower():
+        return False, "密碼不能包含帳號相關資訊"
+    
+    return True, ""
+
 @user_bp.route('/signup/form')
 def user_signup_form():
     return render_template('user/signup_form.html')
@@ -82,6 +111,11 @@ def signup():
 
         if password != password2:
             return render_template('user/signup.html', success=False, error_message="兩次密碼不一致")
+
+        # 驗證密碼強度
+        is_valid, error_message = validate_password_strength(password, email)
+        if not is_valid:
+            return render_template('user/signup.html', success=False, error_message=error_message)
 
         # 檢查信箱是否已存在
         conn = get_connection()
@@ -279,6 +313,12 @@ def reset_password():
             return render_template("user/reset_password_form.html", token=token, error_message="兩次密碼不一致")
 
         email = serializer.loads(token, salt="password-reset", max_age=3600)
+        
+        # 驗證新密碼強度
+        is_valid, error_message = validate_password_strength(password, email)
+        if not is_valid:
+            return render_template("user/reset_password_form.html", token=token, error_message=error_message)
+        
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         conn = get_connection()

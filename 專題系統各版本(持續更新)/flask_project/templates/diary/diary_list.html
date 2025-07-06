@@ -54,13 +54,13 @@
         <div class="diary-list">
             {% if diaries and diaries|length > 0 %}
                 {% for diary in diaries %}
-                    <div class="diary-item" data-emotion="{{ diary[2].split(':')[0] if diary[2] and ':' in diary[2] else diary[2] }}">
+                    <div class="diary-item" data-emotion="{{ diary.analysis.split(':')[0] if diary.analysis and ':' in diary.analysis else diary.analysis }}">
                         <div class="diary-date">
-                            <i>📅</i> {{ diary[3].strftime('%Y-%m-%d %H:%M') }}
+                            <i>📅</i> {{ diary.created_at.strftime('%Y-%m-%d %H:%M') }}
                         </div>
-                        <div class="diary-content">{{ diary[1] }}</div>
-                        {% if diary[2] %}
-                            <div class="diary-emotion">{{ diary[2] }}</div>
+                        <div class="diary-content">{{ diary.content }}</div>
+                        {% if diary.analysis %}
+                            <div class="diary-emotion">{{ diary.analysis }}</div>
                         {% endif %}
                     </div>
                 {% endfor %}

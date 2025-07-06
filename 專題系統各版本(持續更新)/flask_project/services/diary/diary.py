@@ -18,11 +18,12 @@
 - /diary/list: 日記列表檢視
 """
 
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify,session
 from flask_login import login_required, current_user
 from utils import db
+from utils.encryption import encrypt
 from datetime import datetime
-import os
+import os,base64
 from dotenv import load_dotenv
 from . import diary_bp  # 從 __init__.py 導入 Blueprint
 
@@ -89,6 +90,8 @@ def save_diary():
         dify_response = requests.post("https://api.dify.ai/v1/chat-messages", json=dify_payload, headers=dify_headers)
 
         if dify_response.status_code != 200:
+            print("Dify 錯誤狀態碼:", dify_response.status_code)
+            print("Dify 回傳內容:", dify_response.text)
             return jsonify({'success': False, 'message': 'DIFY API 回傳錯誤', 'error': dify_response.text})
 
         ai_analysis_response = dify_response.json()
@@ -96,13 +99,25 @@ def save_diary():
 
         current_time = datetime.now()
 
-        # 儲存到資料庫
+        # 1. 取得 session 中金鑰（Base64 解碼）
+        encoded_key = session.get('encryption_key')
+        
+        if not encoded_key:
+            return jsonify({'success': False, 'message': '金鑰不存在，請重新登入後再試'})
+
+        aes_key = base64.b64decode(encoded_key)
+
+        # 2. 加密內容與分析結果
+        enc_content = encrypt(str(content), aes_key)
+        enc_analysis = encrypt(str(ai_result), aes_key)
+
+        # 3. 儲存到資料庫（加密後內容）
         database_connection = db.get_connection()
         database_cursor = database_connection.cursor()
         database_cursor.execute("""
             INSERT INTO DiaryRecords (User_Email, Diary_Content, AI_analysis_content, Created_at, Updated_at)
             VALUES (%s, %s, %s, %s, %s)
-        """, (current_user.id, content, ai_result, current_time, current_time))
+        """, (current_user.id, enc_content, enc_analysis, current_time, current_time))
         database_connection.commit()
         database_connection.close()
 
@@ -112,20 +127,11 @@ def save_diary():
         return jsonify({'success': False, 'message': f'發生錯誤: {str(e)}'})
 
 
-# 顯示日記列表
 @diary_bp.route('/list')
-@login_required  # 需要登入才能存取
+@login_required
 def diary_list():
-    """
-    顯示用戶日記列表頁面
-    
-    從資料庫獲取當前用戶的所有日記記錄，依建立時間降序排列
-    
-    Returns:
-        str: 渲染後的日記列表 HTML 頁面
-    """
     try:
-        # 從資料庫獲取用戶的所有日記
+        # 1. 從資料庫撈資料（目前是加密的）
         database_connection = db.get_connection()
         database_cursor = database_connection.cursor()
         database_cursor.execute("""
@@ -134,9 +140,40 @@ def diary_list():
             WHERE User_Email = %s 
             ORDER BY Created_at DESC
         """, (current_user.id,))
-        diaries = database_cursor.fetchall()
+        rows = database_cursor.fetchall()
         database_connection.close()
-        
-        return render_template('diary/diary_list.html', diaries=diaries)
+
+        # 2. 解碼 session 金鑰
+        import base64
+        from flask import session
+        from utils.encryption import decrypt
+
+        encoded_key = session.get('encryption_key')
+        if not encoded_key:
+            return render_template('diary/diary_list.html',
+                                   error_message="解密金鑰不存在，請重新登入")
+
+        aes_key = base64.b64decode(encoded_key)
+
+        # 3. 解密每一筆日記
+        decrypted_diaries = []
+        for diary_id, enc_content, enc_analysis, created_at in rows:
+            try:
+                content  = decrypt(enc_content, aes_key)
+                analysis = decrypt(enc_analysis, aes_key)
+            except Exception as e:
+                content = "[無法解密]"
+                analysis = f"[解密錯誤: {str(e)}]"
+
+            decrypted_diaries.append({
+                'id': diary_id,
+                'content': content,
+                'analysis': analysis,
+                'created_at': created_at
+            })
+
+        # 4. 傳給模板
+        return render_template('diary/diary_list.html', diaries=decrypted_diaries)
+
     except Exception as e:
         return render_template('diary/diary_list.html', error_message=f'發生錯誤: {str(e)}')

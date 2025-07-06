@@ -222,3 +222,83 @@ body.dark-mode .user-page-wrapper .success-message {
 body.dark-mode .user-page-wrapper .error-message {
   color: #f28b82; /* 淺紅色，錯誤風格與按鈕一致 */
 }
+
+/* === 密碼強度指示器樣式 === */
+.password-strength-indicator,
+.password-match-indicator {
+  margin: 10px 0 20px 0;
+  padding: 15px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e0e0e0;
+}
+
+.strength-title {
+  font-weight: bold;
+  color: #4b6a3e;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.strength-requirement {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.check-icon {
+  margin-right: 8px;
+  font-weight: bold;
+  width: 16px;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+/* 未滿足要求的樣式 */
+.strength-requirement:not(.valid) .check-icon {
+  color: #e57373;
+}
+
+.strength-requirement:not(.valid) {
+  color: #666;
+}
+
+/* 滿足要求的樣式 */
+.strength-requirement.valid .check-icon {
+  color: #6aad5b;
+}
+
+.strength-requirement.valid {
+  color: #4b6a3e;
+  font-weight: 500;
+}
+
+/* 暗色模式 */
+body.dark-mode .password-strength-indicator,
+body.dark-mode .password-match-indicator {
+  background: rgba(45, 55, 65, 0.8);
+  border-color: #4a5a6a;
+}
+
+body.dark-mode .strength-title {
+  color: #a7c0db;
+}
+
+body.dark-mode .strength-requirement {
+  color: #a0a0a0;
+}
+
+body.dark-mode .strength-requirement.valid {
+  color: #9bd4e1;
+}
+
+body.dark-mode .strength-requirement:not(.valid) .check-icon {
+  color: #f28b82;
+}
+
+body.dark-mode .strength-requirement.valid .check-icon {
+  color: #9bd4e1;
+}
