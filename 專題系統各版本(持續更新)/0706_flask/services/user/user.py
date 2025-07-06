@@ -163,7 +163,7 @@ def login():
                          (datetime.now(), request.remote_addr, email))
             conn.commit()
             
-            return redirect(url_for('settings.profile'))
+            return redirect(url_for('index'))
         else:
             return render_template('user/login.html', success=False, error_message="帳號或密碼錯誤")
     except Exception as e:
@@ -299,8 +299,8 @@ def reset_password():
 
 def send_verification_email(recipient_email, verification_token):
     try:
-        sender_email = os.environ.get("MAIL_USERNAME")  # dify2025@soulcraftjournal.studio
-        password = os.environ.get("MAIL_PASSWORD")      # mEjA 9Snj xeMN
+        sender_email = os.environ.get("MAIL_USERNAME")  
+        password = os.environ.get("MAIL_PASSWORD")
         
         if not sender_email or not password:
             logger.error("Zoho 環境變數未設置")

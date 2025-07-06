@@ -52,7 +52,7 @@ def profile():
         database_connection.commit()
         database_connection.close()
         flash("個人資料已更新")
-        return redirect(url_for('index'))
+        return redirect(url_for('settings.profile'))
 
     database_connection = db.get_connection()
     database_cursor = database_connection.cursor()
