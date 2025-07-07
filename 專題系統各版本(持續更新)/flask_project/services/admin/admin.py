@@ -48,7 +48,7 @@ def admin_dashboard():
     """
     管理員儀表板頁面
     
-    顯示系統統計資訊，包括用戶數量和日記數量
+    顯示系統統計資訊，包括用戶數量、日記數量和舉報統計
     
     Returns:
         str: 儀表板 HTML 頁面，或 403 錯誤頁面
@@ -58,16 +58,77 @@ def admin_dashboard():
 
     database_connection = db.get_connection()
     database_cursor = database_connection.cursor()
+    
+    # 基本統計
     database_cursor.execute("SELECT COUNT(*) FROM User")
     user_count = database_cursor.fetchone()[0]
+    
     database_cursor.execute("SELECT COUNT(*) FROM DiaryRecords")
     diary_count = database_cursor.fetchone()[0]
+    
+    # 舉報統計
+    database_cursor.execute("SELECT COUNT(*) FROM Reports")
+    total_reports = database_cursor.fetchone()[0]
+    
+    database_cursor.execute("SELECT COUNT(*) FROM Reports WHERE Status = 'pending'")
+    pending_reports = database_cursor.fetchone()[0]
+    
+    # 今日新增統計
+    database_cursor.execute("SELECT COUNT(*) FROM User WHERE DATE(Created_at) = CURDATE()")
+    new_users_today = database_cursor.fetchone()[0]
+    
+    database_cursor.execute("SELECT COUNT(*) FROM DiaryRecords WHERE DATE(Created_at) = CURDATE()")
+    new_diaries_today = database_cursor.fetchone()[0]
+    
+    database_cursor.execute("SELECT COUNT(*) FROM Reports WHERE DATE(Created_at) = CURDATE()")
+    new_reports_today = database_cursor.fetchone()[0]
+    
+    # 最近活動
+    database_cursor.execute("""
+        SELECT r.Report_id, r.Theme, u.User_name, r.Created_at 
+        FROM Reports r
+        LEFT JOIN User u ON r.User_Email = u.User_Email
+        ORDER BY r.Created_at DESC 
+        LIMIT 5
+    """)
+    recent_reports = [
+        {
+            'Report_ID': row[0],
+            'Theme': row[1],
+            'Reporter_Name': row[2] or '匿名用戶',
+            'Created_at': row[3]
+        }
+        for row in database_cursor.fetchall()
+    ]
+    
+    database_cursor.execute("""
+        SELECT User_Email as Username, User_Email as Email, Created_at 
+        FROM User 
+        ORDER BY Created_at DESC 
+        LIMIT 5
+    """)
+    recent_users = [
+        {
+            'Username': row[0].split('@')[0],  # 使用 email 前綴作為顯示名稱
+            'Email': row[1],
+            'Created_at': row[2]
+        }
+        for row in database_cursor.fetchall()
+    ]
+    
     database_connection.close()
 
     return render_template(
         'admin/dashboard.html',
         user_count=user_count,
-        diary_count=diary_count
+        diary_count=diary_count,
+        total_reports=total_reports,
+        pending_reports=pending_reports,
+        new_users_today=new_users_today,
+        new_diaries_today=new_diaries_today,
+        new_reports_today=new_reports_today,
+        recent_reports=recent_reports,
+        recent_users=recent_users
     )
 
 # 使用者列表
@@ -87,45 +148,8 @@ def admin_users():
 
     database_connection = db.get_connection()
     database_cursor = database_connection.cursor()
-    database_cursor.execute("SELECT User_Email, User_name, Created_at,last_login_ip FROM User ORDER BY Created_at DESC")
+    database_cursor.execute("SELECT User_Email, User_name, Created_at, last_login_ip FROM user ORDER BY Created_at DESC")
     users_data = database_cursor.fetchall()
     database_connection.close()
 
     return render_template('admin/users.html', users=users_data)
-
-# 日記紀錄
-@admin_bp.route('/diaries')
-@login_required
-def admin_diaries():
-    """
-    日記記錄檢視頁面
-    
-    顯示所有用戶的日記記錄，包括：
-    - 日記 ID 和作者資訊
-    - 日記內容摘要（前 80 字元）
-    - AI 分析結果
-    - 建立時間
-    
-    Returns:
-        str: 日記列表 HTML 頁面，或 403 錯誤頁面
-    """
-    if not is_admin():
-        return "你沒有權限進入後台", 403
-
-    database_connection = db.get_connection()
-    database_cursor = database_connection.cursor()
-    database_cursor.execute("""
-        SELECT d.Diary_id,
-               d.User_Email,
-               COALESCE(u.User_name, '') AS name,
-               LEFT(d.Diary_Content, 80) AS snippet,
-               d.AI_analysis_content,
-               d.Created_at
-        FROM DiaryRecords d
-        LEFT JOIN User u ON d.User_Email = u.User_Email
-        ORDER BY d.Created_at DESC
-    """)
-    diaries_data = database_cursor.fetchall()
-    database_connection.close()
-
-    return render_template('admin/diaries.html', diaries=diaries_data)

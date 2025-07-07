@@ -1,0 +1,250 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Admin - 意見回饋管理{% endblock %}
+
+{% block extra_css %}
+<!-- CSS 已整合到 admin.css 中 -->
+{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+  <!-- 頁面標題 -->
+  <div class="page-header">
+    <h1 class="page-title">意見回饋管理</h1>
+    <div class="page-actions">
+      <a href="{{ url_for('admin.admin_report_stats') }}" class="btn btn-outline">
+        <i class="icon-chart"></i> 統計報表
+      </a>
+    </div>
+  </div>
+
+  <!-- 統計卡片 -->
+  <div class="stats-grid">
+    {% set cards = [
+      ('pending',  '待處理'),
+      ('accepted', '已接受'),
+      ('rejected', '已拒絕'),
+      ('closed',   '已關閉')
+    ] %}
+    {% for key, label in cards %}
+    <div class="stat-card {{ key }}">
+      <div class="stat-number" data-count="{{ status_stats.get(key, 0) }}">{{ status_stats.get(key, 0) }}</div>
+      <div class="stat-label">{{ label }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- 篩選器 -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label for="status-filter">狀態篩選：</label>
+      <select id="status-filter">
+        <option value="all"      {{ 'selected' if status_filter == 'all' }}>全部</option>
+        <option value="pending"  {{ 'selected' if status_filter == 'pending' }}>待處理</option>
+        <option value="accepted" {{ 'selected' if status_filter == 'accepted' }}>已接受</option>
+        <option value="rejected" {{ 'selected' if status_filter == 'rejected' }}>已拒絕</option>
+        <option value="closed"   {{ 'selected' if status_filter == 'closed' }}>已關閉</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- 舉報列表 -->
+  {% if reports %}
+  <div class="reports-table-container">
+    <!-- 桌面版表格 -->
+    <table class="table d-none d-md-table">
+      <thead>
+        <tr>
+          <th>ID</th><th>舉報者</th><th>主題</th><th>類型</th><th>AI 分析</th><th>狀態</th><th>時間</th><th>操作</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+        <tr class="report-row status-{{ report.Status }}">
+          <td data-label="ID:">#{{ report.Report_id }}</td>
+          <td data-label="舉報者:">
+            <div class="user-info">
+              <div class="user-email">{{ report.User_Email }}</div>
+              {% if report.User_name %}<div class="user-name">{{ report.User_name }}</div>{% endif %}
+            </div>
+          </td>
+          <td data-label="主題:">
+            <div class="theme-cell">{{ report.Theme[:50] }}{% if report.Theme|length > 50 %}…{% endif %}</div>
+          </td>
+          <td data-label="類型:">
+            <div class="options-cell">
+              {% for option in report.Options[:2] %}<span class="option-tag">{{ option }}</span>{% endfor %}
+              {% if report.Options|length > 2 %}<span class="more-options">+{{ report.Options|length - 2 }}</span>{% endif %}
+            </div>
+          </td>
+          <td data-label="AI 分析:">
+            {% if report.AI_Valid is not none %}
+            <div class="ai-analysis">
+              <span class="ai-result {{ 'valid' if report.AI_Valid else 'invalid' }}">{{ '✓' if report.AI_Valid else '?' }}</span>
+              {% if report.AI_Confidence %}<span class="ai-confidence">{{ "%.0f"|format(report.AI_Confidence * 100) }}%</span>{% endif %}
+            </div>
+            {% else %}<span class="text-muted">-</span>{% endif %}
+          </td>
+          <td data-label="狀態:">
+            <span class="status-badge status-{{ report.Status }}">
+              {% if report.Status == 'pending' %}待處理
+              {% elif report.Status == 'accepted' %}已接受
+              {% elif report.Status == 'rejected' %}已拒絕
+              {% elif report.Status == 'closed' %}已關閉{% endif %}
+            </span>
+          </td>
+          <td data-label="時間:">
+            <div class="time-cell">
+              <div class="created-time">{{ report.Created_at.strftime('%m-%d %H:%M') }}</div>
+              {% if report.Updated_at != report.Created_at %}
+              <div class="updated-time">更新: {{ report.Updated_at.strftime('%m-%d %H:%M') }}</div>{% endif %}
+            </div>
+          </td>
+          <td data-label="操作:">
+            <div class="action-buttons">
+              <a href="{{ url_for('admin.admin_report_detail', report_id=report.Report_id) }}" class="btn btn-sm btn-primary">查看</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- 手機版卡片 -->
+    <div class="d-md-none">
+      {% for report in reports %}
+      <div class="report-card status-{{ report.Status }}">
+        <div class="card-header">
+          <div class="report-id">#{{ report.Report_id }}</div>
+          <span class="status-badge status-{{ report.Status }}">
+            {% if report.Status == 'pending' %}待處理
+            {% elif report.Status == 'accepted' %}已接受
+            {% elif report.Status == 'rejected' %}已拒絕
+            {% elif report.Status == 'closed' %}已關閉{% endif %}
+          </span>
+        </div>
+        <div class="card-content">
+          <div class="report-theme">{{ report.Theme }}</div>
+          <div class="report-user">{{ report.User_Email }}</div>
+          <div class="report-options">{% for option in report.Options %}<span class="option-tag">{{ option }}</span>{% endfor %}</div>
+          {% if report.AI_Valid is not none %}
+          <div class="ai-analysis">
+            AI 分析:
+            <span class="ai-result {{ 'valid' if report.AI_Valid else 'invalid' }}">{{ '有效' if report.AI_Valid else '待確認' }}</span>
+            {% if report.AI_Confidence %}({{ "%.0f"|format(report.AI_Confidence * 100) }}%){% endif %}
+          </div>
+          {% endif %}
+          <div class="report-time">{{ report.Created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+        </div>
+        <div class="card-actions">
+          <a href="{{ url_for('admin.admin_report_detail', report_id=report.Report_id) }}" class="btn btn-sm btn-primary">查看詳情</a>
+          {% if report.Status == 'pending' %}
+          <button class="btn btn-sm btn-success" data-quick-update data-report-id="{{ report.Report_id }}" data-action="accepted">接受</button>
+          <button class="btn btn-sm btn-danger"  data-quick-update data-report-id="{{ report.Report_id }}" data-action="rejected">拒絕</button>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 分頁 -->
+  {% if pagination.total_pages > 1 %}
+  <div class="pagination-container">
+    <nav class="pagination">
+      {% if pagination.has_prev %}<a href="?page={{ pagination.prev_num }}&status={{ status_filter }}" class="page-link">上一頁</a>{% endif %}
+      {% for page_num in range(1, pagination.total_pages + 1) %}
+        {% if page_num == pagination.page %}
+          <span class="page-link current">{{ page_num }}</span>
+        {% elif page_num <= 3 or page_num > pagination.total_pages - 3
+              or (pagination.page - 1 <= page_num <= pagination.page + 1) %}
+          <a href="?page={{ page_num }}&status={{ status_filter }}" class="page-link">{{ page_num }}</a>
+        {% elif page_num == 4 or page_num == pagination.total_pages - 3 %}
+          <span class="page-ellipsis">…</span>
+        {% endif %}
+      {% endfor %}
+      {% if pagination.has_next %}<a href="?page={{ pagination.next_num }}&status={{ status_filter }}" class="page-link">下一頁</a>{% endif %}
+    </nav>
+    <div class="pagination-info">
+      顯示第 {{ (pagination.page - 1) * 20 + 1 }} - {{ min(pagination.page * 20, pagination.total_count) }} 項， 共 {{ pagination.total_count }} 項
+    </div>
+  </div>
+  {% endif %}
+
+  {% else %}
+  <!-- 空狀態 -->
+  <div class="empty-state">
+    <div class="empty-icon">📝</div>
+    <h3>暫無舉報記錄</h3>
+    <p>當使用者提交舉報時，會在這裡顯示</p>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 修復狀態篩選功能
+document.addEventListener('DOMContentLoaded', function() {
+    const statusFilter = document.getElementById('status-filter');
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', function() {
+            const selectedStatus = this.value;
+            const currentUrl = new URL(window.location.href);
+            
+            // 更新或添加 status 參數
+            if (selectedStatus === 'all') {
+                currentUrl.searchParams.delete('status');
+            } else {
+                currentUrl.searchParams.set('status', selectedStatus);
+            }
+            
+            // 重置頁面參數
+            currentUrl.searchParams.delete('page');
+            
+            // 跳轉到新的 URL
+            window.location.href = currentUrl.toString();
+        });
+    }
+    
+    // 修復表格行點擊事件
+    const reportRows = document.querySelectorAll('.report-row');
+    reportRows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // 如果點擊的是按鈕或連結，不觸發行點擊事件
+            if (e.target.closest('.btn') || e.target.closest('.action-buttons')) {
+                return;
+            }
+            
+            // 獲取報告 ID
+            const reportIdElement = row.querySelector('[data-label="ID:"]');
+            if (reportIdElement) {
+                const reportId = reportIdElement.textContent.replace('#', '');
+                if (reportId) {
+                    window.location.href = `/admin/report/${reportId}`;
+                }
+            }
+        });
+    });
+    
+    // 修復手機卡片點擊事件
+    const reportCards = document.querySelectorAll('.report-card');
+    reportCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // 如果點擊的是按鈕或連結，不觸發卡片點擊事件
+            if (e.target.closest('.btn') || e.target.closest('.card-actions')) {
+                return;
+            }
+            
+            // 查找詳情連結
+            const detailLink = card.querySelector('a[href*="/admin/report/"]');
+            if (detailLink) {
+                window.location.href = detailLink.href;
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
