@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // === 密碼強度即時檢查 ===
-    const password1Input = document.getElementById('password1');
+    // 支援註冊頁面的 password1/password2 和重設密碼頁面的 password/password2
+    const password1Input = document.getElementById('password1') || document.getElementById('password');
     const password2Input = document.getElementById('password2');
     const emailInput = document.getElementById('email');
     
@@ -145,6 +146,20 @@ document.addEventListener('DOMContentLoaded', function () {
             element.classList.add('valid');
         } else {
             element.classList.remove('valid');
+        }
+    }
+
+    // === 密碼可見性切換 ===
+    window.togglePasswordVisibility = function(inputId) {
+        const inputElement = document.getElementById(inputId);
+        const buttonElement = document.querySelector(`button[onclick="togglePasswordVisibility('${inputId}')"]`);
+
+        if (inputElement.type === 'password') {
+            inputElement.type = 'text';
+            buttonElement.classList.add('hidden');
+        } else {
+            inputElement.type = 'password';
+            buttonElement.classList.remove('hidden');
         }
     }
 });
