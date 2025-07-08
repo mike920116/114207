@@ -19,7 +19,7 @@
     <hr>
 
     <h3>修改密碼</h3>
-    <a href="{{ url_for('user.forgot_form') }}" class="btn btn-success">🔑 前往修改密碼頁面</a>
+    <a href="{{ url_for('user.logout') }}?next={{ url_for('user.forgot_form') }}" class="btn btn-success">🔑 前往修改密碼頁面</a>
   </div>
 </div>
 {% endblock %}
