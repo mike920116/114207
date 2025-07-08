@@ -1,0 +1,79 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}日記之森 | 心理日記{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/diary/diary_form.css') }}">
+<script src="{{ url_for('static', filename='js/modules/diary/diary_form.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<!-- 日記表單容器 -->
+<div class="form-container">
+    <h2 class="form-title">我的心理日記</h2>
+
+    <!-- 儲存成功提示 -->
+    <div id="success-alert" class="alert alert-success" role="alert">
+        日記已成功儲存！
+    </div>
+    <!-- 錯誤訊息提示 -->
+    <div id="error-alert" class="alert alert-danger" role="alert">
+        發生錯誤，請稍後再試。
+    </div>
+
+    <!-- ✨ AI 回覆區塊（預設隱藏） -->
+    <div id="ai-response-box" class="ai-response-box">
+        <h3 class="ai-response-title">AI 小助手的回饋</h3>
+        <p id="ai-response-content" class="ai-response-content"></p>
+    </div>
+
+    <!-- 日記表單 -->
+    <div>
+        <!-- 日期 -->
+        <div class="form-group">
+            <div class="input-wrapper">
+                <label for="diary-date">日期</label>
+                <input type="date" id="diary-date" class="form-control" value="{{ today_date }}" required>
+            </div>
+        </div>
+
+        <!-- 內容 -->
+        <div class="form-group">
+            <div class="input-wrapper">
+                <label for="diary-content">今天的心情...</label>
+                <textarea id="diary-content" class="form-control textarea-control"
+                          placeholder="今天發生了什麼？感受如何？詳細地描述您的情緒、成因，想法..." rows="8"></textarea>
+            </div>
+        </div>
+
+        <!-- 情緒選擇 -->
+        <div class="form-group">
+            <div class="input-wrapper">
+                <label>您今天的主要情緒是？</label>
+                <div class="emotion-box">
+                    <div class="emotion-option" data-emotion="快樂">快樂 😊</div>
+                    <div class="emotion-option" data-emotion="平靜">平靜 😌</div>
+                    <div class="emotion-option" data-emotion="感恩">感恩 🙏</div>
+                    <div class="emotion-option" data-emotion="焦慮">焦慮 😰</div>
+                    <div class="emotion-option" data-emotion="悲傷">悲傷 😢</div>
+                    <div class="emotion-option" data-emotion="憤怒">憤怒 😠</div>
+                    <div class="emotion-option" data-emotion="困惑">困惑 🤔</div>
+                    <div class="emotion-option" data-emotion="疲倦">疲倦 😴</div>
+                </div>
+                <p class="mood-hint">選擇最能代表您今天整體心情的情緒</p>
+            </div>
+        </div>
+
+        <!-- 送出 -->
+        <div class="form-group">
+            <div class="input-wrapper">
+                <button id="submit-diary"
+                        class="btn-submit"
+                        data-save-url="{{ url_for('diary.save_diary') }}">
+                    儲存日記
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
