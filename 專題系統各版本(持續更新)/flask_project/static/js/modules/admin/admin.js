@@ -73,6 +73,59 @@
 let currentReportId = null;
 let currentAction = null;
 
+// 修正報告詳情頁面導航問題
+function fixReportNavigation() {
+    // 修正表格行點擊事件
+    const reportRows = document.querySelectorAll('.report-row');
+    reportRows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // 如果點擊的是按鈕或連結，不觸發行點擊事件
+            if (e.target.closest('.btn') || e.target.closest('.action-buttons') || e.target.closest('a')) {
+                return;
+            }
+            
+            // 獲取報告 ID
+            const reportIdElement = row.querySelector('[data-label="ID:"]');
+            if (reportIdElement) {
+                const reportId = reportIdElement.textContent.replace('#', '');
+                if (reportId) {
+                    // 使用相對路徑避免重定向問題
+                    window.location.href = `/admin/report/${reportId}`;
+                }
+            }
+        });
+    });
+    
+    // 修正手機卡片點擊事件
+    const reportCards = document.querySelectorAll('.report-card');
+    reportCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // 如果點擊的是按鈕或連結，不觸發卡片點擊事件
+            if (e.target.closest('.btn') || e.target.closest('.card-actions') || e.target.closest('a')) {
+                return;
+            }
+            
+            // 查找詳情連結
+            const detailLink = card.querySelector('a[href*="/admin/report/"]');
+            if (detailLink) {
+                window.location.href = detailLink.href;
+            }
+        });
+    });
+    
+    // 修正查看按鈕點擊事件
+    const viewButtons = document.querySelectorAll('.btn[href*="/admin/report/"]');
+    viewButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const href = this.getAttribute('href');
+            if (href) {
+                window.location.href = href;
+            }
+        });
+    });
+}
+
 // 統計報表管理器
 class ReportStatsManager {
     constructor() {
@@ -83,9 +136,13 @@ class ReportStatsManager {
     init() {
         // 等待 DOM 載入完成
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.initializeCharts());
+            document.addEventListener('DOMContentLoaded', () => {
+                this.initializeCharts();
+                fixReportNavigation();
+            });
         } else {
             this.initializeCharts();
+            fixReportNavigation();
         }
     }
 
@@ -416,13 +473,36 @@ class ReportStatsManager {
 
 // 初始化舉報管理功能
 function initReportManagement() {
+    console.log('Initializing Report Management...');
+    
     if (document.querySelector('.report-row') || document.querySelector('.report-card')) {
-        initStatCounters();
-        initTableInteractions();
-        initQuickActions();
-        initReportListHandlers();
-        initStatusFilters?.();
-        initPagination?.();
+        console.log('Report elements found, initializing components...');
+        
+        try {
+            initStatCounters();
+            console.log('✓ Stat counters initialized');
+            
+            initTableInteractions();
+            console.log('✓ Table interactions initialized');
+            
+            initQuickActions();
+            console.log('✓ Quick actions initialized');
+            
+            initReportListHandlers();
+            console.log('✓ Report list handlers initialized');
+            
+            initStatusFilters?.();
+            console.log('✓ Status filters initialized');
+            
+            initPagination?.();
+            console.log('✓ Pagination initialized');
+            
+            console.log('Report Management initialization completed successfully');
+        } catch (error) {
+            console.error('Error during Report Management initialization:', error);
+        }
+    } else {
+        console.log('No report elements found, skipping Report Management initialization');
     }
 }
 
@@ -484,9 +564,56 @@ function initQuickActions() {
 
 /* ───────── Report List 專用 ───────── */
 function initReportListHandlers() {
-    // 狀態篩選
+    // 狀態篩選 - 移除現有監聽器並重新綁定
     const sel = document.getElementById('status-filter');
-    sel?.addEventListener('change', () => filterByStatus(sel.value));
+    if (sel) {
+        // 記錄初始狀態
+        const initialStatus = sel.getAttribute('data-current-status') || sel.value;
+        console.log('Initializing status filter. Current status:', initialStatus);
+        
+        // 更新調試信息
+        const debugEl = document.getElementById('current-filter-debug');
+        if (debugEl) {
+            debugEl.textContent = initialStatus;
+        }
+        
+        // 移除可能存在的監聽器
+        const newSel = sel.cloneNode(true);
+        sel.parentNode.replaceChild(newSel, sel);
+        
+        // 添加新的監聽器
+        newSel.addEventListener('change', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const selectedValue = this.value;
+            const previousValue = this.getAttribute('data-current-status') || '';
+            
+            console.log('Status filter change detected:');
+            console.log('- Previous value:', previousValue);
+            console.log('- New value:', selectedValue);
+            console.log('- Current URL:', window.location.href);
+            
+            // 更新調試信息
+            const debugEl = document.getElementById('current-filter-debug');
+            if (debugEl) {
+                debugEl.textContent = selectedValue;
+            }
+            
+            // 設置新的當前狀態
+            this.setAttribute('data-current-status', selectedValue);
+            
+            // 延遲執行以確保事件完全處理
+            setTimeout(() => {
+                filterByStatus(selectedValue);
+            }, 100);
+        });
+        
+        console.log('Status filter initialized successfully');
+    } else {
+        console.warn('Status filter element not found');
+    }
+    
     // Modal 關閉 / 送出
     document.querySelector('[data-close-modal]')?.addEventListener('click', closeQuickModal);
     document.querySelector('[data-submit-modal]')?.addEventListener('click', submitQuickUpdate);
@@ -495,8 +622,85 @@ function initReportListHandlers() {
     });
 }
 
-function filterByStatus(status) { 
-    window.location.href = `?status=${status}`; 
+function filterByStatus(status) {
+    console.log('=== filterByStatus called ===');
+    console.log('Target status:', status);
+    console.log('Current location:', window.location.href);
+    
+    try {
+        // 清除可能的事件處理器，避免重複觸發
+        const select = document.getElementById('status-filter');
+        if (select) {
+            select.disabled = true;
+            console.log('Select element disabled temporarily');
+            setTimeout(() => {
+                if (select) {
+                    select.disabled = false;
+                    console.log('Select element re-enabled');
+                }
+            }, 2000);
+        }
+
+        const currentUrl = new URL(window.location.href);
+        console.log('Current URL object:', currentUrl.toString());
+        
+        // 更新或添加 status 參數
+        if (status === 'all') {
+            currentUrl.searchParams.delete('status');
+            console.log('Removed status parameter');
+        } else {
+            currentUrl.searchParams.set('status', status);
+            console.log('Set status parameter to:', status);
+        }
+        
+        // 重置頁面參數
+        currentUrl.searchParams.delete('page');
+        console.log('Removed page parameter');
+        
+        // 確保 URL 正確構建
+        const newUrl = currentUrl.toString();
+        console.log('New URL to navigate to:', newUrl);
+        
+        // 顯示載入提示
+        const debugEl = document.getElementById('current-filter-debug');
+        if (debugEl) {
+            debugEl.textContent = `載入中... (${status})`;
+        }
+        
+        // 使用 location.assign 代替 location.href，確保跳轉
+        console.log('Starting navigation...');
+        window.location.assign(newUrl);
+        
+    } catch (error) {
+        console.error('Error in filterByStatus:', error);
+        console.error('Error stack:', error.stack);
+        
+        // 重新啟用選擇器
+        const select = document.getElementById('status-filter');
+        if (select) {
+            select.disabled = false;
+        }
+        
+        // 降級處理 - 構建完整的 URL 路徑
+        const baseUrl = window.location.origin + window.location.pathname;
+        let newUrl = baseUrl;
+        
+        if (status !== 'all') {
+            newUrl += `?status=${encodeURIComponent(status)}`;
+        }
+        
+        console.log('Using fallback URL:', newUrl);
+        
+        // 顯示錯誤提示
+        const debugEl = document.getElementById('current-filter-debug');
+        if (debugEl) {
+            debugEl.textContent = `錯誤重試... (${status})`;
+        }
+        
+        setTimeout(() => {
+            window.location.assign(newUrl);
+        }, 500);
+    }
 }
 
 function quickUpdate(reportId, action) {
@@ -537,8 +741,92 @@ function submitQuickUpdate() {
 }
 
 /* ───────── 占位空函式避免 console error ───────── */
-function initStatusFilters() { }
-function initPagination() { }
+
+/* ===========================
+   報告列表狀態篩選管理
+   =========================== */
+
+// 確保狀態篩選功能正常工作的額外保護
+function initReportListStatusFilter() {
+    'use strict';
+    
+    function ensureStatusFilterWorks() {
+        const statusFilter = document.getElementById('status-filter');
+        if (!statusFilter) {
+            console.warn('Status filter element not found');
+            return;
+        }
+        
+        console.log('Setting up status filter with current value:', statusFilter.value);
+        
+        // 移除所有現有的事件監聽器
+        const newFilter = statusFilter.cloneNode(true);
+        statusFilter.parentNode.replaceChild(newFilter, statusFilter);
+        
+        // 添加新的事件監聽器
+        newFilter.addEventListener('change', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const selectedStatus = this.value;
+            console.log('Status filter changed to:', selectedStatus);
+            
+            // 確保不會被重複觸發
+            this.disabled = true;
+            
+            try {
+                // 構建新的 URL
+                const url = new URL(window.location.href);
+                
+                if (selectedStatus === 'all') {
+                    url.searchParams.delete('status');
+                } else {
+                    url.searchParams.set('status', selectedStatus);
+                }
+                
+                // 重置頁面參數
+                url.searchParams.delete('page');
+                
+                const newUrl = url.toString();
+                console.log('Navigating to:', newUrl);
+                
+                // 立即跳轉
+                window.location.href = newUrl;
+                
+            } catch (error) {
+                console.error('Error in status filter:', error);
+                
+                // 降級處理
+                const baseUrl = window.location.pathname;
+                let fallbackUrl = baseUrl;
+                
+                if (selectedStatus !== 'all') {
+                    fallbackUrl += '?status=' + encodeURIComponent(selectedStatus);
+                }
+                
+                console.log('Using fallback URL:', fallbackUrl);
+                window.location.href = fallbackUrl;
+            }
+        });
+        
+        console.log('Status filter setup completed');
+    }
+    
+    // 在多個時機確保初始化
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', ensureStatusFilterWorks);
+    } else {
+        ensureStatusFilterWorks();
+    }
+    
+    // 額外的延遲初始化，確保在其他腳本執行後
+    setTimeout(ensureStatusFilterWorks, 500);
+}
+
+// 初始化報告列表狀態篩選（只在相關頁面執行）
+if (window.location.pathname.includes('/admin/report') && !window.location.pathname.includes('/admin/report/')) {
+    initReportListStatusFilter();
+}
 
 /* ───────── 聊天系統初始化 ───────── */
 function initChatFunctionality() {
@@ -857,23 +1145,46 @@ function initDashboardFeatures() {
 
 /* =========== 主要初始化函式 =========== */
 document.addEventListener('DOMContentLoaded', () => {
-    // 初始化聊天功能
-    if (document.getElementById("session-list")) {
-        initChatFunctionality();
-    }
+    console.log('Admin page DOMContentLoaded, starting initialization...');
+    
+    try {
+        // 初始化聊天功能
+        if (document.getElementById("session-list")) {
+            console.log('Initializing chat functionality...');
+            initChatFunctionality();
+        }
 
-    // 初始化舉報管理功能
-    initReportManagement();
+        // 初始化舉報管理功能
+        console.log('Initializing report management...');
+        initReportManagement();
 
-    // 初始化公告管理功能
-    initAnnouncementManagement();
+        // 初始化公告管理功能
+        console.log('Initializing announcement management...');
+        initAnnouncementManagement();
 
-    // 初始化 Dashboard 功能
-    initDashboardFeatures();
+        // 初始化 Dashboard 功能
+        console.log('Initializing dashboard features...');
+        initDashboardFeatures();
 
-    // 初始化統計報表功能
-    if (typeof Chart !== 'undefined') {
-        window.reportStatsManager = new ReportStatsManager();
+        // 初始化回饋詳情頁面
+        console.log('Initializing report detail handlers...');
+        initReportDetailHandlers();
+
+        // 初始化用戶資訊區塊增強功能
+        console.log('Initializing user info enhancements...');
+        initUserInfoEnhancements();
+        formatUserInfo();
+
+        // 初始化統計報表功能
+        if (typeof Chart !== 'undefined') {
+            console.log('Initializing charts...');
+            window.reportStatsManager = new ReportStatsManager();
+        }
+        
+        console.log('All admin page components initialized successfully');
+    } catch (error) {
+        console.error('Error during admin page initialization:', error);
+        console.error('Stack trace:', error.stack);
     }
 });
 
@@ -886,3 +1197,222 @@ window.addEventListener('beforeunload', function() {
 
 // 導出為全局變量（供調試使用）
 window.ReportStatsManager = ReportStatsManager;
+
+/* ───────── Report Detail 專用 ───────── */
+function initReportDetailHandlers() {
+    // 初始化 AI 信心度條動畫
+    const confidenceFill = document.querySelector('.confidence-fill');
+    if (confidenceFill) {
+        const confidence = parseFloat(confidenceFill.dataset.confidence);
+        if (!isNaN(confidence)) {
+            // 設置寬度百分比
+            confidenceFill.style.width = confidence + '%';
+            
+            // 添加動畫效果
+            setTimeout(() => {
+                confidenceFill.style.transition = 'width 0.8s ease-out';
+                confidenceFill.style.width = confidence + '%';
+            }, 100);
+        }
+    }
+}
+
+/* ───────── 用戶資訊區塊增強功能 ───────── */
+function initUserInfoEnhancements() {
+    const userInfoSection = document.querySelector('.user-info-section');
+    if (!userInfoSection) return;
+
+    // 為用戶頭像添加點擊複製郵箱功能
+    const userAvatar = userInfoSection.querySelector('.user-avatar');
+    const userEmail = userInfoSection.querySelector('.user-email');
+    
+    if (userAvatar && userEmail) {
+        userAvatar.style.cursor = 'pointer';
+        userAvatar.title = '點擊複製郵箱地址';
+        
+        userAvatar.addEventListener('click', async function() {
+            const emailText = userEmail.textContent.trim();
+            
+            try {
+                await navigator.clipboard.writeText(emailText);
+                
+                // 顯示複製成功提示
+                showCopySuccess(userAvatar);
+                
+            } catch (err) {
+                console.warn('無法使用 Clipboard API，使用備用方法');
+                fallbackCopyEmail(emailText);
+            }
+        });
+    }
+
+    // 為用戶郵箱添加點擊複製功能
+    if (userEmail) {
+        userEmail.style.cursor = 'pointer';
+        userEmail.title = '點擊複製郵箱地址';
+        
+        userEmail.addEventListener('click', async function() {
+            const emailText = userEmail.textContent.trim();
+            
+            try {
+                await navigator.clipboard.writeText(emailText);
+                showCopySuccess(userEmail);
+            } catch (err) {
+                fallbackCopyEmail(emailText);
+            }
+        });
+    }
+
+    // 為用戶資訊區塊添加懸停效果
+    addHoverEffects(userInfoSection);
+}
+
+// 顯示複製成功提示
+function showCopySuccess(element) {
+    const originalContent = element.innerHTML;
+    const originalTitle = element.title;
+    
+    // 創建成功提示
+    const successIndicator = document.createElement('div');
+    successIndicator.innerHTML = '✅';
+    successIndicator.style.cssText = `
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: var(--secondary);
+        color: white;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        animation: copySuccess 0.5s ease-out;
+        z-index: 10;
+    `;
+    
+    // 添加動畫樣式
+    if (!document.getElementById('copy-success-styles')) {
+        const style = document.createElement('style');
+        style.id = 'copy-success-styles';
+        style.textContent = `
+            @keyframes copySuccess {
+                0% { transform: scale(0); opacity: 0; }
+                50% { transform: scale(1.2); opacity: 1; }
+                100% { transform: scale(1); opacity: 1; }
+            }
+            .copy-success-shake {
+                animation: copyShake 0.3s ease-in-out;
+            }
+            @keyframes copyShake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-2px); }
+                75% { transform: translateX(2px); }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // 為父元素添加相對定位
+    element.style.position = 'relative';
+    element.appendChild(successIndicator);
+    element.title = '已複製到剪貼板！';
+    element.classList.add('copy-success-shake');
+    
+    // 移除提示
+    setTimeout(() => {
+        if (successIndicator.parentNode) {
+            successIndicator.remove();
+        }
+        element.title = originalTitle;
+        element.classList.remove('copy-success-shake');
+    }, 2000);
+}
+
+// 備用複製方法（針對舊瀏覽器）
+function fallbackCopyEmail(emailText) {
+    const textArea = document.createElement('textarea');
+    textArea.value = emailText;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        // 簡單提示
+        alert('郵箱地址已複製到剪貼板：' + emailText);
+    } catch (err) {
+        console.error('複製失敗：', err);
+        // 提示手動複製
+        prompt('請手動複製郵箱地址：', emailText);
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+// 添加懸停效果
+function addHoverEffects(userInfoSection) {
+    const userDetails = userInfoSection.querySelector('.user-details');
+    if (!userDetails) return;
+    
+    // 添加懸停時的微妙動畫
+    userDetails.addEventListener('mouseenter', function() {
+        this.style.transform = 'scale(1.02)';
+        this.style.transition = 'transform 0.3s ease';
+    });
+    
+    userDetails.addEventListener('mouseleave', function() {
+        this.style.transform = 'scale(1)';
+    });
+}
+
+// 格式化用戶資訊顯示
+function formatUserInfo() {
+    const userEmail = document.querySelector('.user-email');
+    const userBadges = document.querySelectorAll('.user-badge');
+    
+    // 為長郵箱地址添加省略號處理
+    if (userEmail && userEmail.textContent.length > 25) {
+        userEmail.title = userEmail.textContent;
+        const email = userEmail.textContent;
+        const atIndex = email.indexOf('@');
+        if (atIndex > 10) {
+            const username = email.substring(0, 8) + '...';
+            const domain = email.substring(atIndex);
+            userEmail.innerHTML = `${username}${domain}`;
+        }
+    }
+    
+    // 為徽章添加動畫效果
+    userBadges.forEach((badge, index) => {
+        badge.style.animationDelay = (index * 0.1) + 's';
+        badge.classList.add('badge-fade-in');
+    });
+    
+    // 添加徽章動畫樣式
+    if (!document.getElementById('badge-animations')) {
+        const style = document.createElement('style');
+        style.id = 'badge-animations';
+        style.textContent = `
+            .badge-fade-in {
+                animation: badgeFadeIn 0.5s ease-out forwards;
+                opacity: 0;
+            }
+            @keyframes badgeFadeIn {
+                from {
+                    opacity: 0;
+                    transform: translateY(10px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}

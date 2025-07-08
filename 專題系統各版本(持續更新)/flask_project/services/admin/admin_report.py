@@ -67,7 +67,8 @@ def admin_reports():
         str: 舉報列表 HTML 頁面，或 403 錯誤頁面
     """
     if not is_admin():
-        return abort(403, "您沒有管理員權限，無法訪問此頁面")
+        flash("您沒有管理員權限，無法訪問此頁面", "error")
+        return redirect(url_for('admin.admin_dashboard'))
     
     try:
         # 獲取篩選參數
@@ -172,7 +173,8 @@ def admin_report_detail(report_id):
         str: 舉報詳情 HTML 頁面，或 403/404 錯誤頁面
     """
     if not is_admin():
-        return abort(403, "您沒有管理員權限，無法訪問此頁面")
+        flash("您沒有管理員權限，無法訪問此頁面", "error")
+        return redirect(url_for('admin.admin_dashboard'))
     
     try:
         conn = db.get_connection()
@@ -245,7 +247,8 @@ def admin_report_update(report_id):
         redirect: 重定向至舉報詳情頁面
     """
     if not is_admin():
-        return abort(403, "您沒有管理員權限，無法執行此操作")
+        flash("您沒有管理員權限，無法執行此操作", "error")
+        return redirect(url_for('admin.admin_reports'))
     
     try:
         # 獲取表單數據
@@ -363,7 +366,8 @@ def admin_report_stats():
         str: 統計頁面 HTML，或 403 錯誤頁面
     """
     if not is_admin():
-        return abort(403, "您沒有管理員權限，無法訪問此頁面")
+        flash("您沒有管理員權限，無法訪問此頁面", "error")
+        return redirect(url_for('admin.admin_dashboard'))
     
     try:
         conn = db.get_connection()

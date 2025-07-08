@@ -38,7 +38,7 @@
   <div class="filter-bar">
     <div class="filter-group">
       <label for="status-filter">狀態篩選：</label>
-      <select id="status-filter">
+      <select id="status-filter" data-current-status="{{ status_filter }}">
         <option value="all"      {{ 'selected' if status_filter == 'all' }}>全部</option>
         <option value="pending"  {{ 'selected' if status_filter == 'pending' }}>待處理</option>
         <option value="accepted" {{ 'selected' if status_filter == 'accepted' }}>已接受</option>
@@ -55,14 +55,14 @@
     <table class="table d-none d-md-table">
       <thead>
         <tr>
-          <th>ID</th><th>舉報者</th><th>主題</th><th>類型</th><th>AI 分析</th><th>狀態</th><th>時間</th><th>操作</th>
+          <th>ID</th><th>意見回饋者</th><th>主題</th><th>類型</th><th>狀態</th><th>時間</th><th>操作</th>
         </tr>
       </thead>
       <tbody>
         {% for report in reports %}
         <tr class="report-row status-{{ report.Status }}">
           <td data-label="ID:">#{{ report.Report_id }}</td>
-          <td data-label="舉報者:">
+          <td data-label="意見回饋者:">
             <div class="user-info">
               <div class="user-email">{{ report.User_Email }}</div>
               {% if report.User_name %}<div class="user-name">{{ report.User_name }}</div>{% endif %}
@@ -76,14 +76,6 @@
               {% for option in report.Options[:2] %}<span class="option-tag">{{ option }}</span>{% endfor %}
               {% if report.Options|length > 2 %}<span class="more-options">+{{ report.Options|length - 2 }}</span>{% endif %}
             </div>
-          </td>
-          <td data-label="AI 分析:">
-            {% if report.AI_Valid is not none %}
-            <div class="ai-analysis">
-              <span class="ai-result {{ 'valid' if report.AI_Valid else 'invalid' }}">{{ '✓' if report.AI_Valid else '?' }}</span>
-              {% if report.AI_Confidence %}<span class="ai-confidence">{{ "%.0f"|format(report.AI_Confidence * 100) }}%</span>{% endif %}
-            </div>
-            {% else %}<span class="text-muted">-</span>{% endif %}
           </td>
           <td data-label="狀態:">
             <span class="status-badge status-{{ report.Status }}">
@@ -127,13 +119,6 @@
           <div class="report-theme">{{ report.Theme }}</div>
           <div class="report-user">{{ report.User_Email }}</div>
           <div class="report-options">{% for option in report.Options %}<span class="option-tag">{{ option }}</span>{% endfor %}</div>
-          {% if report.AI_Valid is not none %}
-          <div class="ai-analysis">
-            AI 分析:
-            <span class="ai-result {{ 'valid' if report.AI_Valid else 'invalid' }}">{{ '有效' if report.AI_Valid else '待確認' }}</span>
-            {% if report.AI_Confidence %}({{ "%.0f"|format(report.AI_Confidence * 100) }}%){% endif %}
-          </div>
-          {% endif %}
           <div class="report-time">{{ report.Created_at.strftime('%Y-%m-%d %H:%M') }}</div>
         </div>
         <div class="card-actions">
@@ -183,68 +168,6 @@
 
 {% endblock %}
 
-{% block extra_js %}
-<script>
-// 修復狀態篩選功能
-document.addEventListener('DOMContentLoaded', function() {
-    const statusFilter = document.getElementById('status-filter');
-    
-    if (statusFilter) {
-        statusFilter.addEventListener('change', function() {
-            const selectedStatus = this.value;
-            const currentUrl = new URL(window.location.href);
-            
-            // 更新或添加 status 參數
-            if (selectedStatus === 'all') {
-                currentUrl.searchParams.delete('status');
-            } else {
-                currentUrl.searchParams.set('status', selectedStatus);
-            }
-            
-            // 重置頁面參數
-            currentUrl.searchParams.delete('page');
-            
-            // 跳轉到新的 URL
-            window.location.href = currentUrl.toString();
-        });
-    }
-    
-    // 修復表格行點擊事件
-    const reportRows = document.querySelectorAll('.report-row');
-    reportRows.forEach(row => {
-        row.addEventListener('click', function(e) {
-            // 如果點擊的是按鈕或連結，不觸發行點擊事件
-            if (e.target.closest('.btn') || e.target.closest('.action-buttons')) {
-                return;
-            }
-            
-            // 獲取報告 ID
-            const reportIdElement = row.querySelector('[data-label="ID:"]');
-            if (reportIdElement) {
-                const reportId = reportIdElement.textContent.replace('#', '');
-                if (reportId) {
-                    window.location.href = `/admin/report/${reportId}`;
-                }
-            }
-        });
-    });
-    
-    // 修復手機卡片點擊事件
-    const reportCards = document.querySelectorAll('.report-card');
-    reportCards.forEach(card => {
-        card.addEventListener('click', function(e) {
-            // 如果點擊的是按鈕或連結，不觸發卡片點擊事件
-            if (e.target.closest('.btn') || e.target.closest('.card-actions')) {
-                return;
-            }
-            
-            // 查找詳情連結
-            const detailLink = card.querySelector('a[href*="/admin/report/"]');
-            if (detailLink) {
-                window.location.href = detailLink.href;
-            }
-        });
-    });
-});
-</script>
+{% block scripts %}
+{{ super() }}
 {% endblock %}

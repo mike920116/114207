@@ -2,9 +2,7 @@
 
 {% block title %}Admin - 回饋詳情 #{{ report.Report_id }}{% endblock %}
 
-{% block e            <div class="confidence-bar">
-              <div class="confidence-fill" data-confidence="{{ report.AI_Confidence }}"></div>
-            </div>a_css %}
+{% block extra_css %}
 <!-- CSS 已整合到 admin.css 中 -->
 {% endblock %}
 
@@ -46,7 +44,7 @@
       <div class="detail-card">
         <!-- 舉報者資訊 -->
         <div class="user-info-section">
-          <h3>舉報者資訊</h3>
+          <h3>意見回饋者資訊</h3>
           <div class="user-details">
             <div class="user-avatar">
               {% if report.User_Avatar %}
@@ -60,6 +58,20 @@
               {% if report.User_name %}
               <div class="user-name">{{ report.User_name }}</div>
               {% endif %}
+              <div class="user-details-extra">
+                <span class="user-badge">
+                  📅 {{ report.Created_at.strftime('%Y-%m-%d') }}
+                </span>
+                {% if report.Status == 'pending' %}
+                <span class="user-badge new-user">
+                  ⏳ 待處理
+                </span>
+                {% elif report.Status == 'accepted' %}
+                <span class="user-badge verified">
+                  ✅ 已處理
+                </span>
+                {% endif %}
+              </div>
             </div>
           </div>
         </div>
@@ -113,7 +125,7 @@
         <div class="ai-header">
           <div class="ai-result {{ 'valid' if report.AI_Valid else 'invalid' }}">
             <i class="icon-ai"></i>
-            <span>{{ '有效舉報' if report.AI_Valid else '需要進一步確認' }}</span>
+            <span>{{ '有效意見' if report.AI_Valid else '需要進一步確認' }}</span>
           </div>
           {% if report.AI_Confidence %}
           <div class="ai-confidence">
@@ -232,20 +244,4 @@
   </div>
   {% endif %}
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// 初始化 AI 信心度條動畫
-document.addEventListener('DOMContentLoaded', function() {
-    const confidenceFill = document.querySelector('.confidence-fill');
-    if (confidenceFill) {
-        const confidence = parseFloat(confidenceFill.dataset.confidence);
-        if (!isNaN(confidence)) {
-            // 設置寬度百分比
-            confidenceFill.style.width = (confidence * 100) + '%';
-        }
-    }
-});
-</script>
 {% endblock %}
