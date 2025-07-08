@@ -38,12 +38,27 @@ document.querySelectorAll('.nav-item').forEach(item => {
 function toggleDarkMode() {
   const isDark = document.body.classList.toggle('dark-mode');
   localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+  // 更新深色模式按鈕文字
+  const darkModeButton = document.getElementById('toggle-dark');
+  if (darkModeButton) {
+    darkModeButton.textContent = isDark ? '☀️ 淺色模式' : '🌗 深色模式';
+  }
 }
 
 /* ========== DOMContentLoaded 初始化 ========== */
 document.addEventListener('DOMContentLoaded', () => {
   /* 主題記憶 */
-  if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark-mode');
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+  }
+
+  // 初始化深色模式按鈕文字
+  const darkModeButton = document.getElementById('toggle-dark');
+  if (darkModeButton) {
+    darkModeButton.textContent = document.body.classList.contains('dark-mode') ? '☀️ 淺色模式' : '🌗 深色模式';
+  }
 
   /* 轉場層 */
   const transition = document.createElement('div');
