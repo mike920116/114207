@@ -8,8 +8,49 @@
 {% endblock %}
 
 {% block content %}
+    <!-- 成長樹系統 - 獨立區塊 -->
+    <div class="growth-tree-section">
+        <div class="growth-header">
+            <h3 class="growth-title">🌳 我的日記之森</h3>
+            <div class="level-display">
+                <span class="level-text">等級 <span id="current-level">1</span></span>
+            </div>
+        </div>
+        
+        <div class="tree-display">
+            <div class="tree-container">
+                <div class="leaf-particles"></div>
+                <div class="tree" id="growth-tree">
+                    <div class="tree-trunk"></div>
+                    <div class="tree-leaves level-1"></div>
+                    <div class="tree-leaves level-2"></div>
+                    <div class="tree-leaves level-3"></div>
+                    <div class="tree-leaves level-4"></div>
+                    <div class="tree-leaves level-5"></div>
+                    <div class="tree-leaves level-6"></div>
+                    <div class="tree-leaves level-7"></div>
+                    <div class="tree-leaves level-8"></div>
+                    <div class="tree-leaves level-9"></div>
+                    <div class="tree-leaves level-10"></div>
+                </div>
+                <div class="tree-info">第 1 棵樹 - 成長階段 1/10</div>
+            </div>
+        </div>
+    </div>
+
     <!-- 日記列表容器 -->
     <div class="diary-container">
+        <!-- 進度系統 -->
+        <div class="progress-system">
+            <div class="progress-info">
+                <span class="diary-count">已寫 <span id="diary-count">{{ diaries|length }}</span> 篇日記</span>
+                <span class="next-level">距離下一級還需 <span id="needed-diaries">0</span> 篇</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+        
         <h2 class="diary-title">我的日記列表</h2>
         
         <!-- 過濾選項 -->
@@ -74,23 +115,8 @@
             {% endif %}
         </div>
         
-        <!-- 頁碼控制 -->
-        {% if diaries and diaries|length > 10 %}
-        <nav aria-label="Page navigation">
-            <ul class="pagination">
-                <li class="page-item disabled">
-                    <a class="page-link" href="#" tabindex="-1">上一頁</a>
-                </li>
-                <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                <li class="page-item"><a class="page-link" href="#">2</a></li>
-                <li class="page-item"><a class="page-link" href="#">3</a></li>
-                <li class="page-item">
-                    <a class="page-link" href="#">下一頁</a>
-                </li>
-            </ul>
-        </nav>
-        {% endif %}
-        
+        <!-- 頁碼控制將由JavaScript動態生成 -->
+
         <!-- 操作按鈕 -->
         <div class="action-buttons">
             <a href="{{ url_for('diary.diary_form') }}" class="btn-add">新增日記</a>

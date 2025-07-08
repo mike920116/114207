@@ -36,8 +36,8 @@
                  class="{% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">📊 儀表板</a></li>
           <li><a href="{{ url_for('admin.admin_users') }}"
                  class="{% if request.endpoint == 'admin.admin_users' %}active{% endif %}">👥 使用者</a></li>
-          <li><a href="{{ url_for('admin.admin_diaries') }}"
-                 class="{% if request.endpoint == 'admin.admin_diaries' %}active{% endif %}">📔 日記紀錄</a></li>
+          <li><a href="{{ url_for('admin.admin_reports') }}"
+                 class="{% if request.endpoint.startswith('admin.admin_report') %}active{% endif %}">📝 舉報管理</a></li>
           <li><a href="{{ url_for('admin_chat.panel') }}"
                 class="{% if request.endpoint.startswith('admin_chat.') %}active{% endif %}">💬 客服面板</a></li>
           <li><a href="{{ url_for('admin_announce.list_') }}"

@@ -213,6 +213,9 @@ def login():
 @login_required
 def logout():
     logout_user()
+    next_url = request.args.get('next')
+    if next_url:
+        return redirect(next_url)
     return redirect('/user/login/form')
 
 @user_bp.route("/verify_email/<token>")
@@ -268,8 +271,8 @@ def forgot_password():
             reset_link = url_for("user.reset_password_form", token=reset_token, _external=True)
             
             # 發送重設密碼信件
-            sender_email = os.environ.get("GMAIL_USERNAME")
-            subject = "密碼重設請求"
+            sender_email = os.environ.get("MAIL_USERNAME")
+            subject = "【Soulcraft】密碼重設請求"
             body = f"請點擊以下連結重設您的密碼: {reset_link}"
             
             msg = MIMEText(body, "plain", "utf-8")
@@ -277,11 +280,15 @@ def forgot_password():
             msg["From"] = sender_email
             msg["To"] = email
             
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-                server.login(sender_email, os.environ.get("GMAIL_PASSWORD"))
+            with smtplib.SMTP(os.environ.get("MAIL_SERVER"), int(os.environ.get("MAIL_PORT"))) as server:
+                server.starttls()
+                server.login(sender_email, os.environ.get("MAIL_PASSWORD"))
                 server.sendmail(sender_email, email, msg.as_string())
 
-        return render_template("user/forgot_password_sent.html", email=email)
+            return render_template("user/forgot_password_sent.html", email=email)
+        else:
+            # 用戶不存在，返回錯誤信息而不是成功頁面
+            return render_template('user/forgot_form.html', error_message="此電子郵件地址尚未註冊帳號，請先註冊或確認電子郵件地址是否正確。")
     except Exception as e:
         logger.error(f"密碼重設請求失敗: {e}")
         return render_template('user/forgot_form.html', error_message="處理請求時發生錯誤")
@@ -309,15 +316,16 @@ def reset_password():
         password = request.form.get("password")
         password2 = request.form.get("password2")
 
-        if password != password2:
-            return render_template("user/reset_password_form.html", token=token, error_message="兩次密碼不一致")
-
+        # 先解析token獲取email
         email = serializer.loads(token, salt="password-reset", max_age=3600)
+
+        if password != password2:
+            return render_template("user/reset_password_form.html", token=token, email=email, error_message="兩次密碼不一致")
         
         # 驗證新密碼強度
         is_valid, error_message = validate_password_strength(password, email)
         if not is_valid:
-            return render_template("user/reset_password_form.html", token=token, error_message=error_message)
+            return render_template("user/reset_password_form.html", token=token, email=email, error_message=error_message)
         
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
@@ -345,8 +353,8 @@ def send_verification_email(recipient_email, verification_token):
         if not sender_email or not password:
             logger.error("Zoho 環境變數未設置")
             return
-        
-        subject = "歡迎加入 - 請驗證您的電子信箱"
+
+        subject = "【Soulcraft】請驗證您的帳號"
         verification_link = url_for("user.verify_email", token=verification_token, _external=True)
 
         # 嘗試使用 HTML 模板，失敗則用純文字
@@ -363,7 +371,7 @@ def send_verification_email(recipient_email, verification_token):
         message["From"] = sender_email
         message["To"] = recipient_email
 
-        with smtplib.SMTP("smtp.zoho.com", 587) as server:
+        with smtplib.SMTP(os.environ.get("MAIL_SERVER"), int(os.environ.get("MAIL_PORT"))) as server:
             server.starttls()
             server.login(sender_email, password)
             server.sendmail(sender_email, recipient_email, message.as_string())
