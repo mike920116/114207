@@ -28,13 +28,25 @@ import requests
 from datetime import datetime
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_required, current_user
+from dotenv import load_dotenv
 from utils import db
 from services.line.line_bot import notify_admins
 from . import support_bp  # 從 __init__.py 導入 Blueprint
 
+# 確保載入環境變數
+load_dotenv()
+
 # ─── Dify 連線設定 ──────────────────────────────────────────
 DIFY_API_URL = os.getenv("DIFY_API_URL", "https://api.dify.ai/v1/chat-messages") 
 DIFY_KEY = os.getenv("DIFY_API_KEY_For_Report")  # 專門用於舉報分析的 API Key
+
+# 清理 DIFY_KEY（移除可能的空白字元）
+if DIFY_KEY:
+    DIFY_KEY = DIFY_KEY.strip()
+    if not DIFY_KEY:  # 如果清理後變成空字串
+        logging.warning("DIFY_API_KEY_For_Report 環境變數為空字串")
+        DIFY_KEY = None
+
 HEADERS = {
     "Authorization": f"Bearer {DIFY_KEY}",
     "Content-Type": "application/json"
@@ -57,6 +69,9 @@ def send_to_dify_for_analysis(theme, options, context):
             - confidence: 判斷可信度
             - suggest_action: 建議行動
     """
+    # 除錯：記錄 DIFY_KEY 的狀態
+    logging.info(f"開始 Dify 分析 - API Key 已載入：{bool(DIFY_KEY)}")
+    
     # 如果 DIFY_KEY 未設定，返回預設分析結果
     if not DIFY_KEY:
         logging.warning("DIFY_API_KEY_For_Report 未設定，使用預設分析結果")
@@ -82,27 +97,83 @@ def send_to_dify_for_analysis(theme, options, context):
         }
         
         logging.info(f"發送 Dify 請求：{DIFY_API_URL}")
+        logging.debug(f"請求 payload：{json.dumps(dify_payload, ensure_ascii=False, indent=2)}")
+        
         response = requests.post(DIFY_API_URL, json=dify_payload, headers=HEADERS, timeout=30)
+        
+        # 記錄回應狀態
+        logging.info(f"Dify 回應狀態：{response.status_code}")
+        logging.debug(f"Dify 原始回應：{response.text}")
+        
         response.raise_for_status()
         
         result = response.json()
         answer = result.get('answer', '{}')
+        logging.info(f"Dify 回應長度：{len(answer) if answer else 0} 字元")
+        
+        # 處理 Markdown 程式碼區塊格式（```json ... ```）
+        def extract_json_from_markdown(text):
+            """從 Markdown 程式碼區塊中提取 JSON"""
+            if not text:
+                return None
+                
+            # 移除可能的前後空白
+            text = text.strip()
+            
+            # 檢查是否包含 ```json 程式碼區塊
+            if '```json' in text:
+                # 提取 ```json 和 ``` 之間的內容
+                import re
+                json_match = re.search(r'```json\s*\n(.*?)\n```', text, re.DOTALL)
+                if json_match:
+                    return json_match.group(1).strip()
+            
+            # 檢查是否包含一般的 ``` 程式碼區塊
+            elif text.startswith('```') and text.endswith('```'):
+                # 移除首尾的 ```
+                lines = text.split('\n')
+                if len(lines) >= 3:
+                    # 移除第一行和最後一行的 ```
+                    return '\n'.join(lines[1:-1]).strip()
+            
+            # 如果沒有程式碼區塊，直接返回原文
+            return text
         
         # 嘗試解析 JSON 回應
         try:
-            analysis_result = json.loads(answer)
-            logging.info(f"Dify 分析成功：{analysis_result}")
-            return analysis_result
-        except json.JSONDecodeError:
+            # 先嘗試從 Markdown 格式中提取 JSON
+            clean_answer = extract_json_from_markdown(answer)
+            logging.debug(f"清理後的 JSON 內容：{clean_answer}")
+            
+            if clean_answer:
+                analysis_result = json.loads(clean_answer)
+                logging.info(f"✅ Dify 分析成功：{analysis_result.get('category', '未知分類')}, 可信度：{analysis_result.get('confidence', 0.0)}")
+                return analysis_result
+            else:
+                raise json.JSONDecodeError("無法提取有效的 JSON 內容", answer, 0)
+                
+        except json.JSONDecodeError as json_error:
             # 如果不是 JSON 格式，返回預設分析結果
-            logging.warning(f"Dify 回應格式異常：{answer}")
-            return {
-                "is_valid": True,
-                "category": "待人工審核", 
-                "reason": "AI 分析格式異常，需要人工審核",
-                "confidence": 0.5,
-                "suggest_action": "轉交管理員進行人工審核"
-            }
+            logging.error(f"JSON 解析錯誤：{json_error}")
+            logging.warning(f"Dify 回應無法解析為 JSON，將使用文字回應")
+            
+            # 嘗試從原始文字中提取有用資訊
+            if answer and isinstance(answer, str):
+                return {
+                    "is_valid": True,
+                    "category": "AI文字回應", 
+                    "reason": f"AI 分析：{answer[:200]}{'...' if len(answer) > 200 else ''}",
+                    "confidence": 0.7,
+                    "suggest_action": "AI 已提供分析但格式需要調整"
+                }
+            else:
+                return {
+                    "is_valid": True,
+                    "category": "待人工審核", 
+                    "reason": "AI 分析格式異常，需要人工審核",
+                    "confidence": 0.5,
+                    "suggest_action": "轉交管理員進行人工審核"
+                }
             
     except requests.exceptions.Timeout:
         logging.error("Dify API 請求超時")
@@ -255,8 +326,8 @@ def submit_report():
         notification_message = f"""
 📢 新的舉報需要處理
 
-🆔 舉報編號：#{report_id}
-👤 舉報者：{current_user.id}
+🆔 意見編號：#{report_id}
+👤 回饋者：{current_user.id}
 📋 主題：{theme}
 🏷️ 類型：{', '.join(selected_options)}
 📝 說明：{context[:100]}{'...' if len(context) > 100 else ''}

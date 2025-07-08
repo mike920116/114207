@@ -31,12 +31,34 @@ def encrypt(plain_text: str, key: bytes) -> str:
 def decrypt(enc_text: str, key: bytes) -> str:
     if not isinstance(key, bytes):
         raise TypeError("金鑰必須為 bytes")
+    
+    if not enc_text or enc_text.strip() == '':
+        raise ValueError("加密文本不能為空")
 
-    raw = base64.b64decode(enc_text)
+    try:
+        raw = base64.b64decode(enc_text)
+    except Exception as e:
+        raise ValueError(f"Base64 解碼失敗: {str(e)}")
+    
+    if len(raw) < 16:
+        raise ValueError("加密數據長度不足，無法提取 IV")
+    
     iv, encrypted = raw[:16], raw[16:]
 
-    cipher = AES.new(key, AES.MODE_CBC, iv)
-    decrypted_padded = cipher.decrypt(encrypted)
-    decrypted = unpad(decrypted_padded)
+    if len(encrypted) == 0:
+        raise ValueError("沒有可解密的數據")
 
-    return decrypted.decode("utf-8")
+    try:
+        cipher = AES.new(key, AES.MODE_CBC, iv)
+        decrypted_padded = cipher.decrypt(encrypted)
+        decrypted = unpad(decrypted_padded)
+        
+        # 嘗試將 bytes 轉換為 UTF-8 字符串
+        result = decrypted.decode("utf-8")
+        return result
+        
+    except UnicodeDecodeError as e:
+        raise UnicodeDecodeError(e.encoding, e.object, e.start, e.end, 
+                                f"UTF-8 解碼失敗，可能是金鑰錯誤: {e.reason}")
+    except Exception as e:
+        raise ValueError(f"解密過程發生錯誤: {str(e)}")

@@ -187,9 +187,15 @@ def login():
             login_user(user_object)
             
             # 產生金鑰並 base64 編碼後放入 session
-            aes_key = derive_key(password, email)
-            encoded_key = base64.b64encode(aes_key).decode('utf-8')
-            session['encryption_key'] = encoded_key
+            try:
+                aes_key = derive_key(password, email)
+                encoded_key = base64.b64encode(aes_key).decode('utf-8')
+                session['encryption_key'] = encoded_key
+                logger.info(f"用戶 {email} 成功登入，金鑰已設置")
+            except Exception as e:
+                logger.error(f"金鑰生成失敗 - 用戶: {email}, 錯誤: {str(e)}")
+                return render_template('user/login.html', success=False, 
+                                       error_message="系統錯誤，請稍後再試")
 
             
             # 記錄登入時間
