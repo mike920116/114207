@@ -17,7 +17,7 @@
 - /admin/diaries: 日記記錄檢視
 """
 
-import os
+import os, logging, json
 from flask import render_template, jsonify
 from flask_login import login_required, current_user
 from utils import db
@@ -25,9 +25,6 @@ from dotenv import load_dotenv
 from . import admin_bp  # 從 __init__.py 導入 Blueprint
 
 load_dotenv()  # 讀取 .env 檔案
-
-# 讀取環境變數中的管理員信箱
-ADMIN_EMAILS = set(email.strip() for email in os.getenv("ADMIN_EMAILS", "").split(","))
 
 # 共用判斷函式
 def is_admin():
@@ -39,7 +36,29 @@ def is_admin():
     Returns:
         bool: 如果是管理員則返回 True，否則返回 False
     """
-    return current_user.is_authenticated and current_user.id in ADMIN_EMAILS
+    try:
+        if not current_user.is_authenticated:
+            return False
+        
+        # 每次檢查時重新載入環境變數，確保最新配置
+        load_dotenv()
+        admin_emails_str = os.getenv("ADMIN_EMAILS", "")
+        if not admin_emails_str.strip():
+            logging.warning("ADMIN_EMAILS 環境變數未設定或為空")
+            return False
+            
+        admin_emails = set(email.strip() for email in admin_emails_str.split(",") if email.strip())
+        
+        # 記錄調試資訊
+        logging.info(f"is_admin() 檢查: user_id={current_user.id}, admin_emails={admin_emails}")
+        
+        result = current_user.id in admin_emails
+        logging.info(f"is_admin() 結果: {result}")
+        return result
+        
+    except Exception as e:
+        logging.error(f"is_admin() 檢查失敗: {e}")
+        return False
 
 # 儀表板
 @admin_bp.route('/dashboard')
@@ -54,6 +73,8 @@ def admin_dashboard():
         str: 儀表板 HTML 頁面，或 403 錯誤頁面
     """
     if not is_admin():
+        if current_user.is_authenticated:
+            logging.warning(f"用戶 {current_user.id} 嘗試訪問管理員儀表板但被拒絕")
         return "你沒有權限進入後台", 403
 
     database_connection = db.get_connection()
@@ -153,3 +174,33 @@ def admin_users():
     database_connection.close()
 
     return render_template('admin/users.html', users=users_data)
+
+# ── 調試路由 ──────────────────────────────────────────
+@admin_bp.route('/debug')
+@login_required
+def admin_debug():
+    """
+    管理員調試頁面 - 顯示當前用戶的權限狀態
+    """
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
+    
+    admin_emails = set(email.strip() for email in os.getenv("ADMIN_EMAILS", "").split(","))
+    
+    debug_info = {
+        "current_user_authenticated": current_user.is_authenticated,
+        "current_user_id": getattr(current_user, 'id', 'N/A'),
+        "current_user_username": getattr(current_user, 'username', 'N/A'),
+        "current_user_type": type(current_user).__name__,
+        "admin_emails": list(admin_emails),
+        "admin_emails_raw": os.getenv("ADMIN_EMAILS", ""),
+        "is_admin_result": is_admin(),
+        "user_in_admin_list": getattr(current_user, 'id', None) in admin_emails if hasattr(current_user, 'id') else False
+    }
+    
+    return f"""
+    <h1>管理員權限調試資訊</h1>
+    <pre>{json.dumps(debug_info, indent=2, ensure_ascii=False)}</pre>
+    <p><a href="/admin/dashboard">返回儀表板</a></p>
+    """

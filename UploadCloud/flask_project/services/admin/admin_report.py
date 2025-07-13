@@ -67,6 +67,9 @@ def admin_reports():
         str: 舉報列表 HTML 頁面，或 403 錯誤頁面
     """
     if not is_admin():
+        # 記錄訪問嘗試
+        if current_user.is_authenticated:
+            logging.warning(f"用戶 {current_user.id} 嘗試訪問舉報管理但被拒絕")
         flash("您沒有管理員權限，無法訪問此頁面", "error")
         return redirect(url_for('admin.admin_dashboard'))
     
