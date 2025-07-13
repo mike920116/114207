@@ -13,11 +13,15 @@ from flask import render_template, request, redirect, url_for,session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from itsdangerous import URLSafeTimedSerializer
 
+from utils.ip import get_client_ip
 from utils.db import get_connection
 from utils.keygen import derive_key
 from . import user_bp
 
 load_dotenv()
+
+client_ip = get_client_ip()
+
 
 # 設置日誌
 # 專案內 logs 目錄統一儲存，不用碰 /var/log
@@ -199,8 +203,12 @@ def login():
 
             
             # 記錄登入時間
-            cursor.execute("UPDATE User SET last_login_time = %s, last_login_ip = %s WHERE User_Email = %s", 
-                         (datetime.now(), request.remote_addr, email))
+            cursor.execute("""
+                UPDATE User
+                SET last_login_time = %s,
+                    last_login_ip   = %s
+                WHERE User_Email = %s
+            """, (datetime.now(), client_ip, email))
             conn.commit()
             
             return redirect(url_for('index'))
