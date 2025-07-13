@@ -73,12 +73,45 @@ def admin_reports():
     Returns:
         str: 舉報列表 HTML 頁面，或 403 錯誤頁面
     """
-    if not is_admin():
-        # 記錄訪問嘗試
-        if current_user.is_authenticated:
-            logging.warning(f"用戶 {current_user.id} 嘗試訪問舉報管理但被拒絕")
-        flash("您沒有管理員權限，無法訪問此頁面", "error")
+    # 詳細的權限檢查日誌
+    logging.info("=== 舉報管理頁面訪問開始 ===")
+    logging.info(f"當前時間: {datetime.now()}")
+    logging.info(f"請求 IP: {request.remote_addr}")
+    logging.info(f"User-Agent: {request.headers.get('User-Agent', 'Unknown')}")
+    
+    # 檢查用戶驗證狀態
+    if not current_user.is_authenticated:
+        logging.warning("用戶未驗證，重定向到登入頁面")
         return redirect(url_for('admin.admin_dashboard'))
+    
+    logging.info(f"用戶已驗證: {current_user.id}")
+    
+    # 檢查管理員權限
+    admin_check_result = is_admin()
+    logging.info(f"is_admin() 檢查結果: {admin_check_result}")
+    
+    if not admin_check_result:
+        # 記錄詳細的拒絕原因
+        logging.warning(f"用戶 {current_user.id} 嘗試訪問舉報管理但被拒絕")
+        logging.warning(f"用戶類型: {type(current_user)}")
+        logging.warning(f"用戶屬性: id={getattr(current_user, 'id', 'N/A')}, username={getattr(current_user, 'username', 'N/A')}")
+        
+        # 手動檢查環境變數
+        import os
+        from dotenv import load_dotenv
+        load_dotenv()
+        admin_emails_raw = os.getenv("ADMIN_EMAILS", "")
+        admin_emails_parsed = set(email.strip() for email in admin_emails_raw.split(",") if email.strip())
+        
+        logging.warning(f"環境變數 ADMIN_EMAILS (原始): '{admin_emails_raw}'")
+        logging.warning(f"環境變數 ADMIN_EMAILS (解析): {admin_emails_parsed}")
+        logging.warning(f"用戶是否在管理員列表: {current_user.id in admin_emails_parsed}")
+        
+        flash("您沒有管理員權限，無法訪問此頁面", "error")
+        logging.warning("重定向到 admin.admin_dashboard")
+        return redirect(url_for('admin.admin_dashboard'))
+    
+    logging.info("權限檢查通過，開始載入舉報資料")
     
     try:
         # 獲取篩選參數

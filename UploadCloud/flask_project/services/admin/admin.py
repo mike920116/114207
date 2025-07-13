@@ -323,6 +323,7 @@ def cloud_debug():
                 .success {{ color: green; }}
                 .error {{ color: red; }}
                 .warning {{ color: orange; }}
+                .info {{ color: blue; }}
                 pre {{ background: #f5f5f5; padding: 10px; border-radius: 5px; }}
             </style>
         </head>
@@ -422,3 +423,167 @@ def cloud_test():
         return redirect(url_for('admin.admin_dashboard'))
     
     return render_template('admin/cloud_test.html')
+
+# ── 即時權限診斷路由 ──────────────────────────────────────────
+@admin_bp.route('/debug-permission')
+@login_required  
+def debug_permission():
+    """
+    即時權限診斷頁面 - 幫助診斷權限問題
+    """
+    import os
+    from datetime import datetime
+    from dotenv import load_dotenv
+    
+    # 強制重新載入環境變數
+    load_dotenv(override=True)
+    
+    # 收集診斷資訊
+    debug_data = {
+        "timestamp": datetime.now().isoformat(),
+        "user_info": {
+            "authenticated": current_user.is_authenticated,
+            "user_id": getattr(current_user, 'id', None),
+            "username": getattr(current_user, 'username', None),
+            "user_type": str(type(current_user)),
+        },
+        "environment": {
+            "admin_emails_os_environ": os.environ.get("ADMIN_EMAILS"),
+            "admin_emails_getenv": os.getenv("ADMIN_EMAILS"),
+            "admin_emails_raw": repr(os.getenv("ADMIN_EMAILS", "")),
+        },
+        "permission_check": {},
+        "system_info": {
+            "working_directory": os.getcwd(),
+            "env_file_exists": os.path.exists('.env'),
+            "python_path": os.environ.get('PYTHONPATH', 'Not Set'),
+        }
+    }
+    
+    # 手動執行權限檢查步驟
+    try:
+        # 步驟 1: 檢查環境變數
+        admin_emails_str = os.getenv("ADMIN_EMAILS", "")
+        debug_data["permission_check"]["step1_env_var"] = {
+            "value": admin_emails_str,
+            "is_empty": not admin_emails_str.strip(),
+        }
+        
+        # 步驟 2: 解析郵箱列表
+        if admin_emails_str.strip():
+            admin_emails = set(email.strip() for email in admin_emails_str.split(",") if email.strip())
+            debug_data["permission_check"]["step2_parsed_emails"] = {
+                "parsed_set": list(admin_emails),
+                "count": len(admin_emails),
+            }
+        else:
+            debug_data["permission_check"]["step2_parsed_emails"] = {
+                "error": "環境變數為空，無法解析",
+            }
+            admin_emails = set()
+        
+        # 步驟 3: 檢查用戶是否在列表中
+        if current_user.is_authenticated and admin_emails:
+            user_in_list = current_user.id in admin_emails
+            debug_data["permission_check"]["step3_user_check"] = {
+                "user_id": current_user.id,
+                "in_admin_list": user_in_list,
+                "exact_matches": [email for email in admin_emails if email == current_user.id],
+                "similar_matches": [email for email in admin_emails if current_user.id.lower() in email.lower() or email.lower() in current_user.id.lower()],
+            }
+        else:
+            debug_data["permission_check"]["step3_user_check"] = {
+                "error": "用戶未驗證或管理員列表為空",
+            }
+        
+        # 步驟 4: 執行實際的 is_admin() 函數
+        admin_result = is_admin()
+        debug_data["permission_check"]["step4_is_admin_result"] = admin_result
+        
+    except Exception as e:
+        debug_data["permission_check"]["error"] = str(e)
+    
+    # 生成 HTML 報告
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>權限診斷報告</title>
+        <style>
+            body {{ font-family: 'Courier New', monospace; margin: 20px; background: #f5f5f5; }}
+            .container {{ background: white; padding: 20px; border-radius: 8px; max-width: 1200px; }}
+            .section {{ margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }}
+            .success {{ background: #d4edda; border-color: #c3e6cb; }}
+            .error {{ background: #f8d7da; border-color: #f5c6cb; }}
+            .warning {{ background: #fff3cd; border-color: #ffeaa7; }}
+            .info {{ background: #d1ecf1; border-color: #bee5eb; }}
+            pre {{ background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }}
+            .btn {{ display: inline-block; padding: 8px 16px; margin: 5px; text-decoration: none; 
+                   border-radius: 4px; color: white; }}
+            .btn-primary {{ background: #007bff; }}
+            .btn-success {{ background: #28a745; }}
+            .btn-danger {{ background: #dc3545; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🔍 權限診斷報告</h1>
+            <p><strong>生成時間:</strong> {debug_data['timestamp']}</p>
+            
+            <div class="section info">
+                <h2>👤 用戶資訊</h2>
+                <ul>
+                    <li><strong>已驗證:</strong> {'✅' if debug_data['user_info']['authenticated'] else '❌'} {debug_data['user_info']['authenticated']}</li>
+                    <li><strong>用戶 ID:</strong> {debug_data['user_info']['user_id']}</li>
+                    <li><strong>用戶名:</strong> {debug_data['user_info']['username']}</li>
+                    <li><strong>用戶類型:</strong> {debug_data['user_info']['user_type']}</li>
+                </ul>
+            </div>
+            
+            <div class="section {'success' if debug_data['environment']['admin_emails_getenv'] else 'error'}">
+                <h2>🌐 環境變數</h2>
+                <ul>
+                    <li><strong>os.environ.get('ADMIN_EMAILS'):</strong> {debug_data['environment']['admin_emails_os_environ'] or '未設定'}</li>
+                    <li><strong>os.getenv('ADMIN_EMAILS'):</strong> {debug_data['environment']['admin_emails_getenv'] or '未設定'}</li>
+                    <li><strong>原始值:</strong> {debug_data['environment']['admin_emails_raw']}</li>
+                </ul>
+            </div>
+            
+            <div class="section {'success' if debug_data['permission_check'].get('step4_is_admin_result') else 'error'}">
+                <h2>🔐 權限檢查步驟</h2>
+    """
+    
+    # 添加權限檢查詳情
+    for step, data in debug_data['permission_check'].items():
+        html_content += f"<h3>{step}:</h3><pre>{json.dumps(data, indent=2, ensure_ascii=False, default=str)}</pre>"
+    
+    html_content += f"""
+            </div>
+            
+            <div class="section info">
+                <h2>💻 系統資訊</h2>
+                <ul>
+                    <li><strong>工作目錄:</strong> {debug_data['system_info']['working_directory']}</li>
+                    <li><strong>.env 檔案存在:</strong> {'✅' if debug_data['system_info']['env_file_exists'] else '❌'} {debug_data['system_info']['env_file_exists']}</li>
+                    <li><strong>PYTHONPATH:</strong> {debug_data['system_info']['python_path']}</li>
+                </ul>
+            </div>
+            
+            <div class="section">
+                <h2>🔗 測試連結</h2>
+                <a href="/admin/report" class="btn btn-primary">嘗試訪問舉報管理</a>
+                <a href="/admin/dashboard" class="btn btn-success">返回儀表板</a>
+                <a href="/admin/cloud-debug" class="btn btn-danger">完整環境診斷</a>
+                <a href="javascript:location.reload()" class="btn btn-secondary">重新整理</a>
+            </div>
+            
+            <div class="section">
+                <h2>📋 完整診斷資料</h2>
+                <pre>{json.dumps(debug_data, indent=2, ensure_ascii=False, default=str)}</pre>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    
+    return html_content
