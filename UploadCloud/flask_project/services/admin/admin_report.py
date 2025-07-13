@@ -163,6 +163,9 @@ def admin_reports():
         
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         
+        sys.stderr.write("[DEBUG] 資料庫 cursor 創建成功\n")
+        sys.stderr.flush()
+        
         # 構建 WHERE 條件
         where_clause = ""
         params = []
@@ -182,7 +185,15 @@ def admin_reports():
         sys.stderr.write(f"[DEBUG] 執行計數查詢: {count_query}\n")
         sys.stderr.flush()
         
-        cursor.execute(count_query, params)
+        try:
+            cursor.execute(count_query, params)
+            sys.stderr.write("[DEBUG] 計數查詢執行成功\n")
+            sys.stderr.flush()
+        except Exception as count_error:
+            sys.stderr.write(f"[DEBUG] *** 計數查詢失敗 *** 錯誤: {count_error}\n")
+            sys.stderr.flush()
+            raise count_error
+        
         total_count = cursor.fetchone()['total']
         
         sys.stderr.write(f"[DEBUG] 總數查詢完成: {total_count}\n")
@@ -211,7 +222,15 @@ def admin_reports():
         sys.stderr.write(f"[DEBUG] 執行列表查詢，參數: {params}\n")
         sys.stderr.flush()
         
-        cursor.execute(list_query, params)
+        try:
+            cursor.execute(list_query, params)
+            sys.stderr.write("[DEBUG] 列表查詢執行成功\n")
+            sys.stderr.flush()
+        except Exception as list_error:
+            sys.stderr.write(f"[DEBUG] *** 列表查詢失敗 *** 錯誤: {list_error}\n")
+            sys.stderr.flush()
+            raise list_error
+        
         reports = cursor.fetchall()
         
         sys.stderr.write(f"[DEBUG] 列表查詢完成，獲得 {len(reports)} 筆記錄\n")
