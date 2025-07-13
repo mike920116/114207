@@ -360,8 +360,10 @@ def send_verification_email(recipient_email, verification_token):
             logger.error("Zoho 環境變數未設置")
             return
 
+        base_url = os.getenv("APP_BASE_URL")
         subject = "【Soulcraft】請驗證您的帳號"
-        verification_link = url_for("user.verify_email", token=verification_token, _external=True)
+        verification_path = url_for("user.verify_email", token=verification_token)
+        verification_link = base_url + verification_path
 
         # 嘗試使用 HTML 模板，失敗則用純文字
         try:
