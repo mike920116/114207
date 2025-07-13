@@ -139,16 +139,28 @@ def admin_reports():
         sys.stderr.flush()
         return redirect(url_for('admin.admin_dashboard'))
     
+    # 如果權限檢查通過，應該到這裡
+    sys.stderr.write("[DEBUG] 權限檢查通過，繼續執行\n")
+    sys.stderr.flush()
     logging.info("權限檢查通過，開始載入舉報資料")
     
     try:
+        sys.stderr.write("[DEBUG] 開始執行資料載入邏輯\n")
+        sys.stderr.flush()
+        
         # 獲取篩選參數
         status_filter = request.args.get('status', 'all')
         page = max(1, int(request.args.get('page', 1)))
         per_page = 20
         offset = (page - 1) * per_page
         
+        sys.stderr.write(f"[DEBUG] 參數解析完成: status_filter={status_filter}, page={page}\n")
+        sys.stderr.flush()
+        
         conn = db.get_connection()
+        sys.stderr.write("[DEBUG] 資料庫連接成功\n")
+        sys.stderr.flush()
+        
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         
         # 構建 WHERE 條件
