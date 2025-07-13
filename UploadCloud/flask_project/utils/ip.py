@@ -1,6 +1,10 @@
-from flask import request
+from flask import request, current_app
 
 def get_client_ip():
-    if request.headers.get("X-Forwarded-For"):
-        return request.headers.get("X-Forwarded-For").split(',')[0].strip()
-    return request.remote_addr
+    xff = request.headers.get("X-Forwarded-For")
+    real_ip = request.remote_addr
+    current_app.logger.info(f"[IP] XFF={xff} | remote_addr={real_ip}")
+
+    if xff:
+        return xff.split(",")[0].strip()
+    return real_ip
