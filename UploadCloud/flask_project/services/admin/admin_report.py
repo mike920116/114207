@@ -53,7 +53,7 @@ def log_report_action(report_id, action, performed_by, description):
         cursor = conn.cursor()
         
         cursor.execute("""
-            INSERT INTO report_audit_log (Report_id, Action, Performed_by, Description)
+            INSERT INTO Report_Audit_Log (Report_id, Action, Performed_by, Description)
             VALUES (%s, %s, %s, %s)
         """, (report_id, action, performed_by, description))
         
@@ -194,7 +194,7 @@ def admin_reports():
                    r.Options, r.Status, r.AI_Valid, r.AI_Confidence,
                    r.Created_at, r.Updated_at, r.Staff_Reply
             FROM Reports r
-            LEFT JOIN user u ON r.User_Email = u.User_Email
+            LEFT JOIN User u ON r.User_Email = u.User_Email
             {where_clause}
             ORDER BY 
                 CASE r.Status 
@@ -307,7 +307,7 @@ def admin_report_detail(report_id):
         cursor.execute("""
             SELECT r.*, u.User_name, u.User_Avatar
             FROM Reports r
-            LEFT JOIN user u ON r.User_Email = u.User_Email
+            LEFT JOIN User u ON r.User_Email = u.User_Email
             WHERE r.Report_id = %s
         """, (report_id,))
         
@@ -319,7 +319,7 @@ def admin_report_detail(report_id):
         # 獲取處理歷程
         cursor.execute("""
             SELECT Action, Performed_by, Description, Created_at
-            FROM report_audit_log 
+            FROM Report_Audit_Log 
             WHERE Report_id = %s 
             ORDER BY Created_at ASC
         """, (report_id,))
@@ -331,8 +331,8 @@ def admin_report_detail(report_id):
         if report['Post_id']:
             cursor.execute("""
                 SELECT p.Post_id, p.Content, p.User_Email, u.User_name
-                FROM posts p
-                LEFT JOIN user u ON p.User_Email = u.User_Email
+                FROM Posts p
+                LEFT JOIN User u ON p.User_Email = u.User_Email
                 WHERE p.Post_id = %s
             """, (report['Post_id'],))
             post_info = cursor.fetchone()
