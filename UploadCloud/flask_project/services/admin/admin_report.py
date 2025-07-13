@@ -75,6 +75,7 @@ def admin_reports():
     """
     # 詳細的權限檢查日誌
     logging.info("=== 舉報管理頁面訪問開始 ===")
+    print("=== 舉報管理頁面訪問開始 ===")  # 強制輸出到 stdout
     logging.info(f"當前時間: {datetime.now()}")
     logging.info(f"請求 IP: {request.remote_addr}")
     logging.info(f"User-Agent: {request.headers.get('User-Agent', 'Unknown')}")
@@ -82,17 +83,21 @@ def admin_reports():
     # 檢查用戶驗證狀態
     if not current_user.is_authenticated:
         logging.warning("用戶未驗證，重定向到登入頁面")
+        print("用戶未驗證，重定向到登入頁面")
         return redirect(url_for('admin.admin_dashboard'))
     
     logging.info(f"用戶已驗證: {current_user.id}")
+    print(f"用戶已驗證: {current_user.id}")
     
     # 檢查管理員權限
     admin_check_result = is_admin()
     logging.info(f"is_admin() 檢查結果: {admin_check_result}")
+    print(f"is_admin() 檢查結果: {admin_check_result}")
     
     if not admin_check_result:
         # 記錄詳細的拒絕原因
         logging.warning(f"用戶 {current_user.id} 嘗試訪問舉報管理但被拒絕")
+        print(f"*** 權限檢查失敗 *** 用戶 {current_user.id} 嘗試訪問舉報管理但被拒絕")
         logging.warning(f"用戶類型: {type(current_user)}")
         logging.warning(f"用戶屬性: id={getattr(current_user, 'id', 'N/A')}, username={getattr(current_user, 'username', 'N/A')}")
         
@@ -104,11 +109,15 @@ def admin_reports():
         admin_emails_parsed = set(email.strip() for email in admin_emails_raw.split(",") if email.strip())
         
         logging.warning(f"環境變數 ADMIN_EMAILS (原始): '{admin_emails_raw}'")
+        print(f"環境變數 ADMIN_EMAILS (原始): '{admin_emails_raw}'")
         logging.warning(f"環境變數 ADMIN_EMAILS (解析): {admin_emails_parsed}")
+        print(f"環境變數 ADMIN_EMAILS (解析): {admin_emails_parsed}")
         logging.warning(f"用戶是否在管理員列表: {current_user.id in admin_emails_parsed}")
+        print(f"用戶是否在管理員列表: {current_user.id in admin_emails_parsed}")
         
         flash("您沒有管理員權限，無法訪問此頁面", "error")
         logging.warning("重定向到 admin.admin_dashboard")
+        print("*** 重定向到 admin.admin_dashboard ***")
         return redirect(url_for('admin.admin_dashboard'))
     
     logging.info("權限檢查通過，開始載入舉報資料")
@@ -483,6 +492,15 @@ def admin_reports_test():
     用於診斷 302 重定向問題
     """
     logging.info("=== 測試舉報頁面訪問（繞過權限檢查）===")
+    print("=== 測試舉報頁面訪問（繞過權限檢查）===")  # 強制輸出到 stdout
+    
+    # 檢查當前用戶狀態
+    print(f"當前用戶: {current_user.id if current_user.is_authenticated else 'NOT_AUTHENTICATED'}")
+    print(f"用戶類型: {type(current_user)}")
+    
+    # 檢查 is_admin 函數
+    admin_result = is_admin()
+    print(f"is_admin() 結果: {admin_result}")
     
     try:
         # 直接嘗試載入資料，不做權限檢查
