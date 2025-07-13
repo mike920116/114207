@@ -170,14 +170,23 @@ def admin_reports():
             where_clause = "WHERE r.Status = %s"
             params.append(status_filter)
         
+        sys.stderr.write(f"[DEBUG] WHERE 條件構建完成: {where_clause}, params: {params}\n")
+        sys.stderr.flush()
+        
         # 獲取總數
         count_query = f"""
             SELECT COUNT(*) as total
             FROM Reports r
             {where_clause}
         """
+        sys.stderr.write(f"[DEBUG] 執行計數查詢: {count_query}\n")
+        sys.stderr.flush()
+        
         cursor.execute(count_query, params)
         total_count = cursor.fetchone()['total']
+        
+        sys.stderr.write(f"[DEBUG] 總數查詢完成: {total_count}\n")
+        sys.stderr.flush()
         
         # 獲取列表數據
         list_query = f"""
@@ -198,8 +207,15 @@ def admin_reports():
             LIMIT %s OFFSET %s
         """
         params.extend([per_page, offset])
+        
+        sys.stderr.write(f"[DEBUG] 執行列表查詢，參數: {params}\n")
+        sys.stderr.flush()
+        
         cursor.execute(list_query, params)
         reports = cursor.fetchall()
+        
+        sys.stderr.write(f"[DEBUG] 列表查詢完成，獲得 {len(reports)} 筆記錄\n")
+        sys.stderr.flush()
         
         # 獲取狀態統計
         cursor.execute("""
@@ -211,6 +227,9 @@ def admin_reports():
         
         conn.close()
         
+        sys.stderr.write("[DEBUG] 資料庫連接已關閉\n")
+        sys.stderr.flush()
+        
         # 處理 JSON 數據
         for report in reports:
             if report['Options']:
@@ -218,6 +237,9 @@ def admin_reports():
                     report['Options'] = json.loads(report['Options'])
                 except:
                     report['Options'] = []
+        
+        sys.stderr.write("[DEBUG] JSON 數據處理完成\n")
+        sys.stderr.flush()
         
         # 分頁資訊
         total_pages = (total_count + per_page - 1) // per_page
@@ -231,6 +253,12 @@ def admin_reports():
             'next_num': page + 1 if page < total_pages else None
         }
         
+        sys.stderr.write(f"[DEBUG] 分頁資訊計算完成: {pagination}\n")
+        sys.stderr.flush()
+        
+        sys.stderr.write("[DEBUG] 準備渲染模板 admin/report_list.html\n")
+        sys.stderr.flush()
+        
         return render_template('admin/report_list.html', 
                              reports=reports,
                              status_filter=status_filter,
@@ -238,8 +266,20 @@ def admin_reports():
                              pagination=pagination)
         
     except Exception as e:
+        sys.stderr.write(f"[DEBUG] *** EXCEPTION CAUGHT *** 錯誤: {str(e)}\n")
+        sys.stderr.write(f"[DEBUG] 錯誤類型: {type(e).__name__}\n")
+        sys.stderr.flush()
+        
+        import traceback
+        sys.stderr.write(f"[DEBUG] 完整錯誤堆棧:\n{traceback.format_exc()}\n")
+        sys.stderr.flush()
+        
         logging.error(f"載入舉報列表失敗: {e}")
         flash("載入資料失敗，請稍後再試", "error")
+        
+        sys.stderr.write("[DEBUG] *** 準備在 except 中重定向到 dashboard ***\n")
+        sys.stderr.flush()
+        
         return redirect(url_for('admin.admin_dashboard'))
 
 # ── 舉報詳情 ──────────────────────────────────────────
