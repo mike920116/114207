@@ -1,0 +1,48 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}日記之森 | 登入{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/user/user.css') }}">
+<script src="{{ url_for('static', filename='js/modules/user/user.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>使用者登入</title>
+</head>
+
+<body>
+  <div class="user-page-wrapper">
+    <div class="auth-box">
+      <h2 class="text-center mb-4">使用者登入</h2>
+
+      {% if error_message %}
+      <div class="alert alert-danger" role="alert">
+        {{ error_message }}
+      </div>
+      {% endif %}
+
+      <form action="{{ url_for('user.login') }}" method="POST">
+        <label for="account">電子郵件</label>
+        <input type="text" class="form-control" id="email" name="email" required>
+
+        <label for="password">密碼</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+
+        <button type="submit" class="btn">登入</button>
+      </form>
+
+      <div class="text-center mt-3">
+        <a href="{{ url_for('user.user_signup_form') }}">還沒有帳號？立即註冊</a>
+      </div>
+      <div class="text-end mt-2">
+        <a href="{{ url_for('user.forgot_form') }}" class="text-muted">忘記密碼？</a>
+      </div>      
+    </div>
+  </div>
+</body>
+{% endblock %}
+

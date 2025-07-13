@@ -1,0 +1,961 @@
+/* === 成長樹系統 - 獨立區塊 === */
+.growth-tree-section {
+  max-width: 900px;
+  margin: 120px auto 20px;
+  padding: 40px 30px;
+  background: linear-gradient(135deg, #E8F5E8, #D4EDDA);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(106, 173, 91, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.growth-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.growth-title {
+  font-size: 32px;
+  color: #3A8B55;
+  margin: 0;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(58, 139, 85, 0.1);
+}
+
+.level-display {
+  background: linear-gradient(135deg, #6aad5b, #89cc7c);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 16px;
+  box-shadow: 0 4px 16px rgba(106, 173, 91, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.tree-display {
+  display: flex;
+  justify-content: center;
+}
+
+/* 成長樹樣式 - 優化版 */
+.tree-container {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tree {
+  position: relative;
+  width: 150px;
+  height: 150px;
+}
+
+.tree-trunk {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 50px;
+  background: linear-gradient(180deg, #8B4513, #A0522D, #654321);
+  border-radius: 14px 14px 6px 6px;
+  transition: height 0.5s ease;
+  box-shadow: inset 2px 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.tree-leaves {
+  position: absolute;
+  border-radius: 50%;
+  transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: scale(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 優化的10個成長階段葉子 - 更自然的分布 */
+.tree-leaves.level-1 {
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle, #90EE90, #7CFC00, #66CC66);
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-2 {
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, #7CFC00, #32CD32, #228B22);
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-3 {
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle, #32CD32, #228B22, #006400);
+  bottom: 55px;
+  left: 25%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-4 {
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle, #32CD32, #228B22, #006400);
+  bottom: 55px;
+  right: 25%;
+  transform: translateX(50%) scale(0);
+}
+
+.tree-leaves.level-5 {
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, #228B22, #006400, #004d00);
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-6 {
+  width: 36px;
+  height: 36px;
+  background: radial-gradient(circle, #228B22, #006400, #004d00);
+  bottom: 70px;
+  left: 15%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-7 {
+  width: 36px;
+  height: 36px;
+  background: radial-gradient(circle, #228B22, #006400, #004d00);
+  bottom: 70px;
+  right: 15%;
+  transform: translateX(50%) scale(0);
+}
+
+.tree-leaves.level-8 {
+  width: 42px;
+  height: 42px;
+  background: radial-gradient(circle, #006400, #004d00, #003300);
+  bottom: 80px;
+  left: 8%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-9 {
+  width: 42px;
+  height: 42px;
+  background: radial-gradient(circle, #006400, #004d00, #003300);
+  bottom: 80px;
+  right: 8%;
+  transform: translateX(50%) scale(0);
+}
+
+.tree-leaves.level-10 {
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, #004d00, #003300, #002200);
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 樹的成長動畫 */
+.tree.level-1 .level-1,
+.tree.level-2 .level-1, .tree.level-2 .level-2,
+.tree.level-3 .level-1, .tree.level-3 .level-2, .tree.level-3 .level-3,
+.tree.level-4 .level-1, .tree.level-4 .level-2, .tree.level-4 .level-3, .tree.level-4 .level-4,
+.tree.level-5 .level-1, .tree.level-5 .level-2, .tree.level-5 .level-3, .tree.level-5 .level-4, .tree.level-5 .level-5,
+.tree.level-6 .level-1, .tree.level-6 .level-2, .tree.level-6 .level-3, .tree.level-6 .level-4, .tree.level-6 .level-5, .tree.level-6 .level-6,
+.tree.level-7 .level-1, .tree.level-7 .level-2, .tree.level-7 .level-3, .tree.level-7 .level-4, .tree.level-7 .level-5, .tree.level-7 .level-6, .tree.level-7 .level-7,
+.tree.level-8 .level-1, .tree.level-8 .level-2, .tree.level-8 .level-3, .tree.level-8 .level-4, .tree.level-8 .level-5, .tree.level-8 .level-6, .tree.level-8 .level-7, .tree.level-8 .level-8,
+.tree.level-9 .level-1, .tree.level-9 .level-2, .tree.level-9 .level-3, .tree.level-9 .level-4, .tree.level-9 .level-5, .tree.level-9 .level-6, .tree.level-9 .level-7, .tree.level-9 .level-8, .tree.level-9 .level-9,
+.tree.level-10 .level-1, .tree.level-10 .level-2, .tree.level-10 .level-3, .tree.level-10 .level-4, .tree.level-10 .level-5, .tree.level-10 .level-6, .tree.level-10 .level-7, .tree.level-10 .level-8, .tree.level-10 .level-9, .tree.level-10 .level-10 {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.tree.level-4 .level-4, .tree.level-5 .level-4, .tree.level-6 .level-4, .tree.level-7 .level-4, .tree.level-8 .level-4, .tree.level-9 .level-4, .tree.level-10 .level-4,
+.tree.level-7 .level-7, .tree.level-8 .level-7, .tree.level-9 .level-7, .tree.level-10 .level-7,
+.tree.level-9 .level-9, .tree.level-10 .level-9 {
+  transform: translateX(50%) scale(1);
+}
+
+.tree-info {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #4b6a3e;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* === 進度系統樣式 === */
+.progress-system {
+  background: linear-gradient(135deg, #F0F7F2, #E4F5E9);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 16px rgba(106, 173, 91, 0.1);
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #4b6a3e;
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6aad5b, #89cc7c, #b1e6ae);
+  border-radius: 10px;
+  transition: width 0.8s ease;
+  width: 0%;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* === 深色模式樣式 === */
+body.dark-mode .growth-tree-section {
+  background: linear-gradient(135deg, #1a3c5a, #27496d);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .growth-title {
+  color: #9bd4e1;
+}
+
+body.dark-mode .level-display {
+  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
+}
+
+body.dark-mode .tree-info {
+  color: #a7c0db;
+}
+
+body.dark-mode .progress-system {
+  background: linear-gradient(135deg, #27496d, #1a3c5a);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+body.dark-mode .progress-info {
+  color: #a7c0db;
+}
+
+body.dark-mode .progress-bar {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .progress-fill {
+  background: linear-gradient(90deg, #4a7b9d, #6daec7, #9bd4e1);
+}
+
+.growth-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.growth-title {
+  font-size: 24px;
+  color: #3A8B55;
+  margin: 0;
+  font-weight: 700;
+}
+
+.level-display {
+  background: linear-gradient(135deg, #6aad5b, #89cc7c);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 3px 10px rgba(106, 173, 91, 0.3);
+}
+
+.growth-content {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+/* 成長樹樣式 */
+.tree-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.tree {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.tree-trunk {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 40px;
+  background: linear-gradient(180deg, #8B4513, #A0522D);
+  border-radius: 10px 10px 4px 4px;
+  transition: height 0.5s ease;
+}
+
+.tree-leaves {
+  position: absolute;
+  border-radius: 50%;
+  transition: all 0.8s ease;
+  opacity: 0;
+  transform: scale(0);
+}
+
+.tree-leaves.level-1 {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #90EE90, #7CFC00);
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-2 {
+  width: 50px;
+  height: 50px;
+  background: linear-gradient(135deg, #7CFC00, #32CD32);
+  bottom: 35px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-3 {
+  width: 35px;
+  height: 35px;
+  background: linear-gradient(135deg, #32CD32, #228B22);
+  bottom: 45px;
+  left: 25%;
+  transform: translateX(-50%) scale(0);
+}
+
+.tree-leaves.level-4 {
+  width: 35px;
+  height: 35px;
+  background: linear-gradient(135deg, #32CD32, #228B22);
+  bottom: 45px;
+  right: 25%;
+  transform: translateX(50%) scale(0);
+}
+
+.tree-leaves.level-5 {
+  width: 60px;
+  height: 60px;
+  background: linear-gradient(135deg, #228B22, #006400);
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+}
+
+/* 樹的成長動畫 */
+.tree.level-1 .level-1,
+.tree.level-2 .level-1, .tree.level-2 .level-2,
+.tree.level-3 .level-1, .tree.level-3 .level-2, .tree.level-3 .level-3,
+.tree.level-4 .level-1, .tree.level-4 .level-2, .tree.level-4 .level-3, .tree.level-4 .level-4,
+.tree.level-5 .level-1, .tree.level-5 .level-2, .tree.level-5 .level-3, .tree.level-5 .level-4, .tree.level-5 .level-5 {
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+}
+
+.tree.level-4 .level-4,
+.tree.level-5 .level-4 {
+  transform: translateX(50%) scale(1);
+}
+
+/* 進度條區域 */
+.progress-section {
+  flex: 1;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #4b6a3e;
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6aad5b, #89cc7c, #b1e6ae);
+  border-radius: 10px;
+  transition: width 0.8s ease;
+  width: 0%;
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* === Diary List – Visual Style: 淺色為科技綠系，深色保留原樣 === */
+.diary-container {
+  max-width: 900px;
+  margin: 100px auto 40px;
+  padding: 40px 30px;
+  background: linear-gradient(135deg, #F0F7F2, #E4F5E9);
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(0, 30, 10, 0.15);
+}
+body.dark-mode .diary-container {
+  background: #1A3C5A;
+  color: #E6F0FA;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+}
+
+.diary-title {
+  font-size: 32px;
+  margin-bottom: 28px;
+  text-align: center;
+  color: #3A8B55;
+}
+body.dark-mode .diary-title {
+  color: #E6F0FA;
+}
+
+/* ---------- Filter & Search ---------- */
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filter-label {
+  font-weight: 600;
+}
+.filter-select {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #A0D4A4;
+  background-color: #F0FAF4;
+  color: #2E6B40;
+}
+body.dark-mode .filter-select {
+  background: #27496D;
+  color: #E6F0FA;
+  border-color: #4A7B9D;
+}
+
+.search-box {
+  position: relative;
+  flex: 1 1 240px;
+}
+.search-input {
+  width: 100%;
+  padding: 8px 38px 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #A0D4A4;
+  background-color: #F0FAF4;
+  color: #2E6B40;
+}
+body.dark-mode .search-input {
+  background: #27496D;
+  color: #E6F0FA;
+  border-color: #4A7B9D;
+}
+.search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* ---------- Diary Item ---------- */
+.diary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.diary-item {
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+  transition: transform .2s;
+}
+.diary-item:hover {
+  transform: translateY(-4px);
+}
+body.dark-mode .diary-item {
+  background: #27496D;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+}
+
+.diary-date {
+  font-size: 14px;
+  color: #5B9B6B;
+  margin-bottom: 6px;
+}
+body.dark-mode .diary-date {
+  color: #8AB6D6;
+}
+
+.diary-content {
+  font-size: 17px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+/* Emotion badge */
+.diary-emotion {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 14px;
+  border-radius: 14px;
+  background: #B2E3BD;
+  color: #3A8B55;
+}
+body.dark-mode .diary-emotion {
+  background: #4A7B9D;
+  color: #E6F0FA;
+}
+
+/* ---------- Empty State ---------- */
+.empty-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+/* ---------- Pagination (優化美化版) ---------- */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 40px;
+  gap: 12px;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 20px;
+  padding: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.page-item {
+  margin: 0 2px;
+}
+
+.page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: #3A8B55;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.page-link:hover {
+  background: linear-gradient(135deg, #E8F5E8, #D4EDDA);
+  color: #2E6B40;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(106, 173, 91, 0.3);
+}
+
+.page-item.active .page-link {
+  background: linear-gradient(135deg, #3A8B55, #58D88B);
+  color: white;
+  box-shadow: 0 4px 16px rgba(58, 139, 85, 0.4);
+  transform: scale(1.05);
+}
+
+.page-item.disabled .page-link {
+  color: #B8D4BC;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.page-item.disabled .page-link:hover {
+  background: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 分頁控制按鈕 */
+.page-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #6aad5b, #89cc7c);
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(106, 173, 91, 0.3);
+}
+
+.page-nav-btn:hover {
+  background: linear-gradient(135deg, #5BBE80, #88F0AE);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(106, 173, 91, 0.4);
+}
+
+.page-nav-btn:disabled {
+  background: linear-gradient(135deg, #B8D4BC, #C8E2CC);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.page-nav-btn:disabled:hover {
+  transform: none;
+  box-shadow: 0 3px 10px rgba(106, 173, 91, 0.3);
+}
+
+.page-info {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 12px;
+  color: #3A8B55;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 深色模式下的分頁樣式 */
+body.dark-mode .pagination {
+  background: rgba(26, 60, 90, 0.8);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .page-link {
+  color: #9bd4e1;
+}
+
+body.dark-mode .page-link:hover {
+  background: linear-gradient(135deg, #27496d, #1a3c5a);
+  color: #E6F0FA;
+}
+
+body.dark-mode .page-item.active .page-link {
+  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
+  color: #E6F0FA;
+}
+
+body.dark-mode .page-nav-btn {
+  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
+  color: #E6F0FA;
+}
+
+body.dark-mode .page-nav-btn:hover {
+  background: linear-gradient(135deg, #4a7b9d, #6daec7);
+}
+
+body.dark-mode .page-info {
+  background: rgba(26, 60, 90, 0.9);
+  color: #9bd4e1;
+}
+
+/* ---------- Action Button ---------- */
+.action-buttons {
+  margin-top: 36px;
+  text-align: center;
+}
+.btn-add {
+  display: inline-block;
+  padding: 14px 36px;
+  background: linear-gradient(90deg, #3A8B55, #58D88B); /* 淺色模式漸層 */
+  color: #F5F5F5;
+  border-radius: 16px;
+  font-size: 18px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn-add:hover {
+  background: linear-gradient(90deg, #5BBE80, #88F0AE); /* 淺色 hover */
+  transform: scale(1.03);
+}
+
+body.dark-mode .btn-add {
+  background: linear-gradient(90deg, #2A4B7C, #4A6D99); /* 深色模式漸層 */
+  color: #E6F0FA;
+}
+
+body.dark-mode .btn-add:hover {
+  background: linear-gradient(90deg, #4A6D99, #6A9FC4); /* 深色 hover */
+  transform: scale(1.03);
+}
+
+/* 飄落葉子動畫 - 增強版 */
+.falling-leaf {
+  position: absolute;
+  top: -30px;
+  font-size: 24px;
+  animation: fall linear;
+  pointer-events: none;
+  z-index: 10;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+.falling-leaf:nth-child(even) {
+  animation-name: fallSwing;
+}
+
+.leaf-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+@keyframes fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(40px) rotate(90deg) translateX(10px);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(80px) rotate(180deg) translateX(-5px);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(120px) rotate(270deg) translateX(8px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(160px) rotate(360deg) translateX(-3px);
+    opacity: 0;
+  }
+}
+
+@keyframes fallSwing {
+  0% {
+    transform: translateY(0) rotate(0deg) translateX(0);
+    opacity: 1;
+  }
+  25% {
+    transform: translateY(40px) rotate(-45deg) translateX(-15px);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(80px) rotate(90deg) translateX(10px);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translateY(120px) rotate(225deg) translateX(-8px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateY(160px) rotate(360deg) translateX(5px);
+    opacity: 0;
+  }
+}
+
+/* 樹的呼吸動畫（高等級時） - 增強版 */
+.tree.level-5, .tree.level-6, .tree.level-7, .tree.level-8, .tree.level-9, .tree.level-10 {
+  animation: breathe 4s ease-in-out infinite;
+}
+
+.tree.level-8, .tree.level-9, .tree.level-10 {
+  animation: breatheGlow 3s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%, 100% { 
+    transform: scale(1); 
+    filter: drop-shadow(0 0 5px rgba(106, 173, 91, 0.3));
+  }
+  50% { 
+    transform: scale(1.02); 
+    filter: drop-shadow(0 0 10px rgba(106, 173, 91, 0.5));
+  }
+}
+
+@keyframes breatheGlow {
+  0%, 100% { 
+    transform: scale(1); 
+    filter: drop-shadow(0 0 8px rgba(106, 173, 91, 0.4));
+  }
+  50% { 
+    transform: scale(1.03); 
+    filter: drop-shadow(0 0 15px rgba(106, 173, 91, 0.7));
+  }
+}
+
+/* 進度條脈衝效果 */
+.progress-fill.pulse {
+  animation: progressPulse 1s ease-in-out;
+}
+
+@keyframes progressPulse {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.1); }
+}
+
+/* === 響應式設計 === */
+@media (max-width: 576px) {
+  .growth-tree-section {
+    margin: 100px 16px 20px;
+    padding: 30px 20px;
+  }
+  
+  .growth-title {
+    font-size: 28px;
+  }
+  
+  .tree-container {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .diary-container {
+    margin: 80px 16px 32px;
+    padding: 28px 20px;
+  }
+  
+  .diary-title {
+    font-size: 28px;
+  }
+  
+  .filter-options {
+    gap: 12px;
+  }
+  
+  .btn-add {
+    font-size: 16px;
+    padding: 12px 24px;
+  }
+  
+  .page-nav-btn {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+  
+  .pagination-container {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .growth-content {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .tree-container {
+    width: 160px;
+    height: 160px;
+  }
+  
+  .growth-header {
+    flex-direction: column;
+    gap: 16px;
+    text-align: center;
+  }
+  
+  .filter-options {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search-box {
+    flex: none;
+  }
+}

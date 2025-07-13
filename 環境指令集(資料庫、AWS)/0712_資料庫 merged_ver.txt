@@ -1,0 +1,229 @@
+-- 刪除並重建資料庫
+DROP DATABASE IF EXISTS flaskdb;
+CREATE DATABASE flaskdb;
+USE flaskdb;
+
+-- 使用者表（含等級、積分、互動統計等擴充欄位）
+CREATE TABLE User (
+    User_Email               VARCHAR(255) PRIMARY KEY,
+    User_name                VARCHAR(255) NOT NULL,
+    password_hash            VARCHAR(255) NOT NULL,
+    User_Avatar              VARCHAR(255),
+    Is_Anonymous             CHAR(1)      DEFAULT 'N',
+    is_verified              TINYINT      DEFAULT 0,
+    email_verification_token VARCHAR(255),
+    token_expiry             DATETIME,
+    reset_token              TEXT         NULL,
+    reset_token_expiry       DATETIME     NULL,
+    bio                      TEXT,
+    user_level               INT          DEFAULT 1    COMMENT '用戶等級(1-7)',
+    user_points              INT          DEFAULT 0    COMMENT '用戶總積分',
+    posts_count              INT          DEFAULT 0    COMMENT '發文數量',
+    likes_received           INT          DEFAULT 0    COMMENT '獲得讚數',
+    comments_made            INT          DEFAULT 0    COMMENT '發表評論數',
+    login_days               INT          DEFAULT 1    COMMENT '連續登入天數',
+    last_level_update        TIMESTAMP    NULL DEFAULT CURRENT_TIMESTAMP COMMENT '最後等級更新時間',
+    last_login_ip            VARCHAR(255),
+    last_login_time          DATETIME,
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 日記記錄表
+CREATE TABLE DiaryRecords (
+    Diary_id                 INT          PRIMARY KEY AUTO_INCREMENT,
+    User_Email               VARCHAR(255),
+    Diary_Content            TEXT,
+    Emotion_status           VARCHAR(255),
+    AI_analysis_content      TEXT,
+    AI_suggestions           TEXT,
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 日記總結表
+CREATE TABLE DiarySummaries (
+    Summary_id               INT          PRIMARY KEY AUTO_INCREMENT,
+    User_Email               VARCHAR(255),
+    Summary_start_period     VARCHAR(255),
+    Summary_end_period       VARCHAR(255),
+    Summary_content          TEXT,
+    Generate_date            DATE,
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 日記互動表
+CREATE TABLE DiaryInteractions (
+    Interaction_id           INT          PRIMARY KEY AUTO_INCREMENT,
+    Diary_id                 INT,
+    User_message             TEXT,
+    AI_response              TEXT,
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (Diary_id) REFERENCES DiaryRecords(Diary_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 社群貼文表（含心情、匿名、圖片連結、互動統計欄位與索引）
+CREATE TABLE Posts (
+    Post_id                  INT          NOT NULL AUTO_INCREMENT,
+    User_Email               VARCHAR(255) DEFAULT NULL,
+    title                    VARCHAR(255) DEFAULT NULL,
+    Content                  TEXT,
+    Mood                     ENUM('happy','sad','angry','surprised','relaxed','neutral') DEFAULT 'neutral',
+    Is_Anonymous             TINYINT(1)   DEFAULT 0,
+    Image_URL                VARCHAR(500) DEFAULT NULL,
+    Is_public                TINYINT(1)   DEFAULT 1,
+    likes_count              INT          DEFAULT 0    COMMENT '貼文獲得的讚數',
+    comments_count           INT          DEFAULT 0    COMMENT '貼文獲得的評論數',
+    shares_count             INT          DEFAULT 0    COMMENT '貼文被分享的次數',
+    reposts_count            INT          DEFAULT 0    COMMENT '貼文被轉發的次數',
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (Post_id),
+    KEY idx_posts_mood (Mood),
+    KEY idx_posts_user_email (User_Email),
+    KEY idx_posts_created_at (Created_at),
+    KEY idx_posts_is_anonymous (Is_Anonymous),
+    CONSTRAINT posts_ibfk_1 FOREIGN KEY (User_Email) REFERENCES User(User_Email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 留言表（含公開狀態與索引）
+CREATE TABLE Comments (
+    Comment_id               INT          NOT NULL AUTO_INCREMENT,
+    Post_id                  INT          DEFAULT NULL,
+    User_Email               VARCHAR(255) DEFAULT NULL,
+    Content                  TEXT,
+    Is_public                TINYINT(1)   DEFAULT 1,
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (Comment_id),
+    KEY Post_id (Post_id),
+    KEY User_Email (User_Email),
+    CONSTRAINT comments_ibfk_1 FOREIGN KEY (Post_id) REFERENCES Posts(Post_id),
+    CONSTRAINT comments_ibfk_2 FOREIGN KEY (User_Email) REFERENCES User(User_Email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 按讚表（含唯一鍵避免重複按讚）
+CREATE TABLE Likes (
+    Like_id                  INT          NOT NULL AUTO_INCREMENT,
+    User_Email               VARCHAR(255) DEFAULT NULL,
+    Post_id                  INT          DEFAULT NULL,
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (Like_id),
+    UNIQUE KEY unique_like (User_Email,Post_id),
+    KEY Post_id (Post_id),
+    CONSTRAINT likes_ibfk_1 FOREIGN KEY (User_Email) REFERENCES User(User_Email),
+    CONSTRAINT likes_ibfk_2 FOREIGN KEY (Post_id) REFERENCES Posts(Post_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 收藏貼文表（含索引）
+CREATE TABLE PostCollections (
+    Collection_id            INT          NOT NULL AUTO_INCREMENT,
+    User_Email               VARCHAR(255) DEFAULT NULL,
+    Post_id                  INT          DEFAULT NULL,
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (Collection_id),
+    KEY User_Email (User_Email),
+    KEY Post_id (Post_id),
+    CONSTRAINT postcollections_ibfk_1 FOREIGN KEY (User_Email) REFERENCES User(User_Email),
+    CONSTRAINT postcollections_ibfk_2 FOREIGN KEY (Post_id) REFERENCES Posts(Post_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 舉報紀錄表（完整版）
+CREATE TABLE Reports (
+    Report_id                INT          NOT NULL AUTO_INCREMENT,
+    User_Email               VARCHAR(255),
+    Post_id                  INT,
+    Theme                    VARCHAR(255),
+    Options                  TEXT,
+    Context                  TEXT,
+    AI_Valid                 TINYINT      DEFAULT NULL,
+    AI_Confidence            FLOAT        DEFAULT NULL,
+    AI_Reason                TEXT,
+    AI_Suggest_Action        TEXT,
+    Status                   ENUM('pending','accepted','rejected','closed') DEFAULT 'pending',
+    Staff_Reply              TEXT,
+    Notified                 BOOLEAN      DEFAULT FALSE,
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    Updated_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (Report_id),
+    FOREIGN KEY (User_Email) REFERENCES User(User_Email),
+    FOREIGN KEY (Post_id)    REFERENCES Posts(Post_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 舉報處理歷程表
+CREATE TABLE Report_Audit_Log (
+    Log_id                   INT          PRIMARY KEY AUTO_INCREMENT,
+    Report_id                INT,
+    Action                   ENUM('ai_check','manual_review','notify_user','close') NOT NULL,
+    Performed_by             VARCHAR(255) NOT NULL,
+    Description              TEXT,
+    Created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (Report_id)  REFERENCES Reports(Report_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 每日用戶活動統計表
+CREATE TABLE userdailyactivity (
+    id                       INT          NOT NULL AUTO_INCREMENT,
+    user_email               VARCHAR(255) NOT NULL,
+    activity_date            DATE         NOT NULL,
+    posts_created            INT          DEFAULT 0,
+    likes_given              INT          DEFAULT 0,
+    comments_made            INT          DEFAULT 0,
+    login_count              INT          DEFAULT 0,
+    created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY unique_user_date (user_email,activity_date),
+    KEY idx_activity_date (activity_date),
+    CONSTRAINT userdailyactivity_ibfk_1 FOREIGN KEY (user_email) REFERENCES User(User_Email) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 用戶等級變動歷程表
+CREATE TABLE userlevelhistory (
+    id                       INT          NOT NULL AUTO_INCREMENT,
+    user_email               VARCHAR(255) NOT NULL,
+    old_level                INT          NOT NULL,
+    new_level                INT          NOT NULL,
+    old_title                VARCHAR(100),
+    new_title                VARCHAR(100),
+    points_earned            INT          DEFAULT 0,
+    reason                   VARCHAR(255),
+    created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    KEY idx_user_email (user_email),
+    KEY idx_created_at (created_at),
+    CONSTRAINT userlevelhistory_ibfk_1 FOREIGN KEY (user_email) REFERENCES User(User_Email) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- AI 會話表
+CREATE TABLE AIChatSessions (
+    session_id               INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_email               VARCHAR(255),
+    conversation_id          VARCHAR(64)  NULL,
+    is_open                  TINYINT      DEFAULT 1,
+    need_human               TINYINT      DEFAULT 0,
+    created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    updated_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_email) REFERENCES User(User_Email)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- AI 訊息表
+CREATE TABLE AIChatLogs (
+    id                       INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    session_id               INT,
+    role                     ENUM('user','ai','admin') NOT NULL,
+    message                  TEXT,
+    created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (session_id) REFERENCES AIChatSessions(session_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- 公告表
+CREATE TABLE Announcements (
+    id                       INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    title                    VARCHAR(255) NOT NULL,
+    body                     TEXT         NOT NULL,
+    start_time               DATETIME     DEFAULT CURRENT_TIMESTAMP,
+    end_time                 DATETIME     NULL,
+    created_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+    updated_at               TIMESTAMP    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
