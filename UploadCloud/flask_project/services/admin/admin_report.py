@@ -133,7 +133,7 @@ def admin_reports():
         # 獲取總數
         count_query = f"""
             SELECT COUNT(*) as total
-            FROM reports r
+            FROM Reports r
             {where_clause}
         """
         cursor.execute(count_query, params)
@@ -144,7 +144,7 @@ def admin_reports():
             SELECT r.Report_id, r.User_Email, u.User_name, r.Theme, 
                    r.Options, r.Status, r.AI_Valid, r.AI_Confidence,
                    r.Created_at, r.Updated_at, r.Staff_Reply
-            FROM reports r
+            FROM Reports r
             LEFT JOIN user u ON r.User_Email = u.User_Email
             {where_clause}
             ORDER BY 
@@ -164,7 +164,7 @@ def admin_reports():
         # 獲取狀態統計
         cursor.execute("""
             SELECT Status, COUNT(*) as count
-            FROM reports
+            FROM Reports
             GROUP BY Status
         """)
         status_stats = {row['Status']: row['count'] for row in cursor.fetchall()}
@@ -226,7 +226,7 @@ def admin_report_detail(report_id):
         # 獲取舉報詳細資訊
         cursor.execute("""
             SELECT r.*, u.User_name, u.User_Avatar
-            FROM reports r
+            FROM Reports r
             LEFT JOIN user u ON r.User_Email = u.User_Email
             WHERE r.Report_id = %s
         """, (report_id,))
@@ -316,7 +316,7 @@ def admin_report_update(report_id):
         # 獲取當前舉報資訊
         cursor.execute("""
             SELECT User_Email, Status, Theme
-            FROM reports 
+            FROM Reports 
             WHERE Report_id = %s
         """, (report_id,))
         
@@ -337,7 +337,7 @@ def admin_report_update(report_id):
         }
         
         cursor.execute("""
-            UPDATE reports 
+            UPDATE Reports 
             SET Status = %(status)s, 
                 Staff_Reply = %(staff_reply)s,
                 Notified = %(notified)s,
@@ -425,14 +425,14 @@ def admin_report_stats():
                 SUM(CASE WHEN Status = 'rejected' THEN 1 ELSE 0 END) as rejected_count,
                 SUM(CASE WHEN AI_Valid = 1 THEN 1 ELSE 0 END) as ai_valid_count,
                 AVG(AI_Confidence) as avg_confidence
-            FROM reports
+            FROM Reports
         """)
         basic_stats = cursor.fetchone()
         
         # 每日舉報趨勢（最近 30 天）
         cursor.execute("""
             SELECT DATE(Created_at) as report_date, COUNT(*) as count
-            FROM reports
+            FROM Reports
             WHERE Created_at >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
             GROUP BY DATE(Created_at)
             ORDER BY report_date DESC
@@ -442,7 +442,7 @@ def admin_report_stats():
         # 舉報主題統計
         cursor.execute("""
             SELECT Theme, COUNT(*) as count
-            FROM reports
+            FROM Reports
             GROUP BY Theme
             ORDER BY count DESC
             LIMIT 10
@@ -455,7 +455,7 @@ def admin_report_stats():
                 AI_Valid,
                 Status,
                 COUNT(*) as count
-            FROM reports
+            FROM Reports
             WHERE Status IN ('accepted', 'rejected')
             GROUP BY AI_Valid, Status
         """)
@@ -490,12 +490,12 @@ def admin_reports_test():
         cursor = conn.cursor(pymysql.cursors.DictCursor)
         
         # 簡單查詢
-        cursor.execute("SELECT COUNT(*) as total FROM reports")
+        cursor.execute("SELECT COUNT(*) as total FROM Reports")
         total_count = cursor.fetchone()['total']
         
         cursor.execute("""
             SELECT r.Report_id, r.User_Email, r.Theme, r.Status, r.Created_at
-            FROM reports r
+            FROM Reports r
             ORDER BY r.Created_at DESC
             LIMIT 10
         """)
