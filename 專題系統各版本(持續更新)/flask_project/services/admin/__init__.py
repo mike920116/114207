@@ -26,6 +26,14 @@ admin_announcement_bp = Blueprint(
     template_folder="../../templates/admin"
 )
 
+# 建立管理員舉報藍圖
+admin_report_bp = Blueprint(
+    "admin_report", __name__,
+    url_prefix="/admin/report",
+    template_folder="../../templates/admin"
+)
+
+
 # 導入功能模組（這會註冊路由到上面的 Blueprint）
 from . import admin
 from . import admin_chat
@@ -33,4 +41,4 @@ from . import admin_announcement
 from . import admin_report
 
 # 導出藍圖供app.py使用
-__all__ = ('admin_bp', 'admin_chat_bp', 'admin_announcement_bp')
+__all__ = ('admin_bp', 'admin_chat_bp', 'admin_announcement_bp','admin_report_bp')
