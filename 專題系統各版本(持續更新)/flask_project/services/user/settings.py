@@ -19,6 +19,7 @@ from flask import (
 )
 from flask_login import login_required, current_user
 from utils import db
+from utils.ip import get_client_ip
 
 # 在 __init__.py 中註冊此藍圖
 settings_bp = Blueprint(
