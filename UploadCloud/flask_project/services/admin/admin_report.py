@@ -30,6 +30,13 @@ from services.line.line_bot import notify_admins
 from .admin import is_admin  # 引入管理員權限檢查
 from . import admin_bp  # 從 __init__.py 導入 Blueprint
 
+# 雲端環境修復
+try:
+    from utils.cloud_env_fix import force_reload_env
+    force_reload_env()
+except ImportError:
+    pass
+
 def log_report_action(report_id, action, performed_by, description):
     """
     記錄舉報處理歷程

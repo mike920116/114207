@@ -24,6 +24,13 @@ from utils import db
 from dotenv import load_dotenv
 from . import admin_bp  # 從 __init__.py 導入 Blueprint
 
+# 雲端環境修復
+try:
+    from utils.cloud_env_fix import force_reload_env
+    force_reload_env()
+except ImportError:
+    pass
+
 load_dotenv()  # 讀取 .env 檔案
 
 # 共用判斷函式
@@ -32,32 +39,66 @@ def is_admin():
     檢查當前用戶是否為管理員
     
     根據環境變數 ADMIN_EMAILS 判斷用戶權限
+    雲端環境增強版本
     
     Returns:
         bool: 如果是管理員則返回 True，否則返回 False
     """
     try:
         if not current_user.is_authenticated:
+            logging.info("is_admin: 用戶未驗證")
             return False
         
-        # 每次檢查時重新載入環境變數，確保最新配置
-        load_dotenv()
-        admin_emails_str = os.getenv("ADMIN_EMAILS", "")
-        if not admin_emails_str.strip():
-            logging.warning("ADMIN_EMAILS 環境變數未設定或為空")
+        # 多層次環境變數載入策略
+        admin_emails_str = None
+        
+        # 1. 嘗試從 os.environ 直接獲取（雲端平台常用）
+        admin_emails_str = os.environ.get("ADMIN_EMAILS")
+        if admin_emails_str:
+            logging.info(f"is_admin: 從 os.environ 獲取 ADMIN_EMAILS: {admin_emails_str}")
+        
+        # 2. 如果沒有，嘗試重新載入 .env 並獲取
+        if not admin_emails_str:
+            load_dotenv(override=True)
+            admin_emails_str = os.getenv("ADMIN_EMAILS")
+            if admin_emails_str:
+                logging.info(f"is_admin: 重新載入後獲取 ADMIN_EMAILS: {admin_emails_str}")
+        
+        # 3. 最後的備用方案 - 硬編碼檢查（僅用於緊急情況）
+        if not admin_emails_str:
+            # 檢查用戶是否是已知的管理員郵箱
+            known_admin_emails = ["2025dify@gmail.com"]  # 你的管理員郵箱
+            if current_user.id in known_admin_emails:
+                logging.warning(f"is_admin: 使用備用管理員檢查，允許 {current_user.id}")
+                return True
+            logging.error("is_admin: 無法獲取 ADMIN_EMAILS 環境變數")
             return False
-            
+        
+        # 解析管理員郵箱列表
         admin_emails = set(email.strip() for email in admin_emails_str.split(",") if email.strip())
         
-        # 記錄調試資訊
-        logging.info(f"is_admin() 檢查: user_id={current_user.id}, admin_emails={admin_emails}")
+        if not admin_emails:
+            logging.error("is_admin: 管理員郵箱列表為空")
+            return False
         
-        result = current_user.id in admin_emails
-        logging.info(f"is_admin() 結果: {result}")
+        # 檢查當前用戶
+        user_id = current_user.id
+        result = user_id in admin_emails
+        
+        # 詳細日誌記錄
+        logging.info(f"is_admin: 用戶={user_id}, 管理員列表={admin_emails}, 結果={result}")
+        
         return result
         
     except Exception as e:
         logging.error(f"is_admin() 檢查失敗: {e}")
+        # 在發生錯誤時，檢查是否是已知管理員
+        try:
+            if current_user.is_authenticated and current_user.id == "2025dify@gmail.com":
+                logging.warning(f"is_admin: 錯誤情況下允許已知管理員 {current_user.id}")
+                return True
+        except:
+            pass
         return False
 
 # 儀表板
@@ -204,3 +245,166 @@ def admin_debug():
     <pre>{json.dumps(debug_info, indent=2, ensure_ascii=False)}</pre>
     <p><a href="/admin/dashboard">返回儀表板</a></p>
     """
+
+# ── 雲端調試路由 ──────────────────────────────────────────
+@admin_bp.route('/cloud-debug')
+def cloud_debug():
+    """
+    雲端部署調試頁面 - 無需登入即可訪問
+    用於診斷雲端環境配置問題
+    """
+    import os
+    from datetime import datetime
+    
+    try:
+        # 獲取環境資訊
+        debug_info = {
+            "timestamp": datetime.now().isoformat(),
+            "environment": {
+                "ADMIN_EMAILS_raw": os.getenv("ADMIN_EMAILS", ""),
+                "ADMIN_EMAILS_parsed": list(set(email.strip() for email in os.getenv("ADMIN_EMAILS", "").split(",") if email.strip())),
+                "SECRET_KEY_set": bool(os.getenv("SECRET_KEY")),
+                "FLASK_ENV": os.getenv("FLASK_ENV", ""),
+                "working_directory": os.getcwd(),
+                "env_file_exists": os.path.exists('.env'),
+            },
+            "current_user": {
+                "authenticated": getattr(current_user, 'is_authenticated', False),
+                "user_id": getattr(current_user, 'id', None) if hasattr(current_user, 'id') else None,
+                "username": getattr(current_user, 'username', None) if hasattr(current_user, 'username') else None,
+            },
+            "database": None,
+            "admin_check": None
+        }
+        
+        # 測試數據庫連接
+        try:
+            from utils.db import get_connection
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM User")
+            user_count = cursor.fetchone()[0]
+            debug_info["database"] = {
+                "connection": "success",
+                "user_count": user_count
+            }
+            
+            # 檢查管理員用戶是否存在
+            admin_emails = debug_info["environment"]["ADMIN_EMAILS_parsed"]
+            if admin_emails:
+                placeholders = ','.join(['%s'] * len(admin_emails))
+                cursor.execute(f"SELECT User_Email, User_name FROM User WHERE User_Email IN ({placeholders})", admin_emails)
+                admin_users = cursor.fetchall()
+                debug_info["database"]["admin_users_found"] = [{"email": row[0], "name": row[1]} for row in admin_users]
+            
+            cursor.close()
+            conn.close()
+            
+        except Exception as db_error:
+            debug_info["database"] = {
+                "connection": "failed",
+                "error": str(db_error)
+            }
+        
+        # 測試 is_admin() 函數
+        try:
+            debug_info["admin_check"] = is_admin()
+        except Exception as admin_error:
+            debug_info["admin_check"] = f"Error: {admin_error}"
+        
+        # 生成 HTML 報告
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>雲端部署調試報告</title>
+            <style>
+                body {{ font-family: monospace; margin: 20px; }}
+                .success {{ color: green; }}
+                .error {{ color: red; }}
+                .warning {{ color: orange; }}
+                pre {{ background: #f5f5f5; padding: 10px; border-radius: 5px; }}
+            </style>
+        </head>
+        <body>
+            <h1>雲端部署調試報告</h1>
+            <p>生成時間: {debug_info['timestamp']}</p>
+            
+            <h2>環境變數</h2>
+            <ul>
+                <li>ADMIN_EMAILS (原始): "{debug_info['environment']['ADMIN_EMAILS_raw']}"</li>
+                <li>ADMIN_EMAILS (解析): {debug_info['environment']['ADMIN_EMAILS_parsed']}</li>
+                <li>SECRET_KEY 已設定: <span class="{'success' if debug_info['environment']['SECRET_KEY_set'] else 'error'}">{debug_info['environment']['SECRET_KEY_set']}</span></li>
+                <li>FLASK_ENV: {debug_info['environment']['FLASK_ENV']}</li>
+                <li>工作目錄: {debug_info['environment']['working_directory']}</li>
+                <li>.env 檔案存在: <span class="{'success' if debug_info['environment']['env_file_exists'] else 'error'}">{debug_info['environment']['env_file_exists']}</span></li>
+            </ul>
+            
+            <h2>當前用戶狀態</h2>
+            <ul>
+                <li>已驗證: <span class="{'success' if debug_info['current_user']['authenticated'] else 'error'}">{debug_info['current_user']['authenticated']}</span></li>
+                <li>用戶 ID: {debug_info['current_user']['user_id'] or 'None'}</li>
+                <li>用戶名: {debug_info['current_user']['username'] or 'None'}</li>
+            </ul>
+            
+            <h2>數據庫狀態</h2>
+            {'<span class="success">連接成功</span>' if debug_info['database'] and debug_info['database'].get('connection') == 'success' else f'<span class="error">連接失敗: {debug_info["database"]["error"] if debug_info["database"] else "未知錯誤"}</span>'}
+            {f'<br>用戶總數: {debug_info["database"]["user_count"]}' if debug_info['database'] and 'user_count' in debug_info['database'] else ''}
+            {f'<br>找到的管理員用戶: {debug_info["database"]["admin_users_found"]}' if debug_info['database'] and 'admin_users_found' in debug_info['database'] else ''}
+            
+            <h2>權限檢查結果</h2>
+            <span class="{'success' if debug_info['admin_check'] is True else 'error'}">{debug_info['admin_check']}</span>
+            
+            <h2>完整調試資訊</h2>
+            <pre>{json.dumps(debug_info, indent=2, ensure_ascii=False, default=str)}</pre>
+            
+            <p><a href="/admin/dashboard">返回管理員儀表板</a> | <a href="/admin/report">嘗試訪問舉報管理</a></p>
+        </body>
+        </html>
+        """
+        
+        return html
+        
+    except Exception as e:
+        return f"""
+        <h1>調試頁面錯誤</h1>
+        <p style="color: red;">錯誤: {str(e)}</p>
+        <pre>{str(e.__class__.__name__)}: {str(e)}</pre>
+        """
+
+# ── 重定向測試路由 ──────────────────────────────────────────
+@admin_bp.route('/test-redirect')
+@login_required
+def test_redirect():
+    """
+    測試重定向行為的路由
+    """
+    try:
+        # 檢查權限
+        admin_result = is_admin()
+        
+        if admin_result:
+            return f"""
+            <h1>權限檢查通過</h1>
+            <p>用戶: {current_user.id}</p>
+            <p>權限: 管理員</p>
+            <p><a href="/admin/report">前往舉報管理</a></p>
+            <p><a href="/admin/dashboard">返回儀表板</a></p>
+            """
+        else:
+            # 不使用 redirect，直接返回資訊
+            return f"""
+            <h1 style="color: red;">權限檢查失敗</h1>
+            <p>用戶: {current_user.id if current_user.is_authenticated else '未登入'}</p>
+            <p>權限: 一般用戶</p>
+            <p>這就是導致 302 重定向的原因</p>
+            <p><a href="/admin/cloud-debug">查看詳細調試資訊</a></p>
+            <p><a href="/admin/dashboard">嘗試訪問儀表板</a></p>
+            """
+            
+    except Exception as e:
+        return f"""
+        <h1 style="color: red;">測試路由錯誤</h1>
+        <p>錯誤: {str(e)}</p>
+        <p><a href="/admin/cloud-debug">查看調試資訊</a></p>
+        """
