@@ -89,8 +89,10 @@ function fixReportNavigation() {
             if (reportIdElement) {
                 const reportId = reportIdElement.textContent.replace('#', '');
                 if (reportId) {
-                    // 使用相對路徑避免重定向問題
-                    window.location.href = `/admin/report/${reportId}`;
+                    // 雲端環境修復：使用完整的 URL
+                    const targetUrl = `${window.location.protocol}//${window.location.host}/admin/report/${reportId}`;
+                    console.log('Navigating to report detail:', targetUrl);
+                    window.location.href = targetUrl;
                 }
             }
         });
@@ -108,22 +110,33 @@ function fixReportNavigation() {
             // 查找詳情連結
             const detailLink = card.querySelector('a[href*="/admin/report/"]');
             if (detailLink) {
+                console.log('Navigating via card click:', detailLink.href);
                 window.location.href = detailLink.href;
             }
         });
     });
     
-    // 修正查看按鈕點擊事件
+    // 修正查看按鈕點擊事件 - 移除 preventDefault，讓瀏覽器正常處理連結
     const viewButtons = document.querySelectorAll('.btn[href*="/admin/report/"]');
     viewButtons.forEach(button => {
+        // 移除舊的事件監聽器，讓瀏覽器自然處理 href 屬性
+        button.removeEventListener('click', preventDefaultHandler);
+        
+        // 添加調試日誌
         button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const href = this.getAttribute('href');
-            if (href) {
-                window.location.href = href;
-            }
+            console.log('View button clicked:', this.href);
+            // 不阻止默認行為，讓瀏覽器正常導航
         });
     });
+}
+
+// 防止重複綁定的輔助函數
+function preventDefaultHandler(e) {
+    e.preventDefault();
+    const href = this.getAttribute('href');
+    if (href) {
+        window.location.href = href;
+    }
 }
 
 // 統計報表管理器
@@ -641,25 +654,15 @@ function filterByStatus(status) {
             }, 2000);
         }
 
-        const currentUrl = new URL(window.location.href);
-        console.log('Current URL object:', currentUrl.toString());
+        // 雲端環境修復：確保使用正確的基礎 URL
+        const baseUrl = window.location.protocol + '//' + window.location.host + '/admin/report';
+        let newUrl = baseUrl;
         
-        // 更新或添加 status 參數
-        if (status === 'all') {
-            currentUrl.searchParams.delete('status');
-            console.log('Removed status parameter');
-        } else {
-            currentUrl.searchParams.set('status', status);
-            console.log('Set status parameter to:', status);
+        if (status !== 'all') {
+            newUrl += `?status=${encodeURIComponent(status)}`;
         }
         
-        // 重置頁面參數
-        currentUrl.searchParams.delete('page');
-        console.log('Removed page parameter');
-        
-        // 確保 URL 正確構建
-        const newUrl = currentUrl.toString();
-        console.log('New URL to navigate to:', newUrl);
+        console.log('Constructed URL for cloud deployment:', newUrl);
         
         // 顯示載入提示
         const debugEl = document.getElementById('current-filter-debug');
@@ -667,9 +670,19 @@ function filterByStatus(status) {
             debugEl.textContent = `載入中... (${status})`;
         }
         
-        // 使用 location.assign 代替 location.href，確保跳轉
+        // 雲端環境優化：使用更可靠的跳轉方法
         console.log('Starting navigation...');
-        window.location.assign(newUrl);
+        
+        // 方法1：直接設定 location.href
+        window.location.href = newUrl;
+        
+        // 備用方法：如果上面的不起作用，延遲執行
+        setTimeout(() => {
+            if (window.location.href !== newUrl) {
+                console.log('Fallback navigation attempt');
+                window.location.replace(newUrl);
+            }
+        }, 1000);
         
     } catch (error) {
         console.error('Error in filterByStatus:', error);
@@ -681,15 +694,15 @@ function filterByStatus(status) {
             select.disabled = false;
         }
         
-        // 降級處理 - 構建完整的 URL 路徑
-        const baseUrl = window.location.origin + window.location.pathname;
-        let newUrl = baseUrl;
+        // 降級處理 - 強制跳轉
+        const baseUrl = '/admin/report';
+        let fallbackUrl = baseUrl;
         
         if (status !== 'all') {
-            newUrl += `?status=${encodeURIComponent(status)}`;
+            fallbackUrl += `?status=${encodeURIComponent(status)}`;
         }
         
-        console.log('Using fallback URL:', newUrl);
+        console.log('Using fallback URL:', fallbackUrl);
         
         // 顯示錯誤提示
         const debugEl = document.getElementById('current-filter-debug');
@@ -698,7 +711,7 @@ function filterByStatus(status) {
         }
         
         setTimeout(() => {
-            window.location.assign(newUrl);
+            window.location.href = fallbackUrl;
         }, 500);
     }
 }

@@ -1,0 +1,152 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}雲端舉報管理測試{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+  <div class="page-header">
+    <h1 class="page-title">雲端舉報管理測試頁面</h1>
+  </div>
+
+  <div class="test-section">
+    <h2>環境資訊</h2>
+    <ul>
+      <li>當前 URL: <span id="current-url"></span></li>
+      <li>主機名: <span id="hostname"></span></li>
+      <li>協議: <span id="protocol"></span></li>
+      <li>端口: <span id="port"></span></li>
+    </ul>
+  </div>
+
+  <div class="test-section">
+    <h2>路由測試</h2>
+    <div class="test-buttons">
+      <button id="test-report-list" class="btn btn-primary">測試舉報列表</button>
+      <button id="test-with-status" class="btn btn-secondary">測試狀態篩選</button>
+      <button id="test-direct-nav" class="btn btn-success">直接導航測試</button>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>測試結果</h2>
+    <div id="test-results" class="test-results"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>模擬舉報連結</h2>
+    <div class="mock-report-links">
+      <a href="{{ url_for('admin.admin_reports') }}" class="btn btn-outline">舉報列表 (Flask URL)</a>
+      <a href="/admin/report" class="btn btn-outline">舉報列表 (直接路徑)</a>
+      <a href="{{ url_for('admin.admin_reports') }}?status=pending" class="btn btn-outline">待處理舉報</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 顯示環境資訊
+    document.getElementById('current-url').textContent = window.location.href;
+    document.getElementById('hostname').textContent = window.location.hostname;
+    document.getElementById('protocol').textContent = window.location.protocol;
+    document.getElementById('port').textContent = window.location.port || '預設';
+    
+    const resultsEl = document.getElementById('test-results');
+    
+    function logResult(message) {
+        const div = document.createElement('div');
+        div.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+        resultsEl.appendChild(div);
+        console.log(message);
+    }
+    
+    // 測試舉報列表
+    document.getElementById('test-report-list').addEventListener('click', function() {
+        logResult('開始測試舉報列表導航...');
+        try {
+            const url = `${window.location.protocol}//${window.location.host}/admin/report`;
+            logResult(`目標 URL: ${url}`);
+            
+            // 測試 fetch 請求
+            fetch(url, { method: 'HEAD' })
+                .then(response => {
+                    logResult(`HTTP 狀態: ${response.status}`);
+                    if (response.status === 200) {
+                        logResult('✅ 路由可訪問，開始導航...');
+                        window.location.href = url;
+                    } else if (response.status === 302) {
+                        logResult('❌ 發生 302 重定向');
+                        logResult(`重定向目標: ${response.headers.get('Location') || '未知'}`);
+                    } else {
+                        logResult(`❌ 意外的狀態碼: ${response.status}`);
+                    }
+                })
+                .catch(error => {
+                    logResult(`❌ 請求失敗: ${error.message}`);
+                });
+        } catch (error) {
+            logResult(`❌ 測試失敗: ${error.message}`);
+        }
+    });
+    
+    // 測試狀態篩選
+    document.getElementById('test-with-status').addEventListener('click', function() {
+        logResult('開始測試狀態篩選導航...');
+        try {
+            const url = `${window.location.protocol}//${window.location.host}/admin/report?status=pending`;
+            logResult(`目標 URL: ${url}`);
+            window.location.href = url;
+        } catch (error) {
+            logResult(`❌ 測試失敗: ${error.message}`);
+        }
+    });
+    
+    // 直接導航測試
+    document.getElementById('test-direct-nav').addEventListener('click', function() {
+        logResult('開始直接導航測試...');
+        try {
+            // 使用相對路徑
+            const url = '/admin/report';
+            logResult(`相對路徑: ${url}`);
+            window.location.href = url;
+        } catch (error) {
+            logResult(`❌ 測試失敗: ${error.message}`);
+        }
+    });
+});
+</script>
+
+<style>
+.test-section {
+    margin: 20px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.test-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.mock-report-links {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.test-results {
+    max-height: 300px;
+    overflow-y: auto;
+    background: #f5f5f5;
+    padding: 10px;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.test-results div {
+    margin: 2px 0;
+}
+</style>
+{% endblock %}

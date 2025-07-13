@@ -18,7 +18,7 @@
 """
 
 import os, logging, json
-from flask import render_template, jsonify
+from flask import render_template, jsonify, flash, redirect, url_for
 from flask_login import login_required, current_user
 from utils import db
 from dotenv import load_dotenv
@@ -408,3 +408,17 @@ def test_redirect():
         <p>錯誤: {str(e)}</p>
         <p><a href="/admin/cloud-debug">查看調試資訊</a></p>
         """
+
+# ── 雲端測試路由 ──────────────────────────────────────────
+@admin_bp.route('/cloud-test')
+@login_required
+def cloud_test():
+    """
+    雲端環境測試頁面
+    用於測試舉報管理功能在雲端環境中的行為
+    """
+    if not is_admin():
+        flash("您沒有管理員權限，無法訪問此頁面", "error")
+        return redirect(url_for('admin.admin_dashboard'))
+    
+    return render_template('admin/cloud_test.html')
