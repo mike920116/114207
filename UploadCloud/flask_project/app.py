@@ -126,6 +126,3 @@ def inject_today_date():
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
-else:
-    # 生產環境：包裝 Socket.IO 以支援 WSGI 部署
-    application = WSGIApp(socketio, app)
