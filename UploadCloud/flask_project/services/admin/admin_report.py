@@ -473,3 +473,62 @@ def admin_report_stats():
         logging.error(f"載入舉報統計失敗: {e}")
         flash("載入統計資料失敗，請稍後再試", "error")
         return redirect(url_for('admin.admin_dashboard'))
+
+# ── 測試路由（繞過權限檢查）──────────────────────────────────────────
+@admin_bp.route('/report-test')
+@login_required
+def admin_reports_test():
+    """
+    測試用舉報列表頁面 - 繞過權限檢查
+    用於診斷 302 重定向問題
+    """
+    logging.info("=== 測試舉報頁面訪問（繞過權限檢查）===")
+    
+    try:
+        # 直接嘗試載入資料，不做權限檢查
+        conn = db.get_connection()
+        cursor = conn.cursor(pymysql.cursors.DictCursor)
+        
+        # 簡單查詢
+        cursor.execute("SELECT COUNT(*) as total FROM reports")
+        total_count = cursor.fetchone()['total']
+        
+        cursor.execute("""
+            SELECT r.Report_id, r.User_Email, r.Theme, r.Status, r.Created_at
+            FROM reports r
+            ORDER BY r.Created_at DESC
+            LIMIT 10
+        """)
+        reports = cursor.fetchall()
+        
+        conn.close()
+        
+        # 返回簡單的 HTML 響應而不是模板
+        html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>測試舉報頁面</title></head>
+        <body>
+            <h1>測試舉報頁面（繞過權限檢查）</h1>
+            <p>成功載入！總舉報數: {total_count}</p>
+            <h2>最近 10 筆舉報:</h2>
+            <ul>
+        """
+        
+        for report in reports:
+            html += f"<li>#{report['Report_id']} - {report['Theme']} ({report['Status']})</li>"
+        
+        html += """
+            </ul>
+            <p><a href="/admin/dashboard">返回儀表板</a></p>
+            <p><a href="/admin/report">嘗試正常舉報頁面</a></p>
+        </body>
+        </html>
+        """
+        
+        logging.info("測試頁面成功載入")
+        return html
+        
+    except Exception as e:
+        logging.error(f"測試頁面載入失敗: {e}")
+        return f"<h1>測試頁面錯誤</h1><p>錯誤: {str(e)}</p>"
