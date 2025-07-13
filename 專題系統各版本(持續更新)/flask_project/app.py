@@ -41,6 +41,10 @@ load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 
+# 中文編碼設定
+app.config['JSON_AS_ASCII'] = False
+app.config['JSONIFY_MIMETYPE'] = 'application/json; charset=utf-8'
+
 # Socket 相關資料結構（供事件處理共用）
 # 用於管理 AI 聊天暫停狀態和連線狀態
 app.dify_paused_sessions = set()        # 存放暫停的 AI 對話 session

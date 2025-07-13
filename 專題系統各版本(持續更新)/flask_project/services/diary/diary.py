@@ -88,7 +88,7 @@ def save_diary():
             "query": dify_query,
             "conversation_id": None,
             "response_mode": "blocking",
-            "user": str(current_user.id)
+            "user": "normaluser",
         }
 
         dify_headers = {
@@ -96,7 +96,7 @@ def save_diary():
             "Authorization": f"Bearer {DIFY_API_KEY_For_Diary}"
         }
 
-        dify_response = requests.post("https://api.dify.ai/v1/chat-messages", json=dify_payload, headers=dify_headers)
+        dify_response = requests.post("http://104.155.239.252/v1/chat-messages", json=dify_payload, headers=dify_headers)
 
         if dify_response.status_code != 200:
             print("Dify 錯誤狀態碼:", dify_response.status_code)
@@ -177,10 +177,6 @@ def diary_list():
         database_connection.close()
 
         # 2. 解碼 session 金鑰
-        import base64
-        from flask import session
-        from utils.encryption import decrypt
-
         encoded_key = session.get('encryption_key')
         if not encoded_key:
             # 如果沒有金鑰，可能是 session 過期或使用者未正確登入

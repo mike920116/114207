@@ -21,7 +21,7 @@
   </form>
 
   <nav class="social-nav">
-    <a href="#"   class="action-btn" title="新增貼文">➕</a>
+    <a href="/social/create_post"   class="action-btn" title="新增貼文">➕</a>
     <a href="#"              class="action-btn" title="通知">🔔</a>
     <a href="#"              class="action-btn" title="收藏">⭐</a>
     <a href="#"              class="action-btn" title="聊天">💬</a>
@@ -42,17 +42,75 @@
   <!-- — 左側固定標籤（獨立滾動） — -->
   <aside class="tag-panel">
     <ul>
-      <li data-filter="all"        class="tag active">📋 全部</li>
-      <li data-filter="happy"      class="tag">😄 開心</li>
-      <li data-filter="sad"        class="tag">😢 難過</li>
-      <li data-filter="angry"      class="tag">😡 生氣</li>
-      <li data-filter="surprised"  class="tag">😱 驚訝</li>
-      <li data-filter="relaxed"    class="tag">😌 放鬆</li>
+      <!-- 2025-07-07: 標籤加上貼文數量顯示 by 朱羿安 -->
+      <li data-filter="all"        class="tag active">📋 全部 <span class="tag-count" id="count-all">0</span></li>
+      <li data-filter="my-posts"   class="tag">👤 我的貢獻 <span class="tag-count" id="count-my-posts">0</span></li>
+      <li data-filter="happy"      class="tag">😄 開心 <span class="tag-count" id="count-happy">0</span></li>
+      <li data-filter="sad"        class="tag">😢 難過 <span class="tag-count" id="count-sad">0</span></li>
+      <li data-filter="angry"      class="tag">😡 生氣 <span class="tag-count" id="count-angry">0</span></li>
+      <li data-filter="surprised"  class="tag">😱 驚訝 <span class="tag-count" id="count-surprised">0</span></li>
+      <li data-filter="relaxed"    class="tag">😌 放鬆 <span class="tag-count" id="count-relaxed">0</span></li>
     </ul>
   </aside>
 
   <!-- — 右側內容滾動區 — -->
   <section class="scroll-area">
+
+    <!-- 用戶等級信息卡片 -->
+    <div class="user-level-card" id="user-level-card" data-level="{{ user.level_name if user is defined and user.level_name is defined else '新手村民' }}">
+      <div class="level-header">
+        <div class="level-icon">
+          <span class="level-emoji">🌱</span>
+        </div>
+        <div class="level-info">
+          <h3 class="level-title">新手村民</h3>
+          <p class="level-description">剛加入社群的新朋友</p>
+        </div>
+        <div class="level-points">
+          <span class="points-value">0</span>
+          <span class="points-label">積分</span>
+        </div>
+      </div>
+      
+      <div class="level-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: 0%"></div>
+        </div>
+        <div class="progress-text">
+          <span class="current-progress">0%</span>
+          <span class="next-level">下一級：活躍居民</span>
+        </div>
+      </div>
+      
+      <div class="level-stats">
+        <div class="stat-item">
+          <span class="stat-icon">📝</span>
+          <span class="stat-value">0</span>
+          <span class="stat-label">發文</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">👍</span>
+          <span class="stat-value">0</span>
+          <span class="stat-label">獲讚</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">💬</span>
+          <span class="stat-value">0</span>
+          <span class="stat-label">評論</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">📅</span>
+          <span class="stat-value">1</span>
+          <span class="stat-label">天數</span>
+        </div>
+      </div>
+      
+      <div class="level-actions">
+        <a href="/social/level_guide" class="btn btn-info btn-sm">
+          <span class="btn-emoji">📖</span> 查看等級規範
+        </a>
+      </div>
+    </div>
 
       <!-- --- 公告板 --- -->
     <div class="announcement-board">
@@ -69,45 +127,98 @@
     </div>
 
 
-    <!-- --- 貼文清單（示範三篇）--- -->
+    <!-- --- 貼文清單（從資料庫讀取）--- -->
     <div class="post-list">
+      {% if posts %}
+        {% for post in posts %}
+        <article class="post-card" data-post-id="{{ post.post_id }}" data-mood="{{ post.mood or 'neutral' }}">
+          <header>
+            <strong>{{ post.username }}</strong>
+            <span>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+          </header>
+          
+          <!-- 心情標籤 (用邏輯運算方式處理) -->
+          <div class="mood-indicator">
+            {% if post.mood == 'happy' %}
+              <span class="mood-emoji">😄</span> 開心
+            {% elif post.mood == 'sad' %}
+              <span class="mood-emoji">😢</span> 難過
+            {% elif post.mood == 'angry' %}
+              <span class="mood-emoji">😡</span> 生氣
+            {% elif post.mood == 'surprised' %}
+              <span class="mood-emoji">😱</span> 驚訝
+            {% elif post.mood == 'relaxed' %}
+              <span class="mood-emoji">😌</span> 放鬆
+            {% else %}
+              <span class="mood-emoji">😐</span> 平常
+            {% endif %}
+          </div>
+          
+          <!-- 貼文標題（如果有的話） -->
+          {% if post.title and post.title.strip() %}
+          <div class="post-title">
+            <h3>{{ post.title }}</h3>
+          </div>
+          {% endif %}
+          
+          <!-- 貼文內容 -->
+          <p>{{ post.content }}</p>
+          
+          <!-- 圖片（如果有的話） -->
+          {% if post.image_url %}
+          <div class="post-image">
+            <img src="{{ post.image_url }}" alt="貼文圖片" style="max-width: 100%; height: auto; border-radius: 8px;">
+          </div>
+          {% endif %}
+          
+          <!-- 匿名標示 -->
+          {% if post.is_anonymous %}
+          <div class="anonymous-badge">
+            <span class="anonymous-icon">👤</span> 匿名發文
+          </div>
+          {% endif %}
 
-      <article class="post-card" data-post-id="101" data-mood="happy">
-        <header><strong>小明</strong><span>2025-05-25 09 : 00</span></header>
-        <p>今天陽光普照，終於完成馬拉松！🏃‍♂️😄</p>
-        <footer>
-          <button class="like-btn">👍 12</button>
-          <button class="comment-btn">💬 3</button>
-          <button class="share-btn">🔗 分享</button>
-          <button class="repost-btn">🔁 轉發</button>
-          <button class="report-btn">🚩 檢舉</button>
-        </footer>
-      </article>
-
-      <article class="post-card" data-post-id="102" data-mood="sad">
-        <header><strong>匿名</strong><span>2025-05-24 22 : 15</span></header>
-        <p>考試失利，有點沮喪…但會振作的！😢</p>
-        <footer>
-          <button class="like-btn">👍 5</button>
-          <button class="comment-btn">💬 0</button>
-          <button class="share-btn">🔗 分享</button>
-          <button class="repost-btn">🔁 轉發</button>
-          <button class="report-btn">🚩 檢舉</button>
-        </footer>
-      </article>
-
-      <article class="post-card" data-post-id="103" data-mood="surprised">
-        <header><strong>小悠</strong><span>2025-05-24 18 : 30</span></header>
-        <p>第一次抽獎就中了 Switch！太幸運了😱</p>
-        <footer>
-          <button class="like-btn">👍 30</button>
-          <button class="comment-btn">💬 8</button>
-          <button class="share-btn">🔗 分享</button>
-          <button class="repost-btn">🔁 轉發</button>
-          <button class="report-btn">🚩 檢舉</button>
-        </footer>
-      </article>
-
+          <!-- 作者操作按鈕（僅作者可見） -->
+          {% if current_user.is_authenticated and post.user_email == current_user.id %}
+          <div class="author-actions">
+            <button class="edit-post-btn" data-post-id="{{ post.post_id }}" title="編輯貼文">
+              <span class="btn-emoji">✏️</span> 編輯
+            </button>
+            <button class="delete-post-btn" data-post-id="{{ post.post_id }}" title="刪除貼文">
+              <span class="btn-emoji">🗑️</span> 刪除
+            </button>
+          </div>
+          {% endif %}
+          
+          <footer>
+            <button class="like-btn">
+              <span class="btn-emoji">👍</span> {{ post.likes_count }}
+            </button>
+            <button class="comment-btn">
+              <span class="btn-emoji">💬</span> {{ post.comments|length }}
+            </button>
+            <button class="share-btn">
+              <span class="btn-emoji">🔗</span> 分享
+            </button>
+            <button class="repost-btn">
+              <span class="btn-emoji">🔁</span> 轉發
+            </button>
+            <button class="report-btn">
+              <span class="btn-emoji">🚩</span> 檢舉
+            </button>
+          </footer>
+        </article>
+        {% endfor %}
+      {% else %}
+        <!-- 沒有貼文時顯示 -->
+        <div class="no-posts">
+          <div class="no-posts-icon">💬</div>
+          <p>目前還沒有任何貼文，成為第一個分享心情的人吧！</p>
+          <a href="/social/create_post" class="btn btn-primary">
+            <span class="btn-emoji">➕</span> 立即發文
+          </a>
+        </div>
+      {% endif %}
     </div><!-- /post-list -->
 
   </section><!-- /scroll-area -->

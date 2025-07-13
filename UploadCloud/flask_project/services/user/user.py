@@ -3,34 +3,29 @@
 提供註冊、登入、驗證、密碼重設等功能
 """
 
-import logging
-import os
-import smtplib
-import platform
+import logging,os,smtplib,platform,base64,bcrypt,re
 from datetime import datetime, timedelta
 from email.header import Header
 from email.mime.text import MIMEText
 
-import bcrypt
 from dotenv import load_dotenv
-from flask import render_template, request, redirect, url_for
+from flask import render_template, request, redirect, url_for,session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from itsdangerous import URLSafeTimedSerializer
 
 from utils.db import get_connection
+from utils.keygen import derive_key
 from . import user_bp
 
 load_dotenv()
 
 # 設置日誌
-if platform.system() == "Windows":
-    log_dir = os.path.join(os.path.dirname(__file__), "logs")
-    log_file = os.path.join(log_dir, "flaskapp.log")
-else:
-    log_dir = "/var/log"
-    log_file = os.path.join(log_dir, "flaskapp.log")
-
+# 專案內 logs 目錄統一儲存，不用碰 /var/log
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 到 flask_project 資料夾
+log_dir = os.path.join(BASE_DIR, "logs")
 os.makedirs(log_dir, exist_ok=True)
+log_file = os.path.join(log_dir, "flaskapp.log")
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -72,6 +67,34 @@ def load_user(user_id):
         if conn:
             conn.close()
 
+def validate_password_strength(password, email):
+    """
+    驗證密碼強度
+    返回 (is_valid, error_message)
+    """
+    # 1. 檢查密碼長度（至少8個字元）
+    if len(password) < 8:
+        return False, "密碼長度必須至少8個字元"
+    
+    # 2. 檢查是否包含英文字母
+    if not re.search(r'[a-zA-Z]', password):
+        return False, "密碼必須包含至少一個英文字母"
+    
+    # 3. 檢查是否包含數字
+    if not re.search(r'[0-9]', password):
+        return False, "密碼必須包含至少一個數字"
+    
+    # 4. 檢查密碼是否與帳號（email）相同
+    if password.lower() == email.lower():
+        return False, "密碼不能與帳號相同"
+    
+    # 檢查密碼是否包含帳號的部分（例如 email 的用戶名部分）
+    email_username = email.split('@')[0] if '@' in email else email
+    if email_username.lower() in password.lower() or password.lower() in email_username.lower():
+        return False, "密碼不能包含帳號相關資訊"
+    
+    return True, ""
+
 @user_bp.route('/signup/form')
 def user_signup_form():
     return render_template('user/signup_form.html')
@@ -88,6 +111,11 @@ def signup():
 
         if password != password2:
             return render_template('user/signup.html', success=False, error_message="兩次密碼不一致")
+
+        # 驗證密碼強度
+        is_valid, error_message = validate_password_strength(password, email)
+        if not is_valid:
+            return render_template('user/signup.html', success=False, error_message=error_message)
 
         # 檢查信箱是否已存在
         conn = get_connection()
@@ -158,6 +186,18 @@ def login():
             user_object = User(id=user_data[0], username=user_data[1], password=user_data[2])
             login_user(user_object)
             
+            # 產生金鑰並 base64 編碼後放入 session
+            try:
+                aes_key = derive_key(password, email)
+                encoded_key = base64.b64encode(aes_key).decode('utf-8')
+                session['encryption_key'] = encoded_key
+                logger.info(f"用戶 {email} 成功登入，金鑰已設置")
+            except Exception as e:
+                logger.error(f"金鑰生成失敗 - 用戶: {email}, 錯誤: {str(e)}")
+                return render_template('user/login.html', success=False, 
+                                       error_message="系統錯誤，請稍後再試")
+
+            
             # 記錄登入時間
             cursor.execute("UPDATE User SET last_login_time = %s, last_login_ip = %s WHERE User_Email = %s", 
                          (datetime.now(), request.remote_addr, email))
@@ -179,6 +219,9 @@ def login():
 @login_required
 def logout():
     logout_user()
+    next_url = request.args.get('next')
+    if next_url:
+        return redirect(next_url)
     return redirect('/user/login/form')
 
 @user_bp.route("/verify_email/<token>")
@@ -234,8 +277,8 @@ def forgot_password():
             reset_link = url_for("user.reset_password_form", token=reset_token, _external=True)
             
             # 發送重設密碼信件
-            sender_email = os.environ.get("GMAIL_USERNAME")
-            subject = "密碼重設請求"
+            sender_email = os.environ.get("MAIL_USERNAME")
+            subject = "【Soulcraft】密碼重設請求"
             body = f"請點擊以下連結重設您的密碼: {reset_link}"
             
             msg = MIMEText(body, "plain", "utf-8")
@@ -243,11 +286,15 @@ def forgot_password():
             msg["From"] = sender_email
             msg["To"] = email
             
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-                server.login(sender_email, os.environ.get("GMAIL_PASSWORD"))
+            with smtplib.SMTP(os.environ.get("MAIL_SERVER"), int(os.environ.get("MAIL_PORT"))) as server:
+                server.starttls()
+                server.login(sender_email, os.environ.get("MAIL_PASSWORD"))
                 server.sendmail(sender_email, email, msg.as_string())
 
-        return render_template("user/forgot_password_sent.html", email=email)
+            return render_template("user/forgot_password_sent.html", email=email)
+        else:
+            # 用戶不存在，返回錯誤信息而不是成功頁面
+            return render_template('user/forgot_form.html', error_message="此電子郵件地址尚未註冊帳號，請先註冊或確認電子郵件地址是否正確。")
     except Exception as e:
         logger.error(f"密碼重設請求失敗: {e}")
         return render_template('user/forgot_form.html', error_message="處理請求時發生錯誤")
@@ -275,10 +322,17 @@ def reset_password():
         password = request.form.get("password")
         password2 = request.form.get("password2")
 
-        if password != password2:
-            return render_template("user/reset_password_form.html", token=token, error_message="兩次密碼不一致")
-
+        # 先解析token獲取email
         email = serializer.loads(token, salt="password-reset", max_age=3600)
+
+        if password != password2:
+            return render_template("user/reset_password_form.html", token=token, email=email, error_message="兩次密碼不一致")
+        
+        # 驗證新密碼強度
+        is_valid, error_message = validate_password_strength(password, email)
+        if not is_valid:
+            return render_template("user/reset_password_form.html", token=token, email=email, error_message=error_message)
+        
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         conn = get_connection()
@@ -305,8 +359,8 @@ def send_verification_email(recipient_email, verification_token):
         if not sender_email or not password:
             logger.error("Zoho 環境變數未設置")
             return
-        
-        subject = "歡迎加入 - 請驗證您的電子信箱"
+
+        subject = "【Soulcraft】請驗證您的帳號"
         verification_link = url_for("user.verify_email", token=verification_token, _external=True)
 
         # 嘗試使用 HTML 模板，失敗則用純文字
@@ -323,7 +377,7 @@ def send_verification_email(recipient_email, verification_token):
         message["From"] = sender_email
         message["To"] = recipient_email
 
-        with smtplib.SMTP("smtp.zoho.com", 587) as server:
+        with smtplib.SMTP(os.environ.get("MAIL_SERVER"), int(os.environ.get("MAIL_PORT"))) as server:
             server.starttls()
             server.login(sender_email, password)
             server.sendmail(sender_email, recipient_email, message.as_string())
