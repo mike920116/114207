@@ -17,8 +17,8 @@
 - /admin/diaries: 日記記錄檢視
 """
 
-import os
-from flask import render_template, jsonify
+import os, logging, json
+from flask import render_template, jsonify, flash, redirect, url_for
 from flask_login import login_required, current_user
 from utils import db
 from dotenv import load_dotenv
@@ -26,20 +26,73 @@ from . import admin_bp  # 從 __init__.py 導入 Blueprint
 
 load_dotenv()  # 讀取 .env 檔案
 
-# 讀取環境變數中的管理員信箱
-ADMIN_EMAILS = set(email.strip() for email in os.getenv("ADMIN_EMAILS", "").split(","))
-
 # 共用判斷函式
 def is_admin():
     """
     檢查當前用戶是否為管理員
     
     根據環境變數 ADMIN_EMAILS 判斷用戶權限
+    雲端環境增強版本
     
     Returns:
         bool: 如果是管理員則返回 True，否則返回 False
     """
-    return current_user.is_authenticated and current_user.id in ADMIN_EMAILS
+    try:
+        if not current_user.is_authenticated:
+            logging.info("is_admin: 用戶未驗證")
+            return False
+        
+        # 多層次環境變數載入策略
+        admin_emails_str = None
+        
+        # 1. 嘗試從 os.environ 直接獲取（雲端平台常用）
+        admin_emails_str = os.environ.get("ADMIN_EMAILS")
+        if admin_emails_str:
+            logging.info(f"is_admin: 從 os.environ 獲取 ADMIN_EMAILS: {admin_emails_str}")
+        
+        # 2. 如果沒有，嘗試重新載入 .env 並獲取
+        if not admin_emails_str:
+            load_dotenv(override=True)
+            admin_emails_str = os.getenv("ADMIN_EMAILS")
+            if admin_emails_str:
+                logging.info(f"is_admin: 重新載入後獲取 ADMIN_EMAILS: {admin_emails_str}")
+        
+        # 3. 最後的備用方案 - 硬編碼檢查（僅用於緊急情況）
+        if not admin_emails_str:
+            # 檢查用戶是否是已知的管理員郵箱
+            known_admin_emails = ["2025dify@gmail.com"]  # 你的管理員郵箱
+            if current_user.id in known_admin_emails:
+                logging.warning(f"is_admin: 使用備用管理員檢查，允許 {current_user.id}")
+                return True
+            logging.error("is_admin: 無法獲取 ADMIN_EMAILS 環境變數")
+            return False
+        
+        # 解析管理員郵箱列表
+        admin_emails = set(email.strip() for email in admin_emails_str.split(",") if email.strip())
+        
+        if not admin_emails:
+            logging.error("is_admin: 管理員郵箱列表為空")
+            return False
+        
+        # 檢查當前用戶
+        user_id = current_user.id
+        result = user_id in admin_emails
+        
+        # 詳細日誌記錄
+        logging.info(f"is_admin: 用戶={user_id}, 管理員列表={admin_emails}, 結果={result}")
+        
+        return result
+        
+    except Exception as e:
+        logging.error(f"is_admin() 檢查失敗: {e}")
+        # 在發生錯誤時，檢查是否是已知管理員
+        try:
+            if current_user.is_authenticated and current_user.id == "2025dify@gmail.com":
+                logging.warning(f"is_admin: 錯誤情況下允許已知管理員 {current_user.id}")
+                return True
+        except:
+            pass
+        return False
 
 # 儀表板
 @admin_bp.route('/dashboard')
@@ -54,6 +107,8 @@ def admin_dashboard():
         str: 儀表板 HTML 頁面，或 403 錯誤頁面
     """
     if not is_admin():
+        if current_user.is_authenticated:
+            logging.warning(f"用戶 {current_user.id} 嘗試訪問管理員儀表板但被拒絕")
         return "你沒有權限進入後台", 403
 
     database_connection = db.get_connection()
@@ -153,3 +208,4 @@ def admin_users():
     database_connection.close()
 
     return render_template('admin/users.html', users=users_data)
+
