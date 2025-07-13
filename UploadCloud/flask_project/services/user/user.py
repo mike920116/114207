@@ -177,7 +177,7 @@ def login():
         user_data = cursor.fetchone()
 
         if not user_data:
-            return render_template('user/login.html', success=False, error_message="帳號或密碼錯誤")
+            return render_template('user/login.html', success=False, error_message="此帳號尚未註冊，請先註冊")
 
         if not user_data[3]:  # is_verified
             return render_template('user/login.html', success=False, error_message="此帳號尚未驗證，請至信箱收取驗證信")
