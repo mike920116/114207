@@ -20,9 +20,6 @@ from . import user_bp
 
 load_dotenv()
 
-client_ip = get_client_ip()
-
-
 # 設置日誌
 # 專案內 logs 目錄統一儲存，不用碰 /var/log
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 到 flask_project 資料夾
@@ -201,6 +198,7 @@ def login():
                 return render_template('user/login.html', success=False, 
                                        error_message="系統錯誤，請稍後再試")
 
+            client_ip = get_client_ip()
             
             # 記錄登入時間
             cursor.execute("""
