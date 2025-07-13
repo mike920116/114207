@@ -148,7 +148,7 @@ def admin_users():
 
     database_connection = db.get_connection()
     database_cursor = database_connection.cursor()
-    database_cursor.execute("SELECT User_Email, User_name, Created_at, last_login_ip FROM user ORDER BY Created_at DESC")
+    database_cursor.execute("SELECT User_Email, User_name, Created_at, last_login_ip FROM User ORDER BY Created_at DESC")
     users_data = database_cursor.fetchall()
     database_connection.close()
 
