@@ -4,8 +4,18 @@
   <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <!-- 預載主題，避免切頁閃爍 --------------------------- -->
   <script>
-    (()=>{if(localStorage.getItem('admin-theme')==='dark')
-      document.documentElement.classList.add('dark-mode');})();
+    (function() {
+      const theme = localStorage.getItem('admin-theme');
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark-mode');
+      } else if (theme === 'light') {
+        document.documentElement.classList.add('light-mode');
+      }
+      // 如果沒有設定主題，則依據系統偏好設定
+      else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.classList.add('dark-mode');
+      }
+    })();
   </script>
 
   <meta charset="UTF-8">
@@ -26,8 +36,8 @@
                  class="{% if request.endpoint == 'admin.admin_dashboard' %}active{% endif %}">📊 儀表板</a></li>
           <li><a href="{{ url_for('admin.admin_users') }}"
                  class="{% if request.endpoint == 'admin.admin_users' %}active{% endif %}">👥 使用者</a></li>
-          <li><a href="{{ url_for('admin.admin_diaries') }}"
-                 class="{% if request.endpoint == 'admin.admin_diaries' %}active{% endif %}">📔 日記紀錄</a></li>
+          <li><a href="{{ url_for('admin.admin_reports') }}"
+                 class="{% if request.endpoint.startswith('admin.admin_report') %}active{% endif %}">📝 舉報管理</a></li>
           <li><a href="{{ url_for('admin_chat.panel') }}"
                 class="{% if request.endpoint.startswith('admin_chat.') %}active{% endif %}">💬 客服面板</a></li>
           <li><a href="{{ url_for('admin_announce.list_') }}"

@@ -222,3 +222,245 @@ body.dark-mode .user-page-wrapper .success-message {
 body.dark-mode .user-page-wrapper .error-message {
   color: #f28b82; /* 淺紅色，錯誤風格與按鈕一致 */
 }
+
+/* === 密碼強度指示器樣式 === */
+.password-strength-indicator,
+.password-match-indicator {
+  margin: 10px 0 20px 0;
+  padding: 15px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e0e0e0;
+}
+
+.strength-title {
+  font-weight: bold;
+  color: #4b6a3e;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.strength-requirement {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: #666;
+  transition: color 0.3s ease;
+}
+
+.check-icon {
+  margin-right: 8px;
+  font-weight: bold;
+  width: 16px;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+/* 未滿足要求的樣式 */
+.strength-requirement:not(.valid) .check-icon {
+  color: #e57373;
+}
+
+.strength-requirement:not(.valid) {
+  color: #666;
+}
+
+/* 滿足要求的樣式 */
+.strength-requirement.valid .check-icon {
+  color: #6aad5b;
+}
+
+.strength-requirement.valid {
+  color: #4b6a3e;
+  font-weight: 500;
+}
+
+/* 暗色模式 */
+body.dark-mode .password-strength-indicator,
+body.dark-mode .password-match-indicator {
+  background: rgba(45, 55, 65, 0.8);
+  border-color: #4a5a6a;
+}
+
+body.dark-mode .strength-title {
+  color: #a7c0db;
+}
+
+body.dark-mode .strength-requirement {
+  color: #a0a0a0;
+}
+
+body.dark-mode .strength-requirement.valid {
+  color: #9bd4e1;
+}
+
+body.dark-mode .strength-requirement:not(.valid) .check-icon {
+  color: #f28b82;
+}
+
+body.dark-mode .strength-requirement.valid .check-icon {
+  color: #9bd4e1;
+}
+
+/* 密碼顯示/隱藏按鈕美術風格 */
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.password-wrapper input.form-control {
+  padding-right: 45px;
+  margin-bottom: 0;
+}
+.toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  color: #6aad5b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+.toggle-password:hover, .toggle-password:focus {
+  opacity: 1;
+  color: #388e3c;
+  transform: translateY(-50%) scale(1.1);
+}
+.toggle-password:before {
+  content: '🔒';
+}
+.toggle-password.hidden:before {
+  content: '🔓';
+}
+body.dark-mode .toggle-password {
+  color: #9bd4e1;
+}
+body.dark-mode .toggle-password:hover, body.dark-mode .toggle-password:focus {
+  color: #6daec7;
+}
+
+/* === 驗證信件樣式（移植自 verification_email.html） === */
+.verification-email {
+  font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
+  background-color: #d9f2d9;
+  margin: 0;
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.verification-email .container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: rgba(240, 255, 240, 0.95);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(45, 100, 45, 0.35);
+  backdrop-filter: blur(10px);
+}
+
+.verification-email .header {
+  text-align: center;
+  color: #6aad5b;
+  margin-bottom: 30px;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.verification-email .content {
+  color: #4b6a3e;
+  line-height: 1.6;
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
+.verification-email .verify-button {
+  display: inline-block;
+  background: linear-gradient(135deg, #6aad5b, #89cc7c);
+  color: white;
+  padding: 15px 40px;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: bold;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(106, 173, 91, 0.3);
+}
+
+.verification-email .verify-button:hover {
+  background: linear-gradient(135deg, #5a9d4b, #79bc6c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(106, 173, 91, 0.4);
+  color: white;
+  text-decoration: none;
+}
+
+.verification-email .footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #8fcf8c;
+  color: #6a8a5d;
+  font-size: 14px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.verification-email .url-box {
+  word-break: break-all;
+  background-color: rgba(143, 207, 140, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #8fcf8c;
+  color: #4b6a3e;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+}
+
+/* 深色模式下的驗證信件樣式 */
+body.dark-mode .verification-email {
+  background-color: #0a1c2b;
+}
+
+body.dark-mode .verification-email .container {
+  background: rgba(10, 28, 43, 0.95);
+  box-shadow: 0 8px 24px rgba(42, 75, 124, 0.4);
+}
+
+body.dark-mode .verification-email .header {
+  color: #9bd4e1;
+}
+
+body.dark-mode .verification-email .content {
+  color: #a7c0db;
+}
+
+body.dark-mode .verification-email .verify-button {
+  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
+  box-shadow: 0 4px 15px rgba(42, 75, 124, 0.3);
+}
+
+body.dark-mode .verification-email .verify-button:hover {
+  background: linear-gradient(135deg, #1a3b6c, #3a6b8d);
+  box-shadow: 0 6px 20px rgba(42, 75, 124, 0.4);
+}
+
+body.dark-mode .verification-email .footer {
+  border-top-color: #4a7b9d;
+  color: #7a9abf;
+}
+
+body.dark-mode .verification-email .url-box {
+  background-color: rgba(74, 123, 157, 0.2);
+  border-color: #4a7b9d;
+  color: #a7c0db;
+}

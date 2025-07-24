@@ -4,92 +4,162 @@
 提供用戶個人設定相關功能：
 - 個人資料編輯（姓名、個人簡介）
 - 帳號設定檢視（登入記錄）
-- 頭像上傳（待實作）
+- 頭像選擇（伺服器內建 icon）
 
 主要路由：
 - /settings/profile: 個人資料編輯頁面
 - /settings/acc_settings: 帳號設定檢視頁面
 """
 
-from flask import render_template, request, redirect, url_for, flash
+import os
+from datetime import datetime
+from flask import (
+    render_template, request, redirect, url_for,
+    flash, Blueprint, current_app
+)
 from flask_login import login_required, current_user
 from utils import db
-from datetime import datetime
-from flask import Blueprint
+from utils.ip import get_client_ip
 
-# 在__init__.py中引用此藍圖
-settings_bp = Blueprint('settings', __name__, url_prefix="/settings", template_folder='../../templates/settings')
+# 在 __init__.py 中註冊此藍圖
+settings_bp = Blueprint(
+    "settings",
+    __name__,
+    url_prefix="/settings",
+    template_folder="../../templates/settings",
+)
 
-@settings_bp.route('/profile', methods=['GET', 'POST'])
+# -------------------------------------------------
+# 共用工具：取得可用頭像清單
+# -------------------------------------------------
+def _get_available_avatars() -> list[str]:
+    """
+    讀取 static/icons/avatars/ 內所有檔案，回傳檔名清單
+    """
+    avatar_dir = os.path.join(current_app.static_folder, "icons", "avatars")
+    try:
+        return [
+            f
+            for f in os.listdir(avatar_dir)
+            if os.path.isfile(os.path.join(avatar_dir, f))
+        ]
+    except FileNotFoundError:
+        return []
+
+
+# -------------------------------------------------
+# /settings/profile
+# -------------------------------------------------
+@settings_bp.route("/profile", methods=["GET", "POST"])
 @login_required
 def profile():
     """
     個人資料管理頁面
-    
-    GET: 顯示個人資料編輯表單
-    POST: 處理個人資料更新請求
-    
-    Form Data (POST):
-        username (str): 新的用戶名稱
-        bio (str): 個人簡介
-        
-    Returns:
-        str: 個人資料頁面或重導向
+    GET : 顯示表單
+    POST: 更新資料
     """
 
-    if request.method == 'POST':
-        new_name = request.form.get('username')
-        bio = request.form.get('bio')
-        # TODO: 圖片上傳未實作，可補上
+    # ---------- POST：更新 ----------
+    if request.method == "POST":
+        new_name        = request.form.get("username") or None
+        bio             = request.form.get("bio") or None
+        selected_avatar = request.form.get("avatar") or None  # radio 選取的檔名
 
-        database_connection = db.get_connection()
-        database_cursor = database_connection.cursor()
-        database_cursor.execute("""
-            UPDATE User
-            SET User_name = %s, bio = %s, Updated_at = %s
-            WHERE User_Email = %s
-        """, (new_name, bio, datetime.now(), current_user.id))
-        database_connection.commit()
-        database_connection.close()
+        conn = db.get_connection()
+        cur  = conn.cursor()
+
+        if selected_avatar:  # 同時更新頭像
+            cur.execute(
+                """
+                UPDATE User
+                SET User_name   = %s,
+                    bio         = %s,
+                    User_Avatar = %s,
+                    Updated_at  = %s
+                WHERE User_Email = %s
+                """,
+                (
+                    new_name,
+                    bio,
+                    f"icons/avatars/{selected_avatar}",
+                    datetime.now(),
+                    current_user.id,
+                ),
+            )
+        else:  # 只更新文字欄位
+            cur.execute(
+                """
+                UPDATE User
+                SET User_name  = %s,
+                    bio        = %s,
+                    Updated_at = %s
+                WHERE User_Email = %s
+                """,
+                (new_name, bio, datetime.now(), current_user.id),
+            )
+
+        conn.commit()
+        conn.close()
         flash("個人資料已更新")
-        return redirect(url_for('settings.profile'))
+        return redirect(url_for("settings.profile"))
 
-    database_connection = db.get_connection()
-    database_cursor = database_connection.cursor()
-    database_cursor.execute("SELECT User_name, bio, User_Avatar FROM User WHERE User_Email = %s", (current_user.id,))
-    user_profile_data = database_cursor.fetchone()
-    database_connection.close()
+    # ---------- GET：顯示 ----------
+    conn = db.get_connection()
+    cur  = conn.cursor()
+    cur.execute(
+        """
+        SELECT User_name, bio, User_Avatar
+        FROM   User
+        WHERE  User_Email = %s
+        """,
+        (current_user.id,),
+    )
+    user_row = cur.fetchone()
+    conn.close()
 
-    return render_template(
-        'settings/profile.html',
-        username=user_profile_data[0],
-        bio=user_profile_data[1],
-        avatar_url=user_profile_data[2] if user_profile_data[2] else None
+    current_avatar = (
+        user_row[2] if user_row and user_row[2] else "icons/avatars/default.png"
     )
 
-@settings_bp.route('/acc_settings', methods=['GET'])
+    return render_template(
+        "settings/profile.html",
+        username   = user_row[0],
+        bio        = user_row[1],
+        avatar_url = current_avatar,
+        avatars    = _get_available_avatars(),  # 傳給前端渲染
+    )
+
+
+# -------------------------------------------------
+# /settings/acc_settings
+# -------------------------------------------------
+@settings_bp.route("/acc_settings", methods=["GET"])
 @login_required
 def account_settings():
     """
-    帳號設定檢視頁面
-    
-    顯示帳號相關資訊，包括最後登入時間和 IP 位址
-    
-    Returns:
-        str: 帳號設定頁面
+    帳號設定檢視頁面（登入記錄）
     """
 
-    database_connection = db.get_connection()
-    database_cursor = database_connection.cursor()
-    database_cursor.execute("SELECT last_login_time, last_login_ip FROM User WHERE User_Email = %s", (current_user.id,))
-    login_record_data = database_cursor.fetchone()
-    database_connection.close()
+    conn = db.get_connection()
+    cur  = conn.cursor()
+    cur.execute(
+        """
+        SELECT last_login_time, last_login_ip
+        FROM   User
+        WHERE  User_Email = %s
+        """,
+        (current_user.id,),
+    )
+    rec = cur.fetchone()
+    conn.close()
 
-    login_time = login_record_data[0].strftime("%Y-%m-%d %H:%M:%S") if login_record_data and login_record_data[0] else "無資料"
-    login_ip = login_record_data[1] if login_record_data and login_record_data[1] else "無資料"
+    login_time = (
+        rec[0].strftime("%Y-%m-%d %H:%M:%S") if rec and rec[0] else "無資料"
+    )
+    login_ip = rec[1] if rec and rec[1] else "無資料"
 
     return render_template(
-        'settings/acc_settings.html',
+        "settings/acc_settings.html",
         login_time=login_time,
-        login_ip=login_ip
+        login_ip=login_ip,
     )

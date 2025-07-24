@@ -57,14 +57,17 @@ def webhook_callback():
         
     signature = request.headers.get("X-Line-Signature", "")
     body = request.get_data(as_text=True)
+    
+    # 記錄 webhook 接收
+    logging.info(f"收到 LINE webhook 請求，簽名: {signature[:20]}...")
 
     try:
         handler.handle(body, signature)
+        logging.info("LINE webhook 處理成功")
+        return "OK", 200
     except Exception as e:
         logging.exception("LINE webhook 驗證失敗")
         return "NG", 400
-
-    return "OK", 200
 
 # 只在 handler 存在時註冊事件處理器
 if handler:
