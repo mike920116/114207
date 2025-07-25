@@ -1,0 +1,42 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}日記之森 | 使用說明{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet"
+      href="{{ url_for('static',
+                       filename='css/modules/support/support.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="support-hero">
+  <h1>使用說明</h1>
+  <p>一步步帶你進入日記之森，體驗兒童早療服務。</p>
+</section>
+
+<section class="support-section">
+  <h2>1. 註冊 / 登入</h2>
+  <p>點擊右上角「用戶功能」→ 登入／註冊，即可建立帳號並開始使用。</p>
+</section>
+
+<section class="support-section">
+  <h2>2. 撰寫觀察日記</h2>
+  <p>前往「觀察日記」→ 新增日記，輸入孩子的日常行為觀察及發展狀況，系統將自動保存！</p>
+</section>
+
+<section class="support-section">
+  <h2>3. AI 助手互動</h2>
+  <p>在「AI 助手」頁面向桃園早療診所智慧助理發問，獲得專業的發展建議。</p>
+</section>
+
+<section class="support-section">
+  <h2>4. 社群分享</h2>
+  <p>進入「社群互動」區，與其他使用者交流、按讚或留言，建立支持網絡。</p>
+</section>
+
+<section class="support-section">
+  <h2>5. 反饋與客服</h2>
+  <p>於「問題反饋」提交建議，或查看下方常見問題尋求協助。</p>
+</section>
+{% endblock %}
+
