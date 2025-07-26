@@ -203,28 +203,165 @@ body.dark-mode .call-human{background:#d18d24;}
   }
 
   .chat-input-area input {
-    padding: 8px;
-    font-size: 14px;
+    padding: 10px;
+    font-size: 16px;
     border-radius: 8px;
     flex: 1; /* 輸入框佔據剩餘空間 */
     min-width: 0; /* 避免輸入框過寬 */
+    min-height: 44px;
   }
 
   .chat-input-area button {
-    padding: 8px 16px; /* 縮小按鈕尺寸 */
-    font-size: 13px;
-    border-radius: 6px;
+    padding: 10px 16px; /* 調整按鈕尺寸 */
+    font-size: 14px;
+    border-radius: 8px;
     width: auto; /* 取消全寬，按內容調整 */
     min-width: 80px; /* 設置最小寬度，確保可點擊 */
+    min-height: 44px;
   }
 
   .call-human {
-    padding: 8px 12px; /* 縮小按鈕尺寸 */
+    padding: 10px 14px; /* 調整按鈕尺寸 */
     margin-left: 0;
-    font-size: 13px;
-    border-radius: 6px;
+    font-size: 14px;
+    border-radius: 8px;
     width: auto; /* 取消全寬，按內容調整 */
-    min-width: 80px; /* 設置最小寬度，確保可點擊 */
+    min-width: 90px; /* 設置最小寬度，確保可點擊 */
+    min-height: 44px;
+  }
+  
+  .user-msg::before,
+  .ai-msg::before {
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+  
+  .ai-msg::before {
+    content: "🦝小語";
+  }
+}
+
+/* === 小屏手機優化 (320px - 480px) === */
+@media(max-width:480px){
+  .ai-chat-wrapper{
+    padding:50px 3% 0 3%;
+    gap:12px;
+  }
+  
+  .chat-box{
+    padding:12px;
+    border-radius:10px;
+    min-height:120px;
+    max-height:calc(100vh - 130px);
+    gap:12px;
+  }
+  
+  .chat-msg{
+    max-width:90%;
+    padding:8px 12px;
+    font-size:13px;
+    border-radius:12px;
+    line-height:1.4;
+  }
+  
+  .user-msg::before,
+  .ai-msg::before{
+    font-size:11px;
+    margin-bottom:3px;
+  }
+  
+  .ai-msg::before{
+    content:"🦝小語";
+  }
+  
+  .chat-input-area{
+    gap:6px;
+    padding-bottom:12px;
+    flex-wrap:wrap;
+  }
+  
+  .chat-input-area input{
+    padding:8px;
+    font-size:15px;
+    border-radius:6px;
+    min-height:40px;
+  }
+  
+  .chat-input-area button{
+    padding:8px 12px;
+    font-size:13px;
+    border-radius:6px;
+    min-width:70px;
+    min-height:40px;
+  }
+  
+  .call-human{
+    padding:8px 10px;
+    font-size:13px;
+    border-radius:6px;
+    min-width:75px;
+    min-height:40px;
+  }
+}
+
+/* === 觸控設備優化 === */
+@media(hover:none) and (pointer:coarse){
+  .chat-input-area input{
+    min-height:48px;
+    font-size:16px;
+  }
+  
+  .chat-input-area button,
+  .call-human{
+    min-height:48px;
+    font-size:16px;
+    min-width:88px;
+  }
+}
+
+/* === 橫屏手機優化 === */
+@media(max-width:768px) and (orientation:landscape){
+  .ai-chat-wrapper{
+    padding:40px 5% 0 5%;
+  }
+  
+  .chat-box{
+    max-height:calc(100vh - 120px);
+    min-height:100px;
+  }
+  
+  .chat-input-area{
+    flex-direction:row;
+    flex-wrap:nowrap;
+  }
+}
+
+/* === 平板響應式設計 === */
+@media(min-width:769px) and (max-width:1024px){
+  .ai-chat-wrapper{
+    padding:70px 8% 0 8%;
+  }
+  
+  .chat-box{
+    padding:20px;
+    max-height:calc(100vh - 180px);
+  }
+  
+  .chat-msg{
+    max-width:80%;
+    padding:12px 16px;
+    font-size:15px;
+  }
+  
+  .chat-input-area input{
+    padding:12px;
+    font-size:16px;
+  }
+  
+  .chat-input-area button,
+  .call-human{
+    padding:12px 18px;
+    font-size:15px;
   }
 }
 

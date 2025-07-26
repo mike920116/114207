@@ -889,37 +889,119 @@ body.dark-mode .btn-add:hover {
 }
 
 /* === 響應式設計 === */
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .growth-tree-section {
-    margin: 100px 16px 20px;
-    padding: 30px 20px;
+    margin: 90px 12px 16px;
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+  
+  .growth-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .growth-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
   }
   
   .growth-title {
-    font-size: 28px;
+    font-size: 26px;
   }
   
   .tree-container {
-    width: 140px;
-    height: 140px;
+    width: 150px;
+    height: 150px;
   }
   
   .diary-container {
-    margin: 80px 16px 32px;
-    padding: 28px 20px;
+    margin: 16px 12px 20px;
+    padding: 20px 16px;
+    border-radius: 16px;
   }
   
   .diary-title {
-    font-size: 28px;
+    font-size: 26px;
+    margin-bottom: 16px;
   }
   
   .filter-options {
+    flex-direction: column;
+    align-items: stretch;
     gap: 12px;
+  }
+  
+  .search-box {
+    flex: none;
+    width: 100%;
   }
   
   .btn-add {
     font-size: 16px;
-    padding: 12px 24px;
+    padding: 12px 20px;
+    width: 100%;
+    margin-top: 8px;
+  }
+  
+  .diary-card {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  
+  .diary-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .diary-actions {
+    width: 100%;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+  
+  .diary-actions .btn {
+    flex: 1;
+    margin: 0 4px;
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .growth-tree-section {
+    margin: 80px 8px 12px;
+    padding: 20px 12px;
+  }
+  
+  .growth-title {
+    font-size: 24px;
+  }
+  
+  .level-display {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .tree-container {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .diary-container {
+    margin: 12px 8px 16px;
+    padding: 16px 12px;
+  }
+  
+  .diary-title {
+    font-size: 24px;
+  }
+  
+  .btn-add {
+    font-size: 15px;
+    padding: 10px 16px;
   }
   
   .page-nav-btn {
@@ -929,33 +1011,19 @@ body.dark-mode .btn-add:hover {
   
   .pagination-container {
     flex-direction: column;
-    gap: 16px;
-  }
-}
-
-@media (max-width: 768px) {
-  .growth-content {
-    flex-direction: column;
-    gap: 20px;
+    gap: 12px;
   }
   
-  .tree-container {
-    width: 160px;
-    height: 160px;
+  .diary-card {
+    padding: 14px;
   }
   
-  .growth-header {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
+  .diary-content h3 {
+    font-size: 16px;
   }
   
-  .filter-options {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .search-box {
-    flex: none;
+  .diary-content p {
+    font-size: 14px;
+    line-height: 1.5;
   }
 }

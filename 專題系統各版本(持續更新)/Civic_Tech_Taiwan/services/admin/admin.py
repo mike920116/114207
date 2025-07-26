@@ -26,6 +26,9 @@ from . import admin_bp  # 從 __init__.py 導入 Blueprint
 
 load_dotenv()  # 讀取 .env 檔案
 
+# 從 clinic 模組導入預約資料
+from services.clinic import HOSPITAL_DATA, APPOINTMENT_RECORDS
+
 # 共用判斷函式
 def is_admin():
     """
@@ -208,4 +211,61 @@ def admin_users():
     database_connection.close()
 
     return render_template('admin/users.html', users=users_data)
+
+# 預約管理 - 醫院選擇頁面
+@admin_bp.route('/appointment-hospitals')
+@login_required
+def appointment_hospitals():
+    """
+    預約管理 - 醫院選擇頁面
+    
+    顯示所有合作醫院列表，供管理員選擇要管理的醫院
+    
+    Returns:
+        str: 醫院選擇 HTML 頁面，或 403 錯誤頁面
+    """
+    if not is_admin():
+        return "你沒有權限進入後台", 403
+    
+    return render_template('admin/appointment_hospitals.html')
+
+# 預約管理 - 特定醫院的預約管理
+@admin_bp.route('/appointment-management/<hospital_id>')
+@login_required
+def appointment_management(hospital_id):
+    """
+    預約管理 - 特定醫院的預約管理頁面
+    
+    顯示指定醫院的所有預約紀錄和管理功能
+    
+    Args:
+        hospital_id (str): 醫院 ID
+    
+    Returns:
+        str: 預約管理 HTML 頁面，或 404/403 錯誤頁面
+    """
+    if not is_admin():
+        return "你沒有權限進入後台", 403
+    
+    # 檢查醫院是否存在
+    if hospital_id not in HOSPITAL_DATA:
+        return "找不到指定的醫院", 404
+    
+    hospital_info = HOSPITAL_DATA[hospital_id]
+    hospital_name = hospital_info['name']
+    doctors = hospital_info['doctors']
+    
+    # 根據醫院篩選預約紀錄
+    hospital_appointments = [
+        appointment for appointment in APPOINTMENT_RECORDS 
+        if appointment['hospital'] == hospital_name
+    ]
+    
+    return render_template(
+        'admin/appointment_management.html',
+        hospital_id=hospital_id,
+        hospital_name=hospital_name,
+        doctors=doctors,
+        appointments=hospital_appointments
+    )
 

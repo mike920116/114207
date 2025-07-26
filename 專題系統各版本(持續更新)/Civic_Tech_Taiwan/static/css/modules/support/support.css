@@ -47,3 +47,90 @@ body.dark-mode .faq-question{background:#0A1C2B}
 body.dark-mode .faq-answer{
   background:#14283A;color:#E6F0FA
 }
+
+/* ======== 手機版響應式樣式 ======== */
+@media (max-width: 768px) {
+  .support-hero {
+    padding: 100px 16px 40px;
+  }
+  
+  .support-hero h1 {
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+  
+  .support-hero p {
+    font-size: 16px;
+    padding: 0 8px;
+  }
+  
+  .support-section {
+    margin: 24px 16px;
+    padding: 0 8px;
+    font-size: 16px;
+  }
+  
+  .support-section h2 {
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+  
+  .faq-list {
+    margin: 24px 16px;
+    padding: 0 8px;
+  }
+  
+  .faq-item {
+    margin-bottom: 12px;
+    border-radius: 6px;
+  }
+  
+  .faq-question {
+    padding: 12px 16px;
+    font-size: 16px;
+  }
+  
+  .faq-answer {
+    padding: 12px 16px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 576px) {
+  .support-hero {
+    padding: 80px 12px 32px;
+  }
+  
+  .support-hero h1 {
+    font-size: 24px;
+  }
+  
+  .support-hero p {
+    font-size: 15px;
+  }
+  
+  .support-section {
+    margin: 20px 12px;
+    padding: 0 4px;
+  }
+  
+  .support-section h2 {
+    font-size: 20px;
+  }
+  
+  .faq-list {
+    margin: 20px 12px;
+    padding: 0 4px;
+  }
+  
+  .faq-question {
+    padding: 10px 14px;
+    font-size: 15px;
+  }
+  
+  .faq-answer {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}

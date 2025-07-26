@@ -1,0 +1,760 @@
+/* === 門診預約頁面樣式 === */
+.appointment-container {
+    max-width: 1200px;
+    margin: 100px auto 40px;
+    padding: 0 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* 頁面標題區域 */
+.appointment-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, #F0F7F2, #E4F5E9);
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0, 30, 10, 0.1);
+}
+
+body.dark-mode .appointment-header {
+    background: linear-gradient(135deg, #1A3C5A, #2A4B7C);
+    color: #E6F0FA;
+}
+
+.logo-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.system-logo {
+    font-size: 48px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.page-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #3A8B55;
+    margin: 0;
+}
+
+body.dark-mode .page-title {
+    color: #E6F0FA;
+}
+
+.subtitle {
+    font-size: 18px;
+    color: #5B7F47;
+    margin: 0;
+}
+
+body.dark-mode .subtitle {
+    color: #C8D8E8;
+}
+
+/* 表單區域 */
+.appointment-form-section {
+    background: linear-gradient(135deg, #F8FCF9, #F0F7F2);
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(0, 30, 10, 0.15);
+    margin-bottom: 40px;
+}
+
+body.dark-mode .appointment-form-section {
+    background: #1A3C5A;
+    color: #E6F0FA;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.appointment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* 表單列布局 */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 16px;
+    color: #3A8B55;
+}
+
+body.dark-mode .form-group label {
+    color: #C8D8E8;
+}
+
+/* 表單控件樣式 */
+.form-control {
+    padding: 14px 16px;
+    border: 2px solid #C3E9C9;
+    border-radius: 12px;
+    font-size: 16px;
+    background-color: #FFFFFF;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3A8B55;
+    box-shadow: 0 0 0 3px rgba(58, 139, 85, 0.1);
+    transform: translateY(-2px);
+}
+
+body.dark-mode .form-control {
+    background-color: #2C3F36;
+    border-color: #4A7B9D;
+    color: #E6F0FA;
+}
+
+body.dark-mode .form-control:focus {
+    border-color: #8AB6D6;
+    box-shadow: 0 0 0 3px rgba(138, 182, 214, 0.1);
+}
+
+.form-control:disabled {
+    background-color: #F0F0F0;
+    color: #999;
+    cursor: not-allowed;
+}
+
+body.dark-mode .form-control:disabled {
+    background-color: #1A2A34;
+    color: #666;
+}
+
+/* 文字區域控件 */
+.textarea-control {
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+}
+
+/* 勾選框組 */
+.checkbox-group {
+    margin: 20px 0;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+.checkbox-input {
+    display: none;
+}
+
+.checkbox-custom {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #3A8B55;
+    border-radius: 4px;
+    position: relative;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.3s ease;
+}
+
+.checkbox-custom::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.checkbox-input:checked + .checkbox-custom {
+    background-color: #3A8B55;
+    border-color: #3A8B55;
+}
+
+.checkbox-input:checked + .checkbox-custom::after {
+    opacity: 1;
+}
+
+body.dark-mode .checkbox-custom {
+    border-color: #8AB6D6;
+}
+
+body.dark-mode .checkbox-input:checked + .checkbox-custom {
+    background-color: #8AB6D6;
+    border-color: #8AB6D6;
+}
+
+/* 表單動作按鈕 */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.submit-btn, .reset-btn {
+    padding: 14px 30px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px;
+}
+
+.submit-btn {
+    background: linear-gradient(135deg, #3A8B55, #5BA872);
+    color: white;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(58, 139, 85, 0.3);
+}
+
+.reset-btn {
+    background: linear-gradient(135deg, #E0E0E0, #F0F0F0);
+    color: #666;
+}
+
+.reset-btn:hover {
+    background: linear-gradient(135deg, #D0D0D0, #E0E0E0);
+    transform: translateY(-2px);
+}
+
+body.dark-mode .submit-btn {
+    background: linear-gradient(135deg, #2A4B7C, #4A7B9D);
+}
+
+body.dark-mode .reset-btn {
+    background: linear-gradient(135deg, #3A4A5A, #4A5A6A);
+    color: #C8D8E8;
+}
+
+/* 成功訊息彈窗 */
+.success-message {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    z-index: 1001;
+    max-width: 500px;
+    width: 90%;
+}
+
+body.dark-mode .success-message {
+    background: #1A3C5A;
+    color: #E6F0FA;
+}
+
+.success-message.show {
+    display: block;
+    animation: fadeInScale 0.4s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.success-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+.success-message h3 {
+    color: #3A8B55;
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+body.dark-mode .success-message h3 {
+    color: #8AB6D6;
+}
+
+.appointment-info {
+    background: #F8FCF9;
+    padding: 20px;
+    border-radius: 12px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+body.dark-mode .appointment-info {
+    background: #2A4B7C;
+}
+
+.appointment-info p {
+    margin: 8px 0;
+    font-size: 16px;
+}
+
+.close-success-btn {
+    background: linear-gradient(135deg, #3A8B55, #5BA872);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-success-btn:hover {
+    transform: translateY(-2px);
+}
+
+body.dark-mode .close-success-btn {
+    background: linear-gradient(135deg, #2A4B7C, #4A7B9D);
+}
+
+/* 預約紀錄區域 */
+.appointment-history {
+    background: linear-gradient(135deg, #F8FCF9, #F0F7F2);
+    padding: 40px;
+    border-radius: 24px;
+    box-shadow: 0 8px 24px rgba(0, 30, 10, 0.15);
+}
+
+body.dark-mode .appointment-history {
+    background: #1A3C5A;
+    color: #E6F0FA;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.history-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.history-title {
+    font-size: 28px;
+    color: #3A8B55;
+    margin: 0;
+    font-weight: bold;
+}
+
+body.dark-mode .history-title {
+    color: #E6F0FA;
+}
+
+.view-all-btn {
+    color: #3A8B55;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 2px solid transparent;
+}
+
+.view-all-btn:hover {
+    background: #3A8B55;
+    color: white;
+    border-color: #3A8B55;
+    transform: translateY(-1px);
+}
+
+body.dark-mode .view-all-btn {
+    color: #8AB6D6;
+}
+
+body.dark-mode .view-all-btn:hover {
+    background: #8AB6D6;
+    color: #1A3C5A;
+    border-color: #8AB6D6;
+}
+
+.history-table-container {
+    overflow-x: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+body.dark-mode .history-table {
+    background: #2A4B7C;
+}
+
+.history-table th,
+.history-table td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid #E8F4EA;
+}
+
+body.dark-mode .history-table th,
+body.dark-mode .history-table td {
+    border-bottom-color: #4A7B9D;
+}
+
+.history-table th {
+    background: #3A8B55;
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+body.dark-mode .history-table th {
+    background: #4A7B9D;
+}
+
+.history-table tbody tr:hover {
+    background: #F8FCF9;
+}
+
+body.dark-mode .history-table tbody tr:hover {
+    background: #3A5B7C;
+}
+
+/* 狀態標籤 */
+.status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.status.confirmed {
+    background: #D6F4DE;
+    color: #2E6B40;
+}
+
+.status.pending {
+    background: #FFF3CD;
+    color: #856404;
+}
+
+.status.completed {
+    background: #D1ECF1;
+    color: #0C5460;
+}
+
+body.dark-mode .status.confirmed {
+    background: #2A4B3C;
+    color: #8AB6D6;
+}
+
+body.dark-mode .status.pending {
+    background: #4B4A2A;
+    color: #D6C48A;
+}
+
+body.dark-mode .status.completed {
+    background: #2A3B4B;
+    color: #8AC4D6;
+}
+
+/* 動作按鈕 */
+.action-btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 5px;
+    transition: all 0.3s ease;
+}
+
+.view-btn {
+    background: #17A2B8;
+    color: white;
+}
+
+.cancel-btn {
+    background: #DC3545;
+    color: white;
+}
+
+.review-btn {
+    background: #28A745;
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 遮罩層 */
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.overlay.show {
+    display: block;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .appointment-container {
+        margin: 80px auto 20px;
+        padding: 0 15px;
+    }
+    
+    .appointment-header {
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .logo-title {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .system-logo {
+        font-size: 36px;
+    }
+    
+    .page-title {
+        font-size: 28px;
+    }
+    
+    .subtitle {
+        font-size: 16px;
+    }
+    
+    .appointment-form-section,
+    .appointment-history {
+        padding: 25px 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .submit-btn, .reset-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .success-message {
+        padding: 30px 20px;
+        margin: 0 15px;
+    }
+    
+    .history-table-container {
+        font-size: 14px;
+    }
+    
+    .history-table th,
+    .history-table td {
+        padding: 12px 8px;
+    }
+    
+    .action-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+        margin: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .appointment-container {
+        margin: 60px auto 15px;
+        padding: 0 10px;
+    }
+    
+    .appointment-header {
+        padding: 16px 12px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+    }
+    
+    .system-logo {
+        font-size: 32px;
+    }
+    
+    .page-title {
+        font-size: 24px;
+    }
+    
+    .subtitle {
+        font-size: 14px;
+    }
+    
+    .appointment-form-section,
+    .appointment-history {
+        padding: 20px 15px;
+        border-radius: 16px;
+    }
+    
+    .form-control {
+        padding: 10px 12px;
+        font-size: 15px;
+        border-radius: 8px;
+        min-height: 44px;
+    }
+    
+    .form-group label {
+        font-size: 14px;
+    }
+    
+    .textarea-control {
+        min-height: 80px;
+    }
+    
+    .submit-btn, .reset-btn {
+        padding: 12px;
+        font-size: 15px;
+        min-height: 44px;
+        max-width: 100%;
+    }
+    
+    .success-message {
+        padding: 20px 15px;
+        margin: 0 10px;
+        border-radius: 12px;
+    }
+    
+    .history-table {
+        font-size: 12px;
+        min-width: 500px;
+    }
+    
+    .history-table th,
+    .history-table td {
+        padding: 8px 4px;
+        font-size: 11px;
+    }
+    
+    .action-btn {
+        padding: 4px 6px;
+        font-size: 10px;
+        min-height: 28px;
+    }
+}
+
+/* === 觸控設備優化 === */
+@media(hover:none) and (pointer:coarse){
+    .form-control {
+        min-height: 48px;
+        font-size: 16px;
+    }
+    
+    .submit-btn, .reset-btn {
+        min-height: 48px;
+        font-size: 16px;
+    }
+    
+    .action-btn {
+        min-height: 44px;
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+}
+
+/* === 橫屏手機優化 === */
+@media(max-width:768px) and (orientation:landscape){
+    .appointment-container {
+        margin: 40px auto 15px;
+    }
+    
+    .appointment-header {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .logo-title {
+        flex-direction: row;
+        gap: 12px;
+    }
+    
+    .appointment-form-section,
+    .appointment-history {
+        padding: 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+}
+
+/* === 平板響應式設計 === */
+@media(min-width:769px) and (max-width:1024px){
+    .appointment-container {
+        margin: 90px auto 30px;
+        padding: 0 30px;
+    }
+    
+    .appointment-header {
+        padding: 25px 30px;
+    }
+    
+    .page-title {
+        font-size: 32px;
+    }
+    
+    .appointment-form-section,
+    .appointment-history {
+        padding: 35px 30px;
+    }
+    
+    .form-control {
+        padding: 13px 15px;
+        font-size: 16px;
+    }
+}
