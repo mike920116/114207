@@ -125,4 +125,6 @@ def inject_today_date():
 # ── 啟動 ───────────────────────────────────
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    # 不指定 async_mode
+    socketio.run(app, host='0.0.0.0', port=5000,
+                 debug=True, use_reloader=False)
