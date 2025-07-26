@@ -33,6 +33,7 @@ from services.line import line_webhook_bp
 from services.support import support_bp
 from services.social import social_bp
 from services.announcement import announcement_bp
+from services.clinic import clinic_bp
 # ─────────────────────────────────────────
 
 load_dotenv()
@@ -64,6 +65,7 @@ app.register_blueprint(settings_bp,     url_prefix="/settings")
 app.register_blueprint(support_bp,      url_prefix="/support") 
 app.register_blueprint(line_webhook_bp)
 app.register_blueprint(social_bp,       url_prefix="/social")
+app.register_blueprint(clinic_bp,       url_prefix="/clinic")
 app.register_blueprint(announcement_bp)               # frontend API
 app.register_blueprint(admin_announcement_bp)         # admin CRUD
 

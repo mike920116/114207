@@ -42,6 +42,8 @@
                 class="{% if request.endpoint.startswith('admin_chat.') %}active{% endif %}">💬 客服面板</a></li>
           <li><a href="{{ url_for('admin_announce.list_') }}"
                 class="{% if request.endpoint.startswith('admin_announce.') %}active{% endif %}">📢 公告</a></li>
+          <li><a href="{{ url_for('admin.appointment_hospitals') }}"
+                class="{% if request.endpoint.startswith('admin.appointment') %}active{% endif %}">🏥 預約管理</a></li>
         </ul>
       </nav>
 

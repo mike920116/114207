@@ -477,3 +477,217 @@ body.dark-mode .btn-secondary:hover {
     opacity: 1;
   }
 }
+
+/* === 手機端響應式設計 === */
+@media(max-width:768px){
+  .settings-page-wrapper{
+    padding-top:80px;
+    padding-bottom:60px;
+    padding-left:15px;
+    padding-right:15px;
+  }
+  
+  .settings-box{
+    padding:25px 20px;
+    max-width:100%;
+    border-radius:16px;
+    box-shadow:0 4px 20px rgba(60,120,60,0.25);
+  }
+  
+  .settings-box h2,
+  .settings-box h3{
+    font-size:22px;
+    margin-bottom:20px;
+  }
+  
+  .settings-box input.form-control,
+  .settings-box textarea.form-control{
+    padding:12px;
+    font-size:16px;
+    margin-bottom:16px;
+    border-radius:8px;
+  }
+  
+  .settings-box textarea#bio{
+    height:120px;
+    font-size:14px;
+  }
+  
+  .settings-box #bio-counter{
+    font-size:13px;
+    margin-top:-12px;
+    margin-bottom:14px;
+  }
+  
+  .settings-box img#avatar-preview{
+    width:100px;
+    height:100px;
+    border-width:2px;
+  }
+  
+  .settings-box .btn{
+    padding:14px 20px;
+    font-size:16px;
+    border-radius:8px;
+    width:80%;
+    min-height:48px;
+  }
+  
+  .login-info{
+    padding:12px;
+    margin:15px 0;
+    font-size:14px;
+    border-radius:8px;
+  }
+  
+  .modal-dialog{
+    margin:10px;
+    max-width:calc(100% - 20px);
+  }
+  
+  .modal-content{
+    border-radius:12px;
+  }
+  
+  .modal-header{
+    padding:15px 20px;
+  }
+  
+  .modal-body{
+    padding:15px 20px;
+  }
+  
+  .modal-footer{
+    padding:12px 20px;
+    flex-direction:column;
+    gap:10px;
+  }
+  
+  .modal-footer .btn{
+    width:100%;
+    margin:0;
+  }
+  
+  .message-toast{
+    top:10px;
+    right:10px;
+    left:10px;
+    max-width:none;
+    font-size:14px;
+    padding:10px 15px;
+  }
+}
+
+/* === 小屏手機優化 (320px - 480px) === */
+@media(max-width:480px){
+  .settings-page-wrapper{
+    padding-top:60px;
+    padding-left:10px;
+    padding-right:10px;
+  }
+  
+  .settings-box{
+    padding:20px 15px;
+    border-radius:12px;
+  }
+  
+  .settings-box h2,
+  .settings-box h3{
+    font-size:20px;
+    margin-bottom:16px;
+  }
+  
+  .settings-box input.form-control,
+  .settings-box textarea.form-control{
+    padding:10px;
+    font-size:15px;
+    margin-bottom:14px;
+  }
+  
+  .settings-box textarea#bio{
+    height:100px;
+    font-size:13px;
+  }
+  
+  .settings-box img#avatar-preview{
+    width:80px;
+    height:80px;
+  }
+  
+  .settings-box .btn{
+    padding:12px 16px;
+    font-size:15px;
+    width:90%;
+    min-height:44px;
+  }
+  
+  .login-info{
+    padding:10px;
+    font-size:13px;
+  }
+  
+  .message-toast{
+    font-size:13px;
+    padding:8px 12px;
+  }
+}
+
+/* === 觸控設備優化 === */
+@media(hover:none) and (pointer:coarse){
+  .settings-box input.form-control,
+  .settings-box textarea.form-control{
+    min-height:48px;
+    font-size:16px;
+  }
+  
+  .settings-box .btn{
+    min-height:48px;
+    font-size:16px;
+  }
+  
+  .modal-footer .btn{
+    min-height:48px;
+    font-size:16px;
+  }
+}
+
+/* === 橫屏手機優化 === */
+@media(max-width:768px) and (orientation:landscape){
+  .settings-page-wrapper{
+    padding-top:40px;
+    padding-bottom:30px;
+  }
+  
+  .settings-box{
+    padding:20px;
+  }
+  
+  .settings-box h2,
+  .settings-box h3{
+    font-size:20px;
+    margin-bottom:16px;
+  }
+  
+  .settings-box textarea#bio{
+    height:80px;
+  }
+}
+
+/* === 平板響應式設計 === */
+@media(min-width:769px) and (max-width:1024px){
+  .settings-page-wrapper{
+    padding-top:90px;
+    padding-left:30px;
+    padding-right:30px;
+  }
+  
+  .settings-box{
+    padding:40px 35px;
+    max-width:650px;
+  }
+  
+  .settings-box img#avatar-preview{
+    width:120px;
+    height:120px;
+  }
+}

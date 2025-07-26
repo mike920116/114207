@@ -1,0 +1,384 @@
+{% extends 'base.html' %}
+
+{% block title %}日記之森 | 預約紀錄{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/clinic/appointment_history.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- 預約紀錄容器 -->
+<div class="appointment-history-container">
+    <!-- 頁面標題 -->
+    <div class="history-header">
+        <div class="logo-title">
+            <div class="system-logo">🌲</div>
+            <h1 class="page-title">預約紀錄</h1>
+        </div>
+        <p class="subtitle">查看您的所有門診預約紀錄</p>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="stats-cards">
+        <div class="stat-card stat-total">
+            <div class="stat-icon">📊</div>
+            <div class="stat-info">
+                <h3>總預約數</h3>
+                <span class="stat-number">5</span>
+            </div>
+        </div>
+        <div class="stat-card stat-confirmed">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3>已確認</h3>
+                <span class="stat-number">1</span>
+            </div>
+        </div>
+        <div class="stat-card stat-pending">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-info">
+                <h3>待確認</h3>
+                <span class="stat-number">2</span>
+            </div>
+        </div>
+        <div class="stat-card stat-completed">
+            <div class="stat-icon">🎉</div>
+            <div class="stat-info">
+                <h3>已完成</h3>
+                <span class="stat-number">1</span>
+            </div>
+        </div>
+        <div class="stat-card stat-cancelled">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+                <h3>已取消</h3>
+                <span class="stat-number">1</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 篩選器 -->
+    <div class="filter-section">
+        <div class="filter-group">
+            <label for="status-filter">狀態篩選：</label>
+            <select id="status-filter" class="filter-select">
+                <option value="">全部狀態</option>
+                <option value="confirmed">已確認</option>
+                <option value="pending">待確認</option>
+                <option value="completed">已完成</option>
+                <option value="cancelled">已取消</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="date-filter">日期篩選：</label>
+            <select id="date-filter" class="filter-select">
+                <option value="">全部日期</option>
+                <option value="this-month">本月</option>
+                <option value="last-month">上月</option>
+                <option value="this-year">今年</option>
+                <option value="custom">自訂範圍</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="hospital-filter">醫院篩選：</label>
+            <select id="hospital-filter" class="filter-select">
+                <option value="">全部醫院</option>
+                <option value="衛生福利部桃園醫院">衛生福利部桃園醫院</option>
+                <option value="敏盛醫院三民院區">敏盛醫院三民院區</option>
+                <option value="立倫診所">立倫診所</option>
+                <option value="林口長庚紀念醫院">林口長庚紀念醫院</option>
+                <option value="兒童發展復健站（大溪區）">兒童發展復健站（大溪區）</option>
+            </select>
+        </div>
+        <button class="filter-reset-btn" onclick="resetFilters()">重置篩選</button>
+    </div>
+
+    <!-- 預約紀錄列表 -->
+    <div class="appointments-section">
+        <h2 class="section-title">預約紀錄</h2>
+        
+        <!-- 紀錄卡片列表 -->
+        <div class="appointments-list">
+            <!-- 預約紀錄卡片 1 -->
+            <div class="appointment-card" data-status="confirmed" data-hospital="衛生福利部桃園醫院" data-date="2025-07-30">
+                <div class="card-header">
+                    <div class="appointment-id">#APT001</div>
+                    <div class="appointment-status status-confirmed">已確認</div>
+                </div>
+                <div class="card-body">
+                    <div class="appointment-info">
+                        <div class="info-row">
+                            <span class="info-label">醫院：</span>
+                            <span class="info-value">衛生福利部桃園醫院</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">醫師：</span>
+                            <span class="info-value">王志明醫師 - 兒童發展評估中心</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">預約時間：</span>
+                            <span class="info-value">2025-07-30 09:00-09:30</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">孩子姓名：</span>
+                            <span class="info-value">張小明</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">聯絡電話：</span>
+                            <span class="info-value">0912345678</span>
+                        </div>
+                        <div class="info-row diary-permission">
+                            <span class="info-label">日記授權：</span>
+                            <span class="info-value permission-yes">✓ 已授權醫師查看孩子的觀察日記</span>
+                        </div>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="details-label">主要症狀：</div>
+                        <div class="details-content">注意力不集中，學習困難，需要兒童發展聯合評估</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="appointment-date">建立時間：2025-07-25 14:30</div>
+                    <div class="card-actions">
+                        <button class="action-btn view-btn" onclick="viewAppointment('#APT001')">查看詳情</button>
+                        <button class="action-btn cancel-btn" onclick="cancelAppointment('#APT001')">取消預約</button>
+                        <button class="action-btn modify-btn" onclick="modifyAppointment('#APT001')">修改預約</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 預約紀錄卡片 2 -->
+            <div class="appointment-card" data-status="pending" data-hospital="敏盛醫院三民院區" data-date="2025-08-05">
+                <div class="card-header">
+                    <div class="appointment-id">#APT002</div>
+                    <div class="appointment-status status-pending">待確認</div>
+                </div>
+                <div class="card-body">
+                    <div class="appointment-info">
+                        <div class="info-row">
+                            <span class="info-label">醫院：</span>
+                            <span class="info-value">敏盛醫院三民院區</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">醫師：</span>
+                            <span class="info-value">李美華醫師 - 聯合評估科</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">預約時間：</span>
+                            <span class="info-value">2025-08-05 14:30-15:00</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">孩子姓名：</span>
+                            <span class="info-value">李小美</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">聯絡電話：</span>
+                            <span class="info-value">0987654321</span>
+                        </div>
+                        <div class="info-row diary-permission">
+                            <span class="info-label">日記授權：</span>
+                            <span class="info-value permission-yes">✓ 已授權醫師查看孩子的觀察日記</span>
+                        </div>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="details-label">主要症狀：</div>
+                        <div class="details-content">社交困難，情緒起伏大，需要心理輔導和聽覺評估</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="appointment-date">建立時間：2025-07-26 09:15</div>
+                    <div class="card-actions">
+                        <button class="action-btn view-btn" onclick="viewAppointment('#APT002')">查看詳情</button>
+                        <button class="action-btn cancel-btn" onclick="cancelAppointment('#APT002')">取消預約</button>
+                        <button class="action-btn modify-btn" onclick="modifyAppointment('#APT002')">修改預約</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 預約紀錄卡片 3 -->
+            <div class="appointment-card" data-status="completed" data-hospital="立倫診所" data-date="2025-07-20">
+                <div class="card-header">
+                    <div class="appointment-id">#APT003</div>
+                    <div class="appointment-status status-completed">已完成</div>
+                </div>
+                <div class="card-body">
+                    <div class="appointment-info">
+                        <div class="info-row">
+                            <span class="info-label">醫院：</span>
+                            <span class="info-value">立倫診所</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">醫師：</span>
+                            <span class="info-value">張志強醫師 - 職能治療科</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">預約時間：</span>
+                            <span class="info-value">2025-07-20 10:00-10:30</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">孩子姓名：</span>
+                            <span class="info-value">陳小華</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">聯絡電話：</span>
+                            <span class="info-value">0965432187</span>
+                        </div>
+                        <div class="info-row diary-permission">
+                            <span class="info-label">日記授權：</span>
+                            <span class="info-value permission-no">✗ 未授權醫師查看孩子的觀察日記</span>
+                        </div>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="details-label">主要症狀：</div>
+                        <div class="details-content">精細動作發展遲緩，需要職能治療評估</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="appointment-date">建立時間：2025-07-15 16:45</div>
+                    <div class="card-actions">
+                        <button class="action-btn view-btn" onclick="viewAppointment('#APT003')">查看詳情</button>
+                        <button class="action-btn review-btn" onclick="reviewAppointment('#APT003')">寫評價</button>
+                        <button class="action-btn report-btn" onclick="downloadReport('#APT003')">下載報告</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 預約紀錄卡片 4 -->
+            <div class="appointment-card" data-status="cancelled" data-hospital="林口長庚紀念醫院" data-date="2025-07-28">
+                <div class="card-header">
+                    <div class="appointment-id">#APT004</div>
+                    <div class="appointment-status status-cancelled">已取消</div>
+                </div>
+                <div class="card-body">
+                    <div class="appointment-info">
+                        <div class="info-row">
+                            <span class="info-label">醫院：</span>
+                            <span class="info-value">林口長庚紀念醫院</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">醫師：</span>
+                            <span class="info-value">王小明醫師 - 兒童發展評估中心</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">原預約時間：</span>
+                            <span class="info-value">2025-07-28 15:00-15:30</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">取消時間：</span>
+                            <span class="info-value">2025-07-26 10:30</span>
+                        </div>
+                        <div class="info-row diary-permission">
+                            <span class="info-label">日記授權：</span>
+                            <span class="info-value permission-yes">✓ 已授權醫師查看孩子的觀察日記</span>
+                        </div>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="details-label">取消原因：</div>
+                        <div class="details-content">家庭臨時有事，需要重新安排時間</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="appointment-date">建立時間：2025-07-24 11:20</div>
+                    <div class="card-actions">
+                        <button class="action-btn view-btn" onclick="viewAppointment('#APT004')">查看詳情</button>
+                        <button class="action-btn rebook-btn" onclick="rebookAppointment('#APT004')">重新預約</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 預約紀錄卡片 5 -->
+            <div class="appointment-card" data-status="pending" data-hospital="兒童發展復健站（大溪區）" data-date="2025-08-02">
+                <div class="card-header">
+                    <div class="appointment-id">#APT005</div>
+                    <div class="appointment-status status-pending">待確認</div>
+                </div>
+                <div class="card-body">
+                    <div class="appointment-info">
+                        <div class="info-row">
+                            <span class="info-label">醫院：</span>
+                            <span class="info-value">兒童發展復健站（大溪區）</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">醫師：</span>
+                            <span class="info-value">林惠美醫師 - 語言治療科</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">預約時間：</span>
+                            <span class="info-value">2025-08-02 16:00-16:30</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">孩子姓名：</span>
+                            <span class="info-value">黃小安</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">聯絡電話：</span>
+                            <span class="info-value">0923456789</span>
+                        </div>
+                        <div class="info-row diary-permission">
+                            <span class="info-label">日記授權：</span>
+                            <span class="info-value permission-yes">✓ 已授權醫師查看孩子的觀察日記</span>
+                        </div>
+                    </div>
+                    <div class="appointment-details">
+                        <div class="details-label">主要症狀：</div>
+                        <div class="details-content">構音障礙，口語表達能力不佳，需要語言治療</div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="appointment-date">建立時間：2025-07-26 10:45</div>
+                    <div class="card-actions">
+                        <button class="action-btn view-btn" onclick="viewAppointment('#APT005')">查看詳情</button>
+                        <button class="action-btn cancel-btn" onclick="cancelAppointment('#APT005')">取消預約</button>
+                        <button class="action-btn modify-btn" onclick="modifyAppointment('#APT005')">修改預約</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 分頁控制 -->
+        <div class="pagination">
+            <button class="page-btn prev-btn" disabled>上一頁</button>
+            <span class="page-info">第 1 頁，共 1 頁</span>
+            <button class="page-btn next-btn" disabled>下一頁</button>
+        </div>
+    </div>
+
+    <!-- 快速操作按鈕 -->
+    <div class="quick-actions">
+        <a href="/clinic/appointment" class="quick-action-btn new-appointment">
+            <span class="action-icon">➕</span>
+            新增預約
+        </a>
+        <button class="quick-action-btn export-data" onclick="exportData()">
+            <span class="action-icon">📋</span>
+            匯出資料
+        </button>
+    </div>
+</div>
+
+<!-- 預約詳情彈窗 -->
+<div id="appointment-detail-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>預約詳情</h3>
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div id="appointment-detail-content">
+                <!-- 動態載入的預約詳情內容 -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="modal-btn close-modal-btn" onclick="closeModal()">關閉</button>
+        </div>
+    </div>
+</div>
+
+<!-- 遮罩層 -->
+<div id="modal-overlay" class="modal-overlay"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/modules/clinic/appointment_history.js') }}"></script>
+{% endblock %}
