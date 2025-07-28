@@ -24,7 +24,20 @@ from flask_login import login_required, current_user
 from utils import db
 from utils.level_system import UserLevelSystem, update_user_level_and_stats, get_user_level_info
 from datetime import datetime
+from werkzeug.utils import secure_filename
+import os
+import uuid
 from . import social_bp  # 從 __init__.py 導入 Blueprint
+
+# 圖片上傳設定
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+
+def allowed_file(filename):
+    """檢查檔案是否為允許的圖片格式"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @social_bp.route('/create_post', methods=['GET', 'POST'])
 @login_required
@@ -76,8 +89,45 @@ def create_post():
                     'message': '貼文標題不能超過100字'
                 }), 400
             
-            # 處理圖片上傳 (暫時不實作，留待後續)
+            # 處理圖片上傳
             image_url = None
+            if 'image' in request.files:
+                image_file = request.files['image']
+                if image_file and image_file.filename != '' and allowed_file(image_file.filename):
+                    try:
+                        # 檢查檔案大小
+                        image_file.seek(0, os.SEEK_END)
+                        file_size = image_file.tell()
+                        image_file.seek(0)  # 重置檔案指標
+                        
+                        if file_size > MAX_FILE_SIZE:
+                            return jsonify({
+                                'success': False,
+                                'message': '圖片檔案大小不能超過5MB'
+                            }), 400
+                        
+                        # 生成唯一檔名
+                        file_extension = image_file.filename.rsplit('.', 1)[1].lower()
+                        unique_filename = f"{uuid.uuid4().hex}.{file_extension}"
+                        
+                        # 確保上傳資料夾存在
+                        upload_path = os.path.join(UPLOAD_FOLDER)
+                        if not os.path.exists(upload_path):
+                            os.makedirs(upload_path)
+                        
+                        # 儲存檔案
+                        file_path = os.path.join(upload_path, unique_filename)
+                        image_file.save(file_path)
+                        
+                        # 儲存相對路徑到資料庫（用於網頁顯示）
+                        image_url = f"/{file_path.replace(os.sep, '/')}"
+                        
+                    except Exception as e:
+                        print(f"[ERROR] 圖片上傳失敗: {str(e)}")
+                        return jsonify({
+                            'success': False,
+                            'message': f'圖片上傳失敗：{str(e)}'
+                        }), 500
             
             # 儲存到資料庫
             database_connection = db.get_connection()
