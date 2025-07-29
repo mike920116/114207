@@ -30,7 +30,7 @@ import uuid
 from . import social_bp  # 從 __init__.py 導入 Blueprint
 
 # 圖片上傳設定
-UPLOAD_FOLDER = 'static/uploads'
+UPLOAD_FOLDER = '0706_flask_/static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
@@ -120,7 +120,8 @@ def create_post():
                         image_file.save(file_path)
                         
                         # 儲存相對路徑到資料庫（用於網頁顯示）
-                        image_url = f"/{file_path.replace(os.sep, '/')}"
+                        # 使用 url_for 來生成正確的靜態檔案 URL
+                        image_url = f"/0706_flask_/static/uploads/{unique_filename}"
                         
                     except Exception as e:
                         print(f"[ERROR] 圖片上傳失敗: {str(e)}")
