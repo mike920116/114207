@@ -163,11 +163,23 @@
           
           <!-- 貼文內容 -->
           <p>{{ post.content }}</p>
-          
-          <!-- 圖片（如果有的話） -->
+
+          <!-- 07/29修復完成照片未顯示出來的問題 -->
+          <!-- 圖片（如果有的話，使用新的路徑處理方式） -->
+          <!-- 若使用 post.image_url.lstrip('/static/')，表示試圖移除圖片路徑中的 /static/ -->
+          <!-- 使用 post.image_url.split('/')[-1] 提取圖片的檔名（如 image.jpg）。 -->
+          {% set image_path = post.image_url.split('/')[-1] if post.image_url else None %}
           {% if post.image_url %}
           <div class="post-image">
-            <img src="{{ post.image_url }}" alt="貼文圖片" style="max-width: 100%; height: auto; border-radius: 8px;">
+            <img src="{{ url_for('static', filename='uploads/' + post.image_url.split('/')[-1]) }}" 
+                alt="貼文圖片" 
+                style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #ddd;"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display: none; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center; color: #666;">
+              <span>📷</span><br>
+              圖片載入失敗<br>
+              <small>{{ post.image_url }}</small>
+            </div>
           </div>
           {% endif %}
           
