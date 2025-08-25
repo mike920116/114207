@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+
+{% block title %}情緒AI聊天助手{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/ai/emotion_ai.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
+
+{% block content %}
+<!-- 原型C的背景動畫系統 -->
+<div class="particle-background" id="particleBackground"></div>
+<div class="rainbow-overlay"></div>
+
+<!-- 三欄布局容器 -->
+<div class="emotion-three-column-container">
+  <!-- 左側面板 (暫時空白) -->
+  <div class="left-panel glass-panel" id="leftPanel">
+    <button class="panel-toggle-btn" id="leftPanelToggle" title="收起/展開左側面板">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <div class="autonomous-left-header">
+      <h3>🧭 例行探索</h3>
+    </div>
+    <div class="panel-content">
+      <div class="exploration-section">
+        <!-- 洞察補充 -->
+        <div class="exploration-item insight-panel" id="insightPanel">
+          <h5><i class="fas fa-lightbulb"></i> 洞察補充</h5>
+          <div class="insight-content" id="insightContent">
+            <div class="insight-placeholder">開始對話後會顯示洞察補充</div>
+          </div>
+        </div>
+        
+        <!-- 收藏小抽屜 -->
+        <div class="exploration-item favorites-drawer" id="favoritesDrawer">
+          <h5><i class="fas fa-heart"></i> 收藏小抽屜</h5>
+          <div class="favorites-content" id="favoritesContent">
+            <div class="favorites-placeholder">暫無收藏項目...</div>
+          </div>
+        </div>
+        
+        <!-- 推薦目標 -->
+        <div class="exploration-item recommended-goals">
+          <h5><i class="fas fa-target"></i> 推薦目標</h5>
+          <div class="recommended-goals-content" id="recommendedGoalsContent">
+            <div class="goal-item-recommended" data-goal-id="skill">
+              <div class="goal-content">
+                <div class="goal-icon">🛠️</div>
+                <div class="goal-details">
+                  <div class="goal-title" contenteditable="false">接觸新技能</div>
+                  <div class="goal-desc" contenteditable="false">學習一項新的專業技能或愛好</div>
+                </div>
+              </div>
+              <div class="goal-actions">
+                <button class="goal-edit-btn" onclick="editGoal(this)" title="修改">修改</button>
+                <button class="goal-add-btn" onclick="addGoalToSequence(this)" title="添加">添加</button>
+              </div>
+            </div>
+            
+            <div class="goal-item-recommended" data-goal-id="walk">
+              <div class="goal-content">
+                <div class="goal-icon">🚶‍♂️</div>
+                <div class="goal-details">
+                  <div class="goal-title" contenteditable="false">散步20分鐘</div>
+                  <div class="goal-desc" contenteditable="false">每天散步20分鐘，放鬆心情，提升專注力</div>
+                </div>
+              </div>
+              <div class="goal-actions">
+                <button class="goal-edit-btn" onclick="editGoal(this)" title="修改">修改</button>
+                <button class="goal-add-btn" onclick="addGoalToSequence(this)" title="添加">添加</button>
+              </div>
+            </div>
+            
+            <div class="goal-item-recommended" data-goal-id="activity">
+              <div class="goal-content">
+                <div class="goal-icon">🎨</div>
+                <div class="goal-details">
+                  <div class="goal-title" contenteditable="false">嘗試新活動</div>
+                  <div class="goal-desc" contenteditable="false">每周嘗試一種新活動，探索興趣，豐富生活體驗</div>
+                </div>
+              </div>
+              <div class="goal-actions">
+                <button class="goal-edit-btn" onclick="editGoal(this)" title="修改">修改</button>
+                <button class="goal-add-btn" onclick="addGoalToSequence(this)" title="添加">添加</button>
+              </div>
+            </div>
+            
+            <div class="goal-item-recommended" data-goal-id="reading">
+              <div class="goal-content">
+                <div class="goal-icon">📚</div>
+                <div class="goal-details">
+                  <div class="goal-title" contenteditable="false">閱讀一本新書</div>
+                  <div class="goal-desc" contenteditable="false">選擇一本感興趣的書籍，擴展知識視野</div>
+                </div>
+              </div>
+              <div class="goal-actions">
+                <button class="goal-edit-btn" onclick="editGoal(this)" title="修改">修改</button>
+                <button class="goal-add-btn" onclick="addGoalToSequence(this)" title="添加">添加</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 每日提示 -->
+        <div class="exploration-item">
+          <h5><i class="fas fa-calendar-day"></i> 每日提示</h5>
+          <div class="daily-tips-content" id="dailyTipsContent">
+            <div class="tip-item">
+              <div class="tip-icon">🌱</div>
+              <div class="tip-content">
+                <div class="tip-title">深呼吸練習</div>
+                <div class="tip-desc">每當感到壓力時，進行4-7-8呼吸法</div>
+              </div>
+            </div>
+            
+            <div class="tip-item">
+              <div class="tip-icon">💫</div>
+              <div class="tip-content">
+                <div class="tip-title">感恩日記</div>
+                <div class="tip-desc">每天記錄三件讓你感恩的事情</div>
+              </div>
+            </div>
+            
+            <div class="tip-item">
+              <div class="tip-icon">🌈</div>
+              <div class="tip-content">
+                <div class="tip-title">正向肯定</div>
+                <div class="tip-desc">對自己說：我值得被愛，我正在成長</div>
+              </div>
+            </div>
+            
+            <div class="tip-item">
+              <div class="tip-icon">🌸</div>
+              <div class="tip-content">
+                <div class="tip-title">當下專注</div>
+                <div class="tip-desc">花5分鐘專注於當下的感受和環境</div>
+              </div>
+            </div>
+            
+            <div class="tip-item">
+              <div class="tip-icon">⭐</div>
+              <div class="tip-content">
+                <div class="tip-title">小小成就</div>
+                <div class="tip-desc">慶祝今天完成的每一個小目標</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 中央聊天區域 -->
+  <div class="chat-container">
+    <div class="chat-header">
+      <h2>🎭 情緒AI聊天助手</h2>
+    </div>
+
+    <div class="chat-box" id="chat-box">
+      <!-- 預設 AI 提示 -->
+      <div class="message ai">
+        <img src="{{ url_for('static', filename='icons/avatars/ai_avatar.png') }}" alt="AI頭像" class="avatar" onerror="this.src='https://placehold.co/40x40/4facfe/ffffff?text=AI'">
+        <div class="message-content">
+          <div class="name">情緒AI助手</div>
+          <p>你好，{{ current_user.username }}，我是您的情緒AI助手！我將分析您的情緒並與您進行深入對話。分享您的想法和感受吧～</p>
+          <div class="time" id="welcome-time"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 打字指示器 -->
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="message ai">
+        <img src="{{ url_for('static', filename='icons/avatars/ai_avatar.png') }}" alt="AI頭像" class="avatar" onerror="this.src='https://placehold.co/40x40/4facfe/ffffff?text=AI'">
+        <div class="message-content">
+          <div class="name">情緒AI助手</div>
+          <div class="typing-text">
+            AI正在思考中<span class="loading"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 操作列 -->
+    <div class="chat-input-area">
+      <textarea id="user-input" placeholder="分享您的想法和感受..." rows="1"></textarea>
+      <button id="send-btn" title="發送訊息"><i class="fas fa-paper-plane"></i></button>
+      <button id="emotion-toggle-btn" title="顯示/隱藏情緒分析" class="emotion-toggle">📊</button>
+    </div>
+  </div>
+  
+  <!-- 右側面板 (今日導覽) -->
+  <div class="right-panel glass-panel" id="rightPanel">
+    <button class="panel-toggle-btn" id="rightPanelToggle" title="收起/展開右側面板">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+    <div class="autonomous-right-header">
+      <h3>♕ 今日導覽</h3>
+    </div>
+    <div class="panel-content">
+      <!-- 插圖動畫區塊 -->
+      <div class="illustration-area" id="illustrationArea">
+        <div class="illustration-placeholder">
+          <i class="fas fa-image"></i>
+          <span>插圖動畫區域</span>
+        </div>
+      </div>
+      
+      <!-- 日期和模式顯示 -->
+      <div class="date-mode-display">
+        <div class="current-date" id="currentDate">2024年8月25日</div>
+        <div class="current-mode" id="currentMode">夜間反思</div>
+        <button class="time-settings-btn" id="timeSettingsBtn" title="設定日夜時間">
+          <i class="fas fa-clock"></i>
+        </button>
+      </div>
+      
+      <!-- 主題切換按鈕 -->
+      <div class="theme-controls" id="themeControls">
+        <h4>
+          🎨 主題切換
+          <button class="theme-toggle-btn" id="themeToggleBtn" title="展開/收合主題選項">
+            <i class="fas fa-chevron-up"></i>
+          </button>
+        </h4>
+        <div class="theme-buttons">
+          <button class="theme-btn" data-theme="day" title="白天模式">☀️</button>
+          <button class="theme-btn" data-theme="sunset" title="黃昏模式">🌅</button>
+          <button class="theme-btn" data-theme="night" title="夜晚模式">🌙</button>
+        </div>
+      </div>
+      
+      <!-- 目標序列區域 -->
+      <div class="goal-sequence-area">
+        <h4>🎯 目標序列</h4>
+        <div class="goal-sequence-content" id="goalSequenceContent">
+          <div class="goal-item">
+            <div class="goal-content">
+              <div class="goal-icon">📝</div>
+              <div class="goal-details">
+                <div class="goal-title">撰寫一篇日記</div>
+                <div class="goal-desc">記錄今日的想法與感受</div>
+              </div>
+            </div>
+            <button class="goal-check-btn" title="完成目標">
+              <i class="fas fa-check"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 其他功能預留區域 -->
+      <div class="future-features">
+        <p class="placeholder-text">更多功能開發中...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 時間設定視窗 -->
+<div id="timeSettingsModal" class="time-settings-modal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>🕐 日夜時間設定</h3>
+      <button class="modal-close-btn" id="timeSettingsClose">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="time-setting-group">
+        <label>☀️ 日間意向開始時間</label>
+        <div class="time-inputs">
+          <input type="number" id="dayStartHour" min="0" max="23" value="6" class="time-input">
+          <span class="time-separator">:</span>
+          <input type="number" id="dayStartMinute" min="0" max="59" value="0" class="time-input">
+        </div>
+      </div>
+      
+      <div class="time-setting-group">
+        <label>🌙 夜間反思開始時間</label>
+        <div class="time-inputs">
+          <input type="number" id="nightStartHour" min="0" max="23" value="18" class="time-input">
+          <span class="time-separator">:</span>
+          <input type="number" id="nightStartMinute" min="0" max="59" value="0" class="time-input">
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-btn cancel-btn" id="timeSettingsCancel">取消</button>
+      <button class="modal-btn confirm-btn" id="timeSettingsConfirm">確定</button>
+    </div>
+  </div>
+</div>
+
+<!-- 情緒分析浮動視窗 -->
+<div id="emotion-analysis-panel" class="emotion-panel" style="display: none;">
+  <div class="emotion-panel-header">
+    <h3>📊 情緒分析</h3>
+    <button id="close-emotion-panel" class="close-btn">×</button>
+  </div>
+  <div class="emotion-panel-content">
+    <div id="emotion-summary" class="emotion-summary">
+      <p>開始對話後會顯示情緒分析結果</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
+<script src="{{ url_for('static', filename='js/modules/ai/emotion_ai.js') }}"></script>
+<script>
+// 用戶資訊設定 - 由後端預處理，避免VS Code語法錯誤
+window.userAvatarUrl = {{ js_user_avatar|safe }};
+window.currentUsername = {{ js_username|safe }};
+
+// 設置歡迎訊息的時間戳
+document.addEventListener('DOMContentLoaded', function() {
+    const welcomeTime = document.getElementById('welcome-time');
+    if (welcomeTime) {
+        const now = new Date();
+        const timeString = now.toLocaleString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        welcomeTime.textContent = timeString;
+    }
+});
+</script>
+{% endblock %}
