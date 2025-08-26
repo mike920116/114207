@@ -1,0 +1,72 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}個人資料{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/user/settings.css') }}">
+<script src="{{ url_for('static', filename='js/modules/user/settings.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="settings-page-wrapper">
+  <div class="settings-box">
+    <h2>編輯個人資料</h2>
+    <form method="POST" enctype="multipart/form-data">
+      <label for="username">暱稱</label>
+      <input type="text" id="username" name="username" class="form-control" value="{{ username }}" required>
+
+      <label for="bio">自我介紹（最多 200 字）</label>
+      <textarea id="bio" name="bio" class="form-control" maxlength="200">{{ bio or '' }}</textarea>
+      <p id="bio-counter">剩餘 200 字</p>
+
+      <div class="avatar-wrapper">
+        <label>頭像設定</label>
+        
+        <!-- 目前頭像 - 點擊可開啟選擇視窗 -->
+        <div class="current-avatar-container">
+          <p style="margin-bottom: 8px; color: #666;">點擊頭像即可更換</p>
+          <img id="current-avatar"
+              src="{{ url_for('static', filename=avatar_url or 'icons/avatars/default.png') }}"
+              alt="目前頭像"
+              onclick="openAvatarModal()"
+              title="點擊更換頭像">
+        </div>
+
+        <!-- 頭像選擇彈出視窗 -->
+        <div id="avatar-modal" class="avatar-modal">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>選擇頭像</h3>
+              <span class="close-modal" onclick="closeAvatarModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+              <div class="available-avatars">
+                {% for icon in avatars %}
+                  <label class="avatar-option">
+                    <input type="radio"
+                          name="avatar"
+                          value="{{ icon }}"
+                          class="avatar-radio"
+                          {% if avatar_url and icon in avatar_url %}checked{% endif %}
+                          onchange="previewSelectedAvatar(this)">
+                    <img src="{{ url_for('static', filename='icons/avatars/' ~ icon) }}"
+                        alt="{{ icon }}"
+                        class="avatar-img">
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" onclick="closeAvatarModal()">取消</button>
+              <button type="button" class="btn btn-primary" onclick="confirmAvatarSelection()">確認選擇</button>
+            </div>
+          </div>
+        </div>
+      </div>  
+
+      <button type="submit" class="btn btn-success" style="margin-top: 20px;">💾 儲存變更</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+

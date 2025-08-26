@@ -1,0 +1,491 @@
+/* 情緒AI聊天助手樣式 */
+
+.emotion-ai-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Microsoft YaHei', Arial, sans-serif;
+}
+
+.emotion-ai-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    color: white;
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.emotion-ai-header h1 {
+    margin: 0 0 10px 0;
+    font-size: 2.5em;
+    font-weight: bold;
+}
+
+.emotion-ai-header p {
+    margin: 0;
+    font-size: 1.1em;
+    opacity: 0.9;
+}
+
+.emotion-ai-main {
+    display: flex;
+    gap: 30px;
+    min-height: 700px;
+}
+
+/* 聊天區域 */
+.chat-section {
+    flex: 1;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.chat-header h3 {
+    margin: 0;
+    color: #495057;
+    font-size: 1.3em;
+}
+
+.chat-status {
+    display: flex;
+    align-items: center;
+}
+
+.status-online {
+    color: #28a745;
+    font-weight: bold;
+}
+
+.status-offline {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.status-online::before {
+    content: "●";
+    margin-right: 5px;
+    color: #28a745;
+}
+
+.status-offline::before {
+    content: "●";
+    margin-right: 5px;
+    color: #dc3545;
+}
+
+.chat-container {
+    height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    max-height: 500px;
+}
+
+.message {
+    margin-bottom: 20px;
+    display: flex;
+}
+
+.user-message {
+    justify-content: flex-end;
+}
+
+.ai-message {
+    justify-content: flex-start;
+}
+
+.system-message {
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.system-message p {
+    background: #e3f2fd;
+    color: #1565c0;
+    padding: 15px 20px;
+    border-radius: 20px;
+    margin: 0;
+    text-align: center;
+    font-style: italic;
+}
+
+.message-content {
+    max-width: 70%;
+    position: relative;
+}
+
+.user-message .message-content {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 20px 20px 5px 20px;
+    padding: 15px 20px;
+}
+
+.ai-message .message-content {
+    background: #f8f9fa;
+    color: #495057;
+    border-radius: 20px 20px 20px 5px;
+    padding: 15px 20px;
+    border-left: 4px solid #667eea;
+}
+
+.message-text {
+    margin-bottom: 5px;
+    line-height: 1.5;
+}
+
+.message-time {
+    font-size: 0.8em;
+    opacity: 0.7;
+    text-align: right;
+}
+
+.ai-message .message-time {
+    text-align: left;
+}
+
+.chat-input-area {
+    padding: 20px;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.input-container {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+#message-input {
+    flex: 1;
+    border: 2px solid #e9ecef;
+    border-radius: 15px;
+    padding: 15px;
+    font-size: 16px;
+    resize: none;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+}
+
+#message-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#send-button {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 15px;
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-width: 100px;
+}
+
+#send-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+#send-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 分析區域 */
+.analysis-section {
+    flex: 0 0 400px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    max-height: 700px;
+    overflow-y: auto;
+}
+
+.analysis-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.analysis-header h3 {
+    margin: 0;
+    color: #495057;
+    font-size: 1.3em;
+}
+
+.user-analysis-panel,
+.ai-analysis-panel {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border-left: 4px solid #667eea;
+}
+
+.user-analysis-panel h4,
+.ai-analysis-panel h4 {
+    margin: 0 0 15px 0;
+    color: #495057;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+.emotion-chart-container {
+    height: 200px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.emotion-details {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.emotion-summary {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.emotion-summary p {
+    margin: 5px 0;
+    font-size: 0.9em;
+}
+
+.emotion-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.emotion-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
+.emotion-name {
+    font-weight: bold;
+    color: #495057;
+}
+
+.emotion-percentage {
+    background: #667eea;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.emotion-comparison {
+    padding: 20px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-radius: 12px;
+    color: white;
+}
+
+.emotion-comparison h4 {
+    margin: 0 0 15px 0;
+    text-align: center;
+    font-size: 1.1em;
+}
+
+.comparison-content {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.comparison-summary p {
+    margin: 8px 0;
+    font-size: 0.9em;
+}
+
+.interaction-insight {
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    font-style: italic;
+    font-weight: bold;
+}
+
+.no-data {
+    text-align: center;
+    color: #6c757d;
+    font-style: italic;
+    margin: 20px 0;
+}
+
+/* 載入效果 */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #667eea;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-content p {
+    margin: 0;
+    color: #495057;
+    font-weight: bold;
+}
+
+/* 響應式設計 */
+@media (max-width: 1200px) {
+    .emotion-ai-main {
+        flex-direction: column;
+    }
+    
+    .analysis-section {
+        flex: none;
+        max-height: none;
+    }
+    
+    .emotion-ai-main {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .emotion-ai-container {
+        padding: 10px;
+    }
+    
+    .emotion-ai-header h1 {
+        font-size: 2em;
+    }
+    
+    .chat-messages {
+        max-height: 400px;
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+    
+    .analysis-section {
+        padding: 15px;
+    }
+    
+    .user-analysis-panel,
+    .ai-analysis-panel {
+        padding: 15px;
+    }
+}
+
+/* 自定義滾動條 */
+.chat-messages::-webkit-scrollbar,
+.analysis-section::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track,
+.analysis-section::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb,
+.analysis-section::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover,
+.analysis-section::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* 動畫效果 */
+.message {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.emotion-item {
+    transition: background-color 0.2s ease;
+}
+
+.emotion-item:hover {
+    background: #e9ecef;
+}
+
+/* Chart.js 自定義樣式 */
+.emotion-chart-container canvas {
+    max-width: 100%;
+    height: auto;
+}

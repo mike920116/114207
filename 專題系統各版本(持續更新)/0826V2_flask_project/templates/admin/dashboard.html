@@ -1,0 +1,98 @@
+﻿{% extends 'admin/layout.html' %}
+
+{% block title %}Admin ─ 儀表板{% endblock %}
+
+{% block content %}
+  <div class="admin-content">
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <h1 class="page-title">管理員儀表板</h1>
+    </div>
+
+    <!-- 統計卡片 -->
+    <div class="stats-grid">
+      
+      <!-- 使用者統計 -->
+      <div class="dashboard-card" data-stat="user_count">
+        <div class="card-icon users">👥</div>
+        <div class="card-title">系統總使用者</div>
+        <div class="card-value">{{ user_count or 0 }}</div>
+        <div class="card-trend">+{{ new_users_today or 0 }} 今日新增</div>
+      </div>
+
+      <!-- 日記統計 -->
+      <div class="dashboard-card" data-stat="diary_count">
+        <div class="card-icon diary">📝</div>
+        <div class="card-title">日記總數</div>
+        <div class="card-value">{{ diary_count or 0 }}</div>
+        <div class="card-trend">+{{ new_diaries_today or 0 }} 今日新增</div>
+      </div>
+
+      <!-- 舉報統計 -->
+      <div class="dashboard-card" data-stat="total_reports">
+        <div class="card-icon reports">🛡️</div>
+        <div class="card-title">總舉報數</div>
+        <div class="card-value">{{ total_reports or 0 }}</div>
+        <div class="card-trend">+{{ new_reports_today or 0 }} 今日新增</div>
+      </div>
+
+      <!-- 待處理舉報 -->
+      <div class="dashboard-card" data-stat="pending_reports">
+        <div class="card-icon pending">⚠️</div>
+        <div class="card-title">待處理舉報</div>
+        <div class="card-value">{{ pending_reports or 0 }}</div>
+        <div class="card-trend warning">需要關注</div>
+      </div>
+
+    </div>
+
+    <!-- 最近活動 -->
+    {% if recent_reports or recent_users %}
+    <div class="recent-section">
+      <h2 class="section-title">最近活動</h2>
+
+      <div class="activity-grid">
+        
+    <!-- ── 最新舉報 ───────────────────────────────── -->
+          {% if recent_reports %}
+          <div class="dashboard-card activity-card">
+            <h3 class="section-title">最新舉報</h3>
+            <div class="activity-list">
+              {% for report in recent_reports %}
+              <div class="activity-entry">
+                <div class="activity-entry-title">
+                  {{ report.Theme[:40] }}{% if report.Theme|length > 40 %}...{% endif %}
+                </div>
+                <div class="activity-entry-meta">
+                  由 {{ report.Reporter_Name }} 舉報 - {{ report.Created_at.strftime('%m/%d %H:%M') }}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            <a href="{{ url_for('admin.admin_reports') }}" class="activity-link">查看全部 →</a>
+          </div>
+          {% endif %}
+
+             <!-- ── 新註冊使用者 ──────────────────────────────── -->
+          {% if recent_users %}
+          <div class="dashboard-card activity-card">
+            <h3 class="section-title">新註冊使用者</h3>
+            <div class="activity-list">
+              {% for user in recent_users %}
+              <div class="activity-entry">
+                <div class="activity-entry-title">{{ user.Username }}</div>
+                <div class="activity-entry-meta">
+                  {{ user.Email }} - {{ user.Created_at.strftime('%m/%d %H:%M') }}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            <a href="{{ url_for('admin.admin_users') }}" class="activity-link">查看全部 →</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endblock %}
+

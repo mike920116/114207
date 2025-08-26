@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>滾動條預留區域和樣式回滾測試</title>
+    <link rel="stylesheet" href="static/css/modules/ai/emotion_ai.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a2e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        /* 添加夜間主題 */
+        body.night-theme .glass-panel {
+            background: rgba(15, 15, 80, 0.6);
+            border-color: rgba(173, 216, 230, 0.4);
+            box-shadow: 0 8px 32px rgba(72, 61, 139, 0.3);
+            backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="night-theme">
+    <!-- 原型C的背景動畫系統 -->
+    <div class="particle-background" id="particleBackground"></div>
+    <div class="rainbow-overlay"></div>
+
+    <!-- 三欄布局容器 -->
+    <div class="emotion-three-column-container">
+        <!-- 左側面板 -->
+        <div class="left-panel glass-panel" id="leftPanel">
+            <button class="panel-toggle-btn" id="leftPanelToggle" title="收起/展開左側面板">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="autonomous-left-header">
+                <h3>🧭 例行探索</h3>
+            </div>
+            <div class="panel-content">
+                <div class="exploration-section">
+                    <!-- 洞察補充 -->
+                    <div class="exploration-item">
+                        <h5><i class="fas fa-lightbulb"></i> 洞察補充</h5>
+                        <div class="placeholder-area">功能開發中...</div>
+                    </div>
+                    
+                    <!-- 收藏小抽屜 -->
+                    <div class="exploration-item">
+                        <h5><i class="fas fa-heart"></i> 收藏小抽屜</h5>
+                        <div class="placeholder-area">功能開發中...</div>
+                    </div>
+                    
+                    <!-- 推薦目標 (特殊樣式) -->
+                    <div class="exploration-item recommended-goals">
+                        <h5><i class="fas fa-target"></i> 推薦目標</h5>
+                        <div class="placeholder-area">功能開發中...</div>
+                    </div>
+                    
+                    <!-- 每日提示 -->
+                    <div class="exploration-item">
+                        <h5><i class="fas fa-calendar-day"></i> 每日提示</h5>
+                        <div class="placeholder-area">功能開發中...</div>
+                    </div>
+                    
+                    <!-- 添加更多項目來測試滾動 -->
+                    <div class="exploration-item">
+                        <h5><i class="fas fa-star"></i> 測試項目1</h5>
+                        <div class="placeholder-area">測試滾動條效果...</div>
+                    </div>
+                    
+                    <div class="exploration-item">
+                        <h5><i class="fas fa-star"></i> 測試項目2</h5>
+                        <div class="placeholder-area">測試滾動條效果...</div>
+                    </div>
+                    
+                    <div class="exploration-item">
+                        <h5><i class="fas fa-star"></i> 測試項目3</h5>
+                        <div class="placeholder-area">測試滾動條效果...</div>
+                    </div>
+                    
+                    <div class="exploration-item">
+                        <h5><i class="fas fa-star"></i> 測試項目4</h5>
+                        <div class="placeholder-area">測試滾動條效果...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 中央聊天區域 -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <h2>🎭 情緒AI聊天助手</h2>
+            </div>
+            <div class="chat-box" id="chat-box">
+                <p style="color: white; text-align: center; padding: 50px;">中央聊天區域</p>
+            </div>
+            <div class="chat-input-area">
+                <textarea placeholder="測試輸入框..." rows="1"></textarea>
+                <button><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        
+        <!-- 右側面板 -->
+        <div class="right-panel glass-panel" id="rightPanel">
+            <button class="panel-toggle-btn" id="rightPanelToggle" title="收起/展開右側面板">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <div class="autonomous-right-header">
+                <h3>♕ 今日導覽</h3>
+            </div>
+            <div class="panel-content">
+                <!-- 插圖動畫區塊 -->
+                <div class="illustration-area" id="illustrationArea">
+                    <div class="illustration-placeholder">
+                        <i class="fas fa-image"></i>
+                        <span>插圖動畫區域</span>
+                    </div>
+                </div>
+                
+                <!-- 日期和模式顯示 -->
+                <div class="date-mode-display">
+                    <div class="current-date" id="currentDate">2025年8月25日</div>
+                    <div class="current-mode" id="currentMode">夜間反思</div>
+                    <button class="time-settings-btn" id="timeSettingsBtn" title="設定日夜時間">
+                        <i class="fas fa-clock"></i>
+                    </button>
+                </div>
+                
+                <!-- 主題切換按鈕 -->
+                <div class="theme-controls" id="themeControls">
+                    <h4>
+                        🎨 主題切換
+                        <button class="theme-toggle-btn" id="themeToggleBtn" title="展開/收合主題選項">
+                            <i class="fas fa-chevron-up"></i>
+                        </button>
+                    </h4>
+                    <div class="theme-buttons">
+                        <button class="theme-btn" data-theme="day" title="白天模式">☀️</button>
+                        <button class="theme-btn" data-theme="sunset" title="黃昏模式">🌅</button>
+                        <button class="theme-btn" data-theme="night" title="夜晚模式">🌙</button>
+                    </div>
+                </div>
+                
+                <!-- 目標序列區域 -->
+                <div class="goal-sequence-area">
+                    <h4>🎯 目標序列</h4>
+                    <div class="goal-sequence-placeholder">
+                        <div class="placeholder-content">
+                            <i class="fas fa-list-ol"></i>
+                            <span>目標項目預留區域</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 其他功能預留區域 -->
+                <div class="future-features">
+                    <p class="placeholder-text">更多功能開發中...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 簡單的主題切換展開/收合功能測試
+        document.getElementById('themeToggleBtn')?.addEventListener('click', function() {
+            const themeControls = document.getElementById('themeControls');
+            const icon = this.querySelector('i');
+            
+            if (themeControls.classList.contains('collapsed')) {
+                themeControls.classList.remove('collapsed');
+                icon.className = 'fas fa-chevron-up';
+                this.title = '收合主題選項';
+            } else {
+                themeControls.classList.add('collapsed');
+                icon.className = 'fas fa-chevron-down';
+                this.title = '展開主題選項';
+            }
+        });
+    </script>
+</body>
+</html>
