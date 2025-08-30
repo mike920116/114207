@@ -1,5 +1,99 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  /* --- 時間格式化函數 --- */
+  function formatRelativeTime(dateString) {
+    try {
+      // 處理不同的日期格式
+      let date;
+      if (dateString.includes('T')) {
+        // ISO 格式: 2025-08-30T14:30:00
+        date = new Date(dateString);
+      } else if (dateString.includes('-') && dateString.includes(':')) {
+        // 標準格式: 2025-08-30 14:30:00
+        date = new Date(dateString.replace(' ', 'T'));
+      } else {
+        // 其他格式嘗試直接解析
+        date = new Date(dateString);
+      }
+      
+      // 檢查日期是否有效
+      if (isNaN(date.getTime())) {
+        console.warn('[WARNING] 無效的日期格式:', dateString);
+        return dateString; // 返回原始字符串
+      }
+      
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffSeconds = Math.floor(diffMs / 1000);
+      const diffMinutes = Math.floor(diffSeconds / 60);
+      const diffHours = Math.floor(diffMinutes / 60);
+      const diffDays = Math.floor(diffHours / 24);
+      const diffWeeks = Math.floor(diffDays / 7);
+      const diffMonths = Math.floor(diffDays / 30);
+      const diffYears = Math.floor(diffDays / 365);
+      
+      // 處理未來時間（可能因為時區差異）
+      if (diffMs < 0) {
+        return '剛剛';
+      }
+      
+      // 根據時間差返回相對時間
+      if (diffSeconds < 30) {
+        return '剛剛';
+      } else if (diffSeconds < 60) {
+        return `${diffSeconds}秒前`;
+      } else if (diffMinutes < 60) {
+        return `${diffMinutes}分鐘前`;
+      } else if (diffHours < 24) {
+        return `${diffHours}小時前`;
+      } else if (diffDays < 7) {
+        return `${diffDays}天前`;
+      } else if (diffWeeks < 4) {
+        return `${diffWeeks}週前`;
+      } else if (diffMonths < 12) {
+        return `${diffMonths}個月前`;
+      } else {
+        return `${diffYears}年前`;
+      }
+    } catch (error) {
+      console.error('[ERROR] 時間格式化錯誤:', error, '原始時間:', dateString);
+      return dateString; // 返回原始字符串作為備用
+    }
+  }
+
+  /* --- 更新所有時間顯示 --- */
+  function updateAllTimeDisplays() {
+    // 更新留言時間
+    document.querySelectorAll('.comment-time').forEach(timeElement => {
+      const originalTime = timeElement.getAttribute('data-original-time') || timeElement.textContent;
+      if (!timeElement.getAttribute('data-original-time')) {
+        timeElement.setAttribute('data-original-time', originalTime);
+      }
+      const formattedTime = formatRelativeTime(originalTime);
+      timeElement.textContent = formattedTime;
+      timeElement.title = `發布於: ${originalTime}`; // 添加工具提示顯示完整時間
+    });
+    
+    // 更新貼文時間（如果需要的話）
+    document.querySelectorAll('.post-card header span').forEach(timeElement => {
+      if (timeElement.textContent.match(/\d{4}-\d{2}-\d{2}/)) {
+        const originalTime = timeElement.getAttribute('data-original-time') || timeElement.textContent;
+        if (!timeElement.getAttribute('data-original-time')) {
+          timeElement.setAttribute('data-original-time', originalTime);
+        }
+        const formattedTime = formatRelativeTime(originalTime);
+        timeElement.textContent = formattedTime;
+        timeElement.title = `發布於: ${originalTime}`;
+      }
+    });
+  }
+
+  // 頁面載入時立即更新時間
+  updateAllTimeDisplays();
+  
+  // 每分鐘更新一次時間顯示
+  setInterval(updateAllTimeDisplays, 60000);
+
   /* --- 表情符號備用方案檢測 --- */
   function checkEmojiSupport() {
     // 檢測瀏覽器是否支援表情符號
@@ -52,19 +146,343 @@ document.addEventListener('DOMContentLoaded', () => {
   // 執行表情符號檢測
   checkEmojiSupport();
 
-  /* --- 按讚與檢舉 (示範) --- */
+  /* --- 按讚與留言功能 --- */
   document.querySelectorAll('.like-btn').forEach(likeButton => {
-    likeButton.addEventListener('click', () => {
-      const currentText = likeButton.textContent;
-      const currentLikes = parseInt(currentText.replace(/\D/g,'')) + 1;
-      const emojiOrText = currentText.includes('👍') ? '👍' : '[讚]';
-      likeButton.innerHTML = `<span class="btn-emoji">${emojiOrText}</span> ${currentLikes}`;
+    likeButton.addEventListener('click', function() {
+      const postId = this.dataset.postId;
+      const isLiked = this.dataset.liked === 'true';
+      
+      // 防止重複點擊
+      this.disabled = true;
+      
+      fetch(`/social/toggle_like/${postId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // 更新按讚狀態
+          this.dataset.liked = data.is_liked;
+          const emoji = this.querySelector('.btn-emoji');
+          emoji.textContent = data.is_liked ? '👍' : '🤍';
+          
+          // 更新按讚數量
+          this.innerHTML = `<span class="btn-emoji">${data.is_liked ? '👍' : '🤍'}</span> ${data.likes_count}`;
+          
+          // 檢查是否有等級升級
+          if (data.level_up) {
+            showLevelUpNotification(data.level_up);
+          }
+          
+          // 更新等級統計
+          updateUserStats();
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 按讚操作失敗:', error);
+        alert('操作失敗，請稍後再試');
+      })
+      .finally(() => {
+        this.disabled = false;
+      });
     });
   });
 
-  document.querySelectorAll('.report-btn').forEach(reportButton => {
-    reportButton.addEventListener('click', () => alert('已送出檢舉 (demo)'));
+  // 留言按鈕功能
+  document.querySelectorAll('.comment-btn').forEach(commentButton => {
+    commentButton.addEventListener('click', function() {
+      const postId = this.dataset.postId;
+      const commentsSection = document.getElementById(`comments-${postId}`);
+      
+      if (commentsSection.style.display === 'none' || !commentsSection.style.display) {
+        // 顯示留言區
+        commentsSection.style.display = 'block';
+        loadComments(postId);
+      } else {
+        // 隱藏留言區
+        commentsSection.style.display = 'none';
+      }
+    });
   });
+
+  // 關閉留言區按鈕
+  document.querySelectorAll('.close-comments').forEach(closeButton => {
+    closeButton.addEventListener('click', function() {
+      const postId = this.dataset.postId;
+      const commentsSection = document.getElementById(`comments-${postId}`);
+      commentsSection.style.display = 'none';
+    });
+  });
+
+  // 留言表單提交
+  document.querySelectorAll('.comment-form').forEach(commentForm => {
+    const textarea = commentForm.querySelector('textarea[name="content"]');
+    const charCount = commentForm.querySelector('.char-count');
+    const submitBtn = commentForm.querySelector('.submit-comment-btn');
+    const replyIndicator = commentForm.querySelector('.reply-indicator');
+    const cancelReplyBtn = commentForm.querySelector('.cancel-reply');
+    const replyToIdInput = commentForm.querySelector('input[name="reply_to_id"]');
+    const replyToUsernameInput = commentForm.querySelector('input[name="reply_to_username"]');
+    
+    // 字數統計
+    textarea.addEventListener('input', function() {
+      const currentLength = this.value.length;
+      charCount.textContent = currentLength;
+      
+      // 字數警告樣式
+      charCount.className = 'char-count';
+      if (currentLength > 400) {
+        charCount.classList.add('danger');
+        submitBtn.disabled = true;
+      } else if (currentLength > 300) {
+        charCount.classList.add('warning');
+        submitBtn.disabled = false;
+      } else {
+        submitBtn.disabled = false;
+      }
+    });
+    
+    // 取消回覆
+    if (cancelReplyBtn) {
+      cancelReplyBtn.addEventListener('click', function() {
+        replyIndicator.style.display = 'none';
+        replyToIdInput.value = '';
+        replyToUsernameInput.value = '';
+        textarea.placeholder = '寫下您的留言...';
+        textarea.focus();
+      });
+    }
+    
+    // 表單提交
+    commentForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const postId = this.dataset.postId;
+      const content = textarea.value.trim();
+      const replyToId = replyToIdInput.value;
+      const replyToUsername = replyToUsernameInput.value;
+      
+      if (!content) {
+        alert('請輸入留言內容');
+        return;
+      }
+      
+      if (content.length > 500) {
+        alert('留言內容不能超過500字');
+        return;
+      }
+      
+      // 禁用提交按鈕
+      submitBtn.disabled = true;
+      submitBtn.textContent = '發送中...';
+      
+      const formData = new FormData();
+      formData.append('content', content);
+      if (replyToId) {
+        formData.append('reply_to_id', replyToId);
+        formData.append('reply_to_username', replyToUsername);
+      }
+      
+      fetch(`/social/add_comment/${postId}`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // 清空表單
+          textarea.value = '';
+          charCount.textContent = '0';
+          
+          // 隱藏回覆指示器
+          if (replyIndicator) {
+            replyIndicator.style.display = 'none';
+            replyToIdInput.value = '';
+            replyToUsernameInput.value = '';
+            textarea.placeholder = '寫下您的留言...';
+          }
+          
+          // 添加新留言到列表
+          addCommentToList(postId, data.comment);
+          
+          // 更新留言數量
+          updateCommentCount(postId, data.comments_count);
+          
+          // 檢查是否有等級升級
+          if (data.level_up) {
+            showLevelUpNotification(data.level_up);
+          }
+          
+          // 更新等級統計
+          updateUserStats();
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 留言失敗:', error);
+        alert('留言失敗，請稍後再試');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '發送';
+      });
+    });
+  });
+
+  // 載入留言
+  function loadComments(postId) {
+    fetch(`/social/get_comments/${postId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          const commentsList = document.getElementById(`comments-list-${postId}`);
+          
+          if (data.comments.length === 0) {
+            commentsList.innerHTML = `
+              <div class="no-comments">
+                <p>目前還沒有留言，成為第一個留言的人吧！</p>
+              </div>
+            `;
+          } else {
+            commentsList.innerHTML = data.comments.map(comment => 
+              createCommentHTML(comment)
+            ).join('');
+            
+            // 重新綁定回覆按鈕事件
+            bindReplyButtons(postId);
+            
+            // 更新時間顯示
+            updateAllTimeDisplays();
+          }
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 載入留言失敗:', error);
+      });
+  }
+
+  // 創建留言 HTML
+  function createCommentHTML(comment) {
+    const replyInfo = comment.reply_to_username ? 
+      `<div class="reply-info">
+        <span class="reply-prefix">回覆</span>
+        <span class="reply-target">${comment.reply_to_username}</span>：
+      </div>` : '';
+    
+    // 格式化時間顯示
+    const formattedTime = formatRelativeTime(comment.created_at);
+    
+    return `
+      <div class="comment-item" data-comment-id="${comment.comment_id}">
+        <div class="comment-header">
+          <strong class="comment-author">${comment.username}</strong>
+          <span class="comment-time" data-original-time="${comment.created_at}" title="發布於: ${comment.created_at}">${formattedTime}</span>
+          <button class="reply-comment-btn" data-comment-id="${comment.comment_id}" data-username="${comment.username}">回覆</button>
+        </div>
+        ${replyInfo}
+        <div class="comment-content">${comment.content}</div>
+      </div>
+    `;
+  }
+
+  // 添加留言到列表
+  function addCommentToList(postId, comment) {
+    const commentsList = document.getElementById(`comments-list-${postId}`);
+    const noComments = commentsList.querySelector('.no-comments');
+    
+    if (noComments) {
+      noComments.remove();
+    }
+    
+    const newCommentHTML = createCommentHTML(comment);
+    commentsList.insertAdjacentHTML('beforeend', newCommentHTML);
+    
+    // 綁定新留言的回覆按鈕
+    const newComment = commentsList.lastElementChild;
+    const replyBtn = newComment.querySelector('.reply-comment-btn');
+    bindSingleReplyButton(replyBtn, postId);
+    
+    // 滾動到新留言
+    newComment.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    
+    // 更新時間顯示
+    updateAllTimeDisplays();
+  }
+
+  // 綁定回覆按鈕事件
+  function bindReplyButtons(postId) {
+    const commentsList = document.getElementById(`comments-list-${postId}`);
+    const replyButtons = commentsList.querySelectorAll('.reply-comment-btn');
+    
+    replyButtons.forEach(btn => {
+      bindSingleReplyButton(btn, postId);
+    });
+  }
+
+  // 綁定單個回覆按鈕事件
+  function bindSingleReplyButton(replyBtn, postId) {
+    if (!replyBtn || replyBtn.hasAttribute('data-bound')) return;
+    
+    replyBtn.setAttribute('data-bound', 'true');
+    replyBtn.addEventListener('click', function() {
+      const commentId = this.dataset.commentId;
+      const username = this.dataset.username;
+      
+      // 找到對應的留言表單
+      const commentForm = document.querySelector(`[data-post-id="${postId}"].comment-form`);
+      if (!commentForm) return;
+      
+      const textarea = commentForm.querySelector('textarea[name="content"]');
+      const replyIndicator = commentForm.querySelector('.reply-indicator');
+      const replyTarget = commentForm.querySelector('.reply-target');
+      const replyToIdInput = commentForm.querySelector('input[name="reply_to_id"]');
+      const replyToUsernameInput = commentForm.querySelector('input[name="reply_to_username"]');
+      
+      // 設置回覆信息
+      replyToIdInput.value = commentId;
+      replyToUsernameInput.value = username;
+      replyTarget.textContent = username;
+      replyIndicator.style.display = 'flex';
+      
+      // 更新文本域佔位符
+      textarea.placeholder = `回覆 ${username}...`;
+      textarea.focus();
+      
+      // 滾動到表單
+      commentForm.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
+
+  // 初始化時綁定已存在的回覆按鈕
+  document.querySelectorAll('.reply-comment-btn').forEach(btn => {
+    const postCard = btn.closest('.post-card');
+    if (postCard) {
+      const postId = postCard.dataset.postId;
+      bindSingleReplyButton(btn, postId);
+    }
+  });
+
+  // 更新留言數量
+  function updateCommentCount(postId, count) {
+    const commentBtn = document.querySelector(`[data-post-id="${postId}"].comment-btn`);
+    if (commentBtn) {
+      const emoji = commentBtn.querySelector('.btn-emoji');
+      commentBtn.innerHTML = `<span class="btn-emoji">${emoji.textContent}</span> ${count}`;
+    }
+  }
+
+  // 更新用戶統計
+  function updateUserStats() {
+    // 重新載入等級信息以更新統計數據
+    loadUserLevelInfo();
+    showMyContributionsStats();
+  }
 
   /* --- 心情分類和我的貢獻篩選 --- */
   const filterTags = document.querySelectorAll('.tag');
