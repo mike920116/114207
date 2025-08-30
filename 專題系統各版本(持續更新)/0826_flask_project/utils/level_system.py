@@ -18,7 +18,7 @@
 7. 💎 傳奇貢獻者 (2500分) - 傳奇人物
 
 積分計算公式：
-總積分 = (發文數量 × 10) + (獲讚數量 × 3) + (評論數量 × 5) + (登入天數 × 2)
+總積分 = (發文數量 × 10) + (獲讚數量 × 3) + (被留言數量 × 5) + (登入天數 × 2)
 """
 
 from datetime import datetime, date
@@ -96,20 +96,20 @@ class UserLevelSystem:
     }
     
     @classmethod
-    def calculate_points(cls, posts_count=0, likes_received=0, comments_made=0, login_days=0):
+    def calculate_points(cls, posts_count=0, likes_received=0, comments_received=0, login_days=0):
         """
         計算用戶總積分
         
         Args:
             posts_count (int): 發文數量
             likes_received (int): 獲得讚數
-            comments_made (int): 發表評論數
+            comments_received (int): 被其他人留言數量
             login_days (int): 登入天數
             
         Returns:
             int: 總積分
         """
-        return (posts_count * 10) + (likes_received * 3) + (comments_made * 5) + (login_days * 2)
+        return (posts_count * 10) + (likes_received * 3) + (comments_received * 5) + (login_days * 2)
     
     @classmethod
     def get_level_by_points(cls, points):
@@ -241,9 +241,13 @@ def update_user_level_and_stats(user_email, db_connection=None):
         """, (user_email,))
         likes_received = cursor.fetchone()[0]
         
-        # 3. 發表的評論數
-        cursor.execute("SELECT COUNT(*) FROM Comments WHERE User_Email = %s", (user_email,))
-        comments_made = cursor.fetchone()[0]
+        # 3. 用戶貼文被其他人評論的數量（不包括自己的評論）
+        cursor.execute("""
+            SELECT COUNT(*) FROM Comments c 
+            JOIN Posts p ON c.Post_id = p.Post_id 
+            WHERE p.User_Email = %s AND p.Is_public = TRUE AND c.User_Email != %s
+        """, (user_email, user_email))
+        comments_received = cursor.fetchone()[0]
         
         # 4. 登入天數（簡化處理，基於註冊時間計算）
         cursor.execute("SELECT DATEDIFF(NOW(), Created_at) + 1 FROM User WHERE User_Email = %s", (user_email,))
@@ -251,7 +255,7 @@ def update_user_level_and_stats(user_email, db_connection=None):
         login_days = result[0] if result else 1
         
         # 計算總積分
-        total_points = UserLevelSystem.calculate_points(posts_count, likes_received, comments_made, login_days)
+        total_points = UserLevelSystem.calculate_points(posts_count, likes_received, comments_received, login_days)
         
         # 計算等級
         new_level = UserLevelSystem.get_level_by_points(total_points)
@@ -272,7 +276,7 @@ def update_user_level_and_stats(user_email, db_connection=None):
                 login_days = %s,
                 last_level_update = %s
             WHERE User_Email = %s
-        """, (new_level, total_points, posts_count, likes_received, comments_made, login_days, datetime.now(), user_email))
+        """, (new_level, total_points, posts_count, likes_received, comments_received, login_days, datetime.now(), user_email))
         
         # 如果等級提升，記錄歷史
         if new_level > old_level:
@@ -296,7 +300,7 @@ def update_user_level_and_stats(user_email, db_connection=None):
             'stats': {
                 'posts_count': posts_count,
                 'likes_received': likes_received,
-                'comments_made': comments_made,
+                'comments_received': comments_received,
                 'login_days': login_days
             }
         }
@@ -364,7 +368,7 @@ def get_user_level_info(user_email, db_connection=None):
                 'stats': {
                     'posts_count': posts,
                     'likes_received': likes,
-                    'comments_made': comments,
+                    'comments_received': comments,
                     'login_days': days
                 }
             }

@@ -189,70 +189,104 @@ def fix_json_syntax(text):
     return text
 
 def parse_dify_response(response_text):
-    """解析Dify API回應，提取AI回覆和情緒分析"""
+    """
+    解析Dify API回應，提取AI回覆、情緒分析和側邊欄推薦。
+    處理包含多個JSON區塊和Markdown標記的複雜格式，以及外層JSON結構。
+    """
     safe_log(f"[JSON解析] 開始解析響應，長度: {len(response_text)}")
     
-    cleaned_text = response_text.strip()
-    
     try:
-        # 處理外層大括號包裝的格式
-        if cleaned_text.startswith('{\n  {') and cleaned_text.endswith('}\n}'):
-            inner_content = cleaned_text[2:-2].strip()
-            cleaned_text = '[' + inner_content + ']'
-            safe_log("[JSON解析] 檢測到外層大括號格式，已轉換為數組")
-        
+        # 方法1: 嘗試直接解析整個回應為JSON對象
         try:
-            data = json.loads(cleaned_text)
+            data = json.loads(response_text)
+            if isinstance(data, dict):
+                # 檢查是否有標準的結構
+                main_payload_raw = data.get('main_payload', {})
+                sidebar_reco_raw = data.get('sidebar_reco')
+                
+                # 處理 main_payload 中可能包含的 ```json 區塊
+                main_payload = {}
+                if isinstance(main_payload_raw, dict):
+                    main_payload = main_payload_raw.copy()
+                elif isinstance(main_payload_raw, str):
+                    # 如果 main_payload 是字符串，嘗試解析其中的 JSON 區塊
+                    json_blocks = re.findall(r"```json\s*(\{.*?\})\s*```", main_payload_raw, re.DOTALL)
+                    for block in json_blocks:
+                        try:
+                            block_data = json.loads(block)
+                            main_payload.update(block_data)
+                        except json.JSONDecodeError:
+                            continue
+                
+                # 處理 sidebar_reco
+                sidebar_reco = None
+                if isinstance(sidebar_reco_raw, dict):
+                    sidebar_reco = sidebar_reco_raw
+                elif isinstance(sidebar_reco_raw, str):
+                    # 如果 sidebar_reco 是字符串，嘗試解析其中的 JSON 區塊
+                    json_match = re.search(r"```json\s*(\{.*?\})\s*```", sidebar_reco_raw, re.DOTALL)
+                    if json_match:
+                        try:
+                            sidebar_reco = json.loads(json_match.group(1))
+                        except json.JSONDecodeError:
+                            pass
+                
+                safe_log(f"[JSON解析] 方法1成功: main_payload鍵: {list(main_payload.keys())}, sidebar_reco: {'存在' if sidebar_reco else '不存在'}")
+                return {
+                    "main_payload": main_payload,
+                    "sidebar_reco": sidebar_reco
+                }
         except json.JSONDecodeError:
-            fixed_text = _fix_common_json_issues(cleaned_text)
-            data = json.loads(fixed_text)
-            safe_log("[JSON解析] 使用修復後的JSON成功解析")
+            safe_log("[JSON解析] 方法1失敗，嘗試方法2")
         
-        if isinstance(data, dict):
-            data = [data]
-        elif not isinstance(data, list):
-            raise ValueError("解析結果不是預期的格式")
+        # 方法2: 使用正則表達式提取所有被 ```json ... ``` 包圍的區塊
+        json_blocks = re.findall(r"```json\s*(\{.*?\})\s*```", response_text, re.DOTALL)
         
-        # 提取數據
-        ai_response = ""
-        user_analysis = {}
-        ai_analysis = {}
+        if not json_blocks:
+            safe_log("[JSON解析] 警告: 在回應中未找到任何 ```json ... ``` 區塊。")
+            raise ValueError("回應中不包含有效的JSON區塊。")
+
+        # 解析每個JSON區塊並分類處理
+        main_payload = {}
+        sidebar_reco = None
         
-        for obj in data:
-            if not isinstance(obj, dict):
-                continue
+        for block in json_blocks:
+            try:
+                data = json.loads(block)
                 
-            if 'response_from_ai' in obj:
-                ai_response = obj['response_from_ai']
-                
-            elif 'analysis_for_user' in obj:
-                user_data = obj['analysis_for_user']
-                if isinstance(user_data, dict) and user_data.get('primary_emotions'):
-                    user_analysis = _normalize_emotion_analysis(user_data)
+                # 檢查是否為 sidebar_reco（包含 summary 和 items）
+                if isinstance(data, dict) and 'summary' in data and 'items' in data:
+                    sidebar_reco = data
+                    safe_log(f"[JSON解析] 找到 sidebar_reco: {data.get('summary', '')[:50]}...")
+                else:
+                    # 其他所有區塊合併到 main_payload
+                    main_payload.update(data)
+                    safe_log(f"[JSON解析] 合併到 main_payload: {list(data.keys())}")
                     
-            elif 'analysis_for_ai' in obj:
-                ai_data = obj['analysis_for_ai']
-                if isinstance(ai_data, dict) and ai_data.get('primary_emotions'):
-                    ai_analysis = _normalize_emotion_analysis(ai_data)
+            except json.JSONDecodeError as e:
+                safe_log(f"[JSON解析] 解析其中一個JSON區塊時出錯: {e}\n問題區塊: {block[:200]}...")
+                continue
         
-        if not ai_response:
-            safe_log("[JSON解析] 警告: 未找到AI回應")
-            ai_response = "抱歉，我現在無法分析您的情緒。"
-            
-        if not user_analysis:
-            user_analysis = generate_default_analysis()
-            safe_log("[JSON解析] 用戶情緒分析使用默認值")
-            
-        if not ai_analysis:
-            ai_analysis = generate_default_analysis()
-            safe_log("[JSON解析] AI情緒分析使用默認值")
-        
-        safe_log("[JSON解析] 解析成功完成")
-        return user_analysis, ai_response, ai_analysis
-        
+        # 檢查提取的數據是否完整
+        if not main_payload and not sidebar_reco:
+             raise ValueError("無法從解析的數據中提取 main_payload 或 sidebar_reco。")
+
+        safe_log(f"[JSON解析] 方法2成功解析 {len(json_blocks)} 個JSON區塊，main_payload鍵: {list(main_payload.keys())}, sidebar_reco: {'存在' if sidebar_reco else '不存在'}")
+        return {
+            "main_payload": main_payload,
+            "sidebar_reco": sidebar_reco
+        }
+
     except Exception as e:
-        safe_log(f"[JSON解析] 解析失敗: {str(e)}")
-        return generate_default_analysis(), "抱歉，我現在無法分析您的情緒。", generate_default_analysis()
+        safe_log(f"[JSON解析] 處理Dify回應時發生嚴重錯誤: {e}")
+        return {
+            "main_payload": {
+                "response_from_ai": "抱歉，我無法正確解析AI的回應。",
+                "analysis_for_user": generate_default_analysis(),
+                "analysis_for_ai": generate_default_analysis()
+            },
+            "sidebar_reco": None
+        }
 
 def _fix_common_json_issues(json_str):
     """修復常見的JSON格式問題"""
@@ -331,6 +365,12 @@ def emotion_chat_page():
         user_avatar = user_data[0] if user_data and user_data[0] else None
         cursor.close()
         conn.close()
+        
+        # 如果有頭像路徑，確保它是完整的URL路徑
+        if user_avatar and not user_avatar.startswith(('http://', 'https://', '/')):
+            user_avatar = f'/static/icons/avatars/{user_avatar}'
+        
+        safe_log(f"[頁面載入] 用戶頭像路徑: {user_avatar}")
     except Exception as e:
         safe_log(f"[頁面載入] 獲取用戶頭像失敗: {str(e)}")
         user_avatar = None
@@ -366,15 +406,43 @@ def emotion_chat_api():
         # 處理API回應
         raw_answer = api_result.get('answer', '')
         if raw_answer:
-            user_analysis, ai_response, ai_analysis = parse_dify_response(raw_answer)
+            parsed_data = parse_dify_response(raw_answer)
+            main_payload = parsed_data.get('main_payload', {})
+            sidebar_reco = parsed_data.get('sidebar_reco')
         else:
-            user_analysis = generate_default_analysis()
-            ai_response = '抱歉，我無法處理您的請求。'
-            ai_analysis = generate_default_analysis()
-        
+            main_payload = {
+                "response_from_ai": '抱歉，我無法處理您的請求。',
+                "analysis_for_user": generate_default_analysis(),
+                "analysis_for_ai": generate_default_analysis()
+            }
+            sidebar_reco = None
+
         # 確保有AI回應
-        if not ai_response:
-            ai_response = '我理解您的感受，讓我們繼續對話。'
+        if not main_payload.get('response_from_ai'):
+            main_payload['response_from_ai'] = '我理解您的感受，讓我們繼續對話。'
+
+        # 如果沒有sidebar_reco，提供回滾推薦（與前端一致）
+        if not sidebar_reco:
+            sidebar_reco = {
+                'summary': '根據您的情緒狀態，為您推薦以下內容',
+                'items': [
+                    {
+                        'id': 'fallback_emotion_mgmt',
+                        'type': 'psychology',
+                        'title': '情緒管理技巧',
+                        'desc': '學習基本的情緒調節方法',
+                        'addable': True
+                    },
+                    {
+                        'id': 'fallback_mindfulness',
+                        'type': 'meditation',
+                        'title': '正念練習',
+                        'desc': '培養當下意識，提升情緒穩定性',
+                        'addable': True
+                    }
+                ]
+            }
+            safe_log("[API回應] 使用回滾sidebar_reco")
 
         safe_log(f"[情緒AI API] 處理成功，直接返回HTTP響應")
         
@@ -382,9 +450,8 @@ def emotion_chat_api():
         return jsonify({
             'success': True,
             'user_message': user_message,
-            'analysis_for_user': user_analysis,
-            'ai_response': ai_response,
-            'analysis_for_ai': ai_analysis
+            'main_payload': main_payload,
+            'sidebar_reco': sidebar_reco
         })
         
     except Exception as e:
@@ -452,7 +519,14 @@ def emotion_debug_api():
         # 步驟3: JSON結構解析過程
         raw_answer = api_result.get('answer', '')
         try:
-            user_analysis, ai_response, ai_analysis = parse_dify_response(raw_answer)
+            parsed_data = parse_dify_response(raw_answer)
+            main_payload = parsed_data.get('main_payload', {})
+            sidebar_reco = parsed_data.get('sidebar_reco')
+            
+            # 從 main_payload 中提取各個組件
+            ai_response = main_payload.get('response_from_ai', '')
+            user_analysis = main_payload.get('analysis_for_user')
+            ai_analysis = main_payload.get('analysis_for_ai')
             
             step3_data = {
                 "raw_answer": raw_answer,
@@ -460,12 +534,14 @@ def emotion_debug_api():
                 "user_analysis_found": bool(user_analysis and not is_default_analysis(user_analysis)),
                 "ai_response_found": bool(ai_response),
                 "ai_analysis_found": bool(ai_analysis and not is_default_analysis(ai_analysis)),
-                "parsing_method": "json_parsing_with_fallback"
+                "sidebar_reco_found": bool(sidebar_reco),
+                "parsing_method": "unified_json_parsing"
             }
         except Exception as e:
             user_analysis = generate_default_analysis()
             ai_response = '抱歉，我現在無法分析您的情緒。'
             ai_analysis = generate_default_analysis()
+            sidebar_reco = None
             
             step3_data = {
                 "raw_answer": raw_answer,
@@ -474,23 +550,39 @@ def emotion_debug_api():
                 "fallback_used": True
             }
 
-        # 步驟4: 洞察補充項目處理 (模擬實現)
-        sidebar_recommendations = generate_sidebar_recommendations(user_analysis, ai_response)
-        step4_data = {
-            "recommendations_generated": len(sidebar_recommendations),
-            "recommendation_types": [item.get('type') for item in sidebar_recommendations],
-            "processing_method": "emotion_based_generation",
-            "items": sidebar_recommendations
-        }
+        # 步驟4: 洞察補充項目處理
+        if sidebar_reco:
+            sidebar_recommendations = sidebar_reco.get('items', [])
+            step4_data = {
+                "recommendations_source": "dify_api",
+                "recommendations_generated": len(sidebar_recommendations),
+                "recommendation_types": [item.get('type') for item in sidebar_recommendations],
+                "summary": sidebar_reco.get('summary', ''),
+                "items": sidebar_recommendations
+            }
+        else:
+            sidebar_recommendations = generate_sidebar_recommendations(user_analysis, ai_response)
+            step4_data = {
+                "recommendations_source": "local_generation",
+                "recommendations_generated": len(sidebar_recommendations),
+                "recommendation_types": [item.get('type') for item in sidebar_recommendations],
+                "processing_method": "emotion_based_generation",
+                "items": sidebar_recommendations
+            }
 
         # 步驟5: 最終前端展示數據
         final_data = {
             'success': True,
             'user_message': user_message,
-            'analysis_for_user': user_analysis,
-            'ai_response': ai_response,
-            'analysis_for_ai': ai_analysis,
-            'sidebar_recommendations': sidebar_recommendations
+            'main_payload': {
+                'response_from_ai': ai_response,
+                'analysis_for_user': user_analysis,
+                'analysis_for_ai': ai_analysis
+            },
+            'sidebar_reco': sidebar_reco if sidebar_reco else {
+                'summary': '根據您的情緒狀態，為您推薦以下內容',
+                'items': sidebar_recommendations
+            }
         }
         
         step5_data = {
@@ -498,7 +590,7 @@ def emotion_debug_api():
             "user_emotions_count": len(user_analysis.get('primary_emotions', [])) if user_analysis else 0,
             "ai_emotions_count": len(ai_analysis.get('primary_emotions', [])) if ai_analysis else 0,
             "ai_response_length": len(ai_response),
-            "recommendations_count": len(sidebar_recommendations),
+            "recommendations_count": len(sidebar_recommendations) if not sidebar_reco else len(sidebar_reco.get('items', [])),
             "complete_data": final_data
         }
 
@@ -513,12 +605,14 @@ def emotion_debug_api():
         }
 
         # 洞察項目詳細檢視
+        final_sidebar_items = sidebar_reco.get('items', []) if sidebar_reco else sidebar_recommendations
         insight_items_detail = {
-            "items": sidebar_recommendations,
-            "total_items": len(sidebar_recommendations),
-            "addable_items": len([item for item in sidebar_recommendations if item.get('addable', True)]),
-            "item_types": list(set(item.get('type', 'unknown') for item in sidebar_recommendations)),
-            "summary_length": sum(len(item.get('desc', '')) for item in sidebar_recommendations)
+            "items": final_sidebar_items,
+            "total_items": len(final_sidebar_items),
+            "addable_items": len([item for item in final_sidebar_items if item.get('addable', True)]),
+            "item_types": list(set(item.get('type', 'unknown') for item in final_sidebar_items)),
+            "summary_length": sum(len(item.get('desc', '')) for item in final_sidebar_items),
+            "summary": sidebar_reco.get('summary', '本地生成的推薦') if sidebar_reco else '本地生成的推薦'
         }
 
         # 組合調試信息

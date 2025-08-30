@@ -5,6 +5,7 @@
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/ai/emotion_ai.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -28,13 +29,13 @@
         <div class="exploration-item insight-panel" id="insightPanel">
           <h5><i class="fas fa-lightbulb"></i> 洞察補充</h5>
           <div class="insight-content" id="insightContent">
-            <div class="insight-placeholder">開始對話後會顯示洞察補充</div>
+            <!-- 預設訊息將由JavaScript動態生成 -->
           </div>
         </div>
         
-        <!-- 收藏小抽屜 -->
+        <!-- 收納小冊 -->
         <div class="exploration-item favorites-drawer" id="favoritesDrawer">
-          <h5><i class="fas fa-heart"></i> 收藏小抽屜</h5>
+          <h5><i class="fas fa-book"></i> 收納小冊</h5>
           <div class="favorites-content" id="favoritesContent">
             <div class="favorites-placeholder">暫無收藏項目...</div>
           </div>
@@ -42,7 +43,7 @@
         
         <!-- 推薦目標 -->
         <div class="exploration-item recommended-goals">
-          <h5><i class="fas fa-target"></i> 推薦目標</h5>
+          <h5><i class="fas fa-target"></i>今日推薦目標</h5>
           <div class="recommended-goals-content" id="recommendedGoalsContent">
             <div class="goal-item-recommended" data-goal-id="skill">
               <div class="goal-content">
@@ -163,14 +164,14 @@
         <img src="{{ url_for('static', filename='icons/avatars/ai_avatar.png') }}" alt="AI頭像" class="avatar" onerror="this.src='https://placehold.co/40x40/4facfe/ffffff?text=AI'">
         <div class="message-content">
           <div class="name">情緒AI助手</div>
-          <p>你好，{{ current_user.username }}，我是您的情緒AI助手！我將分析您的情緒並與您進行深入對話。分享您的想法和感受吧～</p>
+          <p>你好呀 {{ current_user.username }}！您有沒有想討論什麼主題，或是怎麼開始嗎？</p>
           <div class="time" id="welcome-time"></div>
         </div>
       </div>
     </div>
     
-    <!-- 打字指示器 -->
-    <div class="typing-indicator" id="typingIndicator">
+    <!-- 打字指示器 (已改為動態創建，此元素保留但隱藏) -->
+    <div class="typing-indicator" id="typingIndicator" style="display: none;">
       <div class="message ai">
         <img src="{{ url_for('static', filename='icons/avatars/ai_avatar.png') }}" alt="AI頭像" class="avatar" onerror="this.src='https://placehold.co/40x40/4facfe/ffffff?text=AI'">
         <div class="message-content">
@@ -225,9 +226,9 @@
           </button>
         </h4>
         <div class="theme-buttons">
-          <button class="theme-btn" data-theme="day" title="白天模式">☀️</button>
-          <button class="theme-btn" data-theme="sunset" title="黃昏模式">🌅</button>
-          <button class="theme-btn" data-theme="night" title="夜晚模式">🌙</button>
+          <button class="theme-btn" data-theme="day" title="主題:晨星">☀️</button>
+          <button class="theme-btn" data-theme="sunset" title="主題:烈日">🌅</button>
+          <button class="theme-btn" data-theme="night" title="主題:夜森">🌙</button>
         </div>
       </div>
       
@@ -296,11 +297,22 @@
 <div id="emotion-analysis-panel" class="emotion-panel" style="display: none;">
   <div class="emotion-panel-header">
     <h3>📊 情緒分析</h3>
+    <div class="chart-controls">
+      <button id="chart-type-bar" class="chart-toggle-btn active" title="直方圖顯示">
+        <i class="fas fa-chart-bar"></i>
+      </button>
+      <button id="chart-type-pie" class="chart-toggle-btn" title="圓餅圖顯示">
+        <i class="fas fa-chart-pie"></i>
+      </button>
+    </div>
     <button id="close-emotion-panel" class="close-btn">×</button>
   </div>
   <div class="emotion-panel-content">
     <div id="emotion-summary" class="emotion-summary">
       <p>開始對話後會顯示情緒分析結果</p>
+    </div>
+    <div id="emotion-chart-container" class="emotion-chart-container" style="display: none;">
+      <canvas id="emotion-chart"></canvas>
     </div>
   </div>
 </div>
