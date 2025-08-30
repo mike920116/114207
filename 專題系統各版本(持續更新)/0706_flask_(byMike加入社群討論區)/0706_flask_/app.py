@@ -125,6 +125,7 @@ logging.basicConfig(
 # ── 啟動 ───────────────────────────────────
 
 if __name__ == '__main__':
+    print(" * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)")
     socketio.run(app, debug=True)
 else:
     # 生產環境：包裝 Socket.IO 以支援 WSGI 部署
