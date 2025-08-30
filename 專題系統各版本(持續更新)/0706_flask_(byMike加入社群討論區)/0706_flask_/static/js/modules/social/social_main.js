@@ -378,12 +378,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // 格式化時間顯示
     const formattedTime = formatRelativeTime(comment.created_at);
     
+    // 檢查是否為作者留言（需要從貼文卡片獲取作者資訊）
+    const postCard = document.querySelector(`[data-post-id="${comment.post_id}"]`);
+    const postAuthor = postCard ? postCard.querySelector('header strong').textContent : '';
+    const isAuthor = comment.username === postAuthor;
+    const authorBadge = isAuthor ? '<span class="author-badge">作者</span>' : '';
+    
+    // 檢查是否為當前用戶的留言（用於顯示編輯/刪除按鈕）
+    const isCurrentUser = comment.user_email === currentUserEmail; // 需要在頁面中定義currentUserEmail
+    const commentActions = isCurrentUser ? 
+      `<button class="edit-comment-btn" data-comment-id="${comment.comment_id}" title="編輯留言">
+        <span class="btn-emoji">✏️</span>
+      </button>
+      <button class="delete-comment-btn" data-comment-id="${comment.comment_id}" title="刪除留言">
+        <span class="btn-emoji">🗑️</span>
+      </button>` : '';
+    
     return `
       <div class="comment-item" data-comment-id="${comment.comment_id}">
         <div class="comment-header">
-          <strong class="comment-author">${comment.username}</strong>
+          <strong class="comment-author">
+            ${comment.username}
+            ${authorBadge}
+          </strong>
           <span class="comment-time" data-original-time="${comment.created_at}" title="發布於: ${comment.created_at}">${formattedTime}</span>
-          <button class="reply-comment-btn" data-comment-id="${comment.comment_id}" data-username="${comment.username}">回覆</button>
+          <div class="comment-actions">
+            <button class="reply-comment-btn" data-comment-id="${comment.comment_id}" data-username="${comment.username}">回覆</button>
+            ${commentActions}
+          </div>
         </div>
         ${replyInfo}
         <div class="comment-content">${comment.content}</div>
@@ -403,10 +425,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const newCommentHTML = createCommentHTML(comment);
     commentsList.insertAdjacentHTML('beforeend', newCommentHTML);
     
-    // 綁定新留言的回覆按鈕
+    // 綁定新留言的按鈕事件
     const newComment = commentsList.lastElementChild;
     const replyBtn = newComment.querySelector('.reply-comment-btn');
-    bindSingleReplyButton(replyBtn, postId);
+    const editBtn = newComment.querySelector('.edit-comment-btn');
+    const deleteBtn = newComment.querySelector('.delete-comment-btn');
+    
+    if (replyBtn) bindSingleReplyButton(replyBtn, postId);
+    if (editBtn) bindSingleEditCommentButton(editBtn);
+    if (deleteBtn) bindSingleDeleteCommentButton(deleteBtn);
     
     // 滾動到新留言
     newComment.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -419,9 +446,19 @@ document.addEventListener('DOMContentLoaded', () => {
   function bindReplyButtons(postId) {
     const commentsList = document.getElementById(`comments-list-${postId}`);
     const replyButtons = commentsList.querySelectorAll('.reply-comment-btn');
+    const editButtons = commentsList.querySelectorAll('.edit-comment-btn');
+    const deleteButtons = commentsList.querySelectorAll('.delete-comment-btn');
     
     replyButtons.forEach(btn => {
       bindSingleReplyButton(btn, postId);
+    });
+    
+    editButtons.forEach(btn => {
+      bindSingleEditCommentButton(btn);
+    });
+    
+    deleteButtons.forEach(btn => {
+      bindSingleDeleteCommentButton(btn);
     });
   }
 
@@ -459,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 初始化時綁定已存在的回覆按鈕
+  // 初始化時綁定已存在的按鈕
   document.querySelectorAll('.reply-comment-btn').forEach(btn => {
     const postCard = btn.closest('.post-card');
     if (postCard) {
@@ -467,6 +504,218 @@ document.addEventListener('DOMContentLoaded', () => {
       bindSingleReplyButton(btn, postId);
     }
   });
+
+  // 綁定已存在的編輯和刪除按鈕
+  document.querySelectorAll('.edit-comment-btn').forEach(btn => {
+    bindSingleEditCommentButton(btn);
+  });
+
+  document.querySelectorAll('.delete-comment-btn').forEach(btn => {
+    bindSingleDeleteCommentButton(btn);
+  });
+
+  /* --- 留言編輯和刪除功能 --- */
+
+  // 綁定單個編輯留言按鈕事件
+  function bindSingleEditCommentButton(editBtn) {
+    if (!editBtn || editBtn.hasAttribute('data-bound')) return;
+    
+    editBtn.setAttribute('data-bound', 'true');
+    editBtn.addEventListener('click', function() {
+      const commentId = this.dataset.commentId;
+      console.log('[DEBUG] 編輯留言按鈕被點擊，留言 ID:', commentId);
+      
+      // 獲取留言資料
+      fetch(`/social/edit_comment/${commentId}`, {
+        method: 'GET'
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          showEditCommentModal(commentId, data.comment);
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 獲取留言資料錯誤:', error);
+        alert('載入留言資料失敗');
+      });
+    });
+  }
+
+  // 綁定單個刪除留言按鈕事件
+  function bindSingleDeleteCommentButton(deleteBtn) {
+    if (!deleteBtn || deleteBtn.hasAttribute('data-bound')) return;
+    
+    deleteBtn.setAttribute('data-bound', 'true');
+    deleteBtn.addEventListener('click', function() {
+      const commentId = this.dataset.commentId;
+      console.log('[DEBUG] 刪除留言按鈕被點擊，留言 ID:', commentId);
+      
+      if (confirm('確定要刪除這則留言嗎？此操作無法復原。')) {
+        // 禁用按鈕防止重複點擊
+        this.disabled = true;
+        this.innerHTML = '<span class="btn-emoji">⏳</span>';
+        
+        fetch(`/social/delete_comment/${commentId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            // 移除留言元素
+            const commentItem = this.closest('.comment-item');
+            commentItem.style.opacity = '0.5';
+            commentItem.style.transition = 'opacity 0.3s ease';
+            
+            setTimeout(() => {
+              commentItem.remove();
+              
+              // 更新留言數量
+              updateCommentCount(data.post_id, data.comments_count);
+              
+              // 檢查是否還有留言，沒有的話顯示空狀態
+              const commentsList = document.getElementById(`comments-list-${data.post_id}`);
+              const remainingComments = commentsList.querySelectorAll('.comment-item');
+              if (remainingComments.length === 0) {
+                commentsList.innerHTML = `
+                  <div class="no-comments">
+                    <p>目前還沒有留言，成為第一個留言的人吧！</p>
+                  </div>
+                `;
+              }
+            }, 300);
+            
+            alert(data.message);
+          } else {
+            alert(data.message);
+            // 重新啟用按鈕
+            this.disabled = false;
+            this.innerHTML = '<span class="btn-emoji">🗑️</span>';
+          }
+        })
+        .catch(error => {
+          console.error('[ERROR] 刪除留言錯誤:', error);
+          alert('刪除失敗，請稍後再試');
+          // 重新啟用按鈕
+          this.disabled = false;
+          this.innerHTML = '<span class="btn-emoji">🗑️</span>';
+        });
+      }
+    });
+  }
+
+  // 顯示編輯留言模態框
+  function showEditCommentModal(commentId, commentData) {
+    // 創建編輯模態框
+    const modal = document.createElement('div');
+    modal.className = 'edit-comment-modal-overlay';
+    modal.innerHTML = `
+      <div class="edit-comment-modal">
+        <div class="edit-comment-modal-header">
+          <h3>編輯留言</h3>
+          <button class="close-modal-btn" type="button">×</button>
+        </div>
+        <form id="edit-comment-form" class="edit-comment-modal-body">
+          <div class="form-group">
+            <label for="edit-comment-content">留言內容</label>
+            <textarea id="edit-comment-content" name="content" maxlength="500" class="form-control" required>${commentData.content}</textarea>
+            <div class="char-counter">
+              <span id="edit-comment-count">${commentData.content.length}</span>/500 字
+            </div>
+          </div>
+          
+          <div class="edit-comment-modal-footer">
+            <button type="button" class="btn btn-secondary cancel-edit-comment-btn">取消</button>
+            <button type="submit" class="btn btn-primary">更新留言</button>
+          </div>
+        </form>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // 設置字數統計
+    const contentTextarea = modal.querySelector('#edit-comment-content');
+    const contentCount = modal.querySelector('#edit-comment-count');
+    const submitBtn = modal.querySelector('button[type="submit"]');
+    
+    contentTextarea.addEventListener('input', () => {
+      const currentLength = contentTextarea.value.length;
+      contentCount.textContent = currentLength;
+      
+      // 字數警告樣式
+      contentCount.className = 'char-count';
+      if (currentLength > 500) {
+        contentCount.classList.add('danger');
+        submitBtn.disabled = true;
+      } else if (currentLength > 400) {
+        contentCount.classList.add('warning');
+        submitBtn.disabled = false;
+      } else {
+        submitBtn.disabled = false;
+      }
+    });
+    
+    // 關閉模態框
+    const closeModal = () => {
+      modal.remove();
+    };
+    
+    modal.querySelector('.close-modal-btn').addEventListener('click', closeModal);
+    modal.querySelector('.cancel-edit-comment-btn').addEventListener('click', closeModal);
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) closeModal();
+    });
+    
+    // 提交編輯
+    modal.querySelector('#edit-comment-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(this);
+      const submitBtn = this.querySelector('button[type="submit"]');
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = '更新中...';
+      
+      fetch(`/social/edit_comment/${commentId}`, {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // 更新頁面中的留言內容
+          const commentItem = document.querySelector(`[data-comment-id="${commentId}"]`);
+          if (commentItem) {
+            const contentElement = commentItem.querySelector('.comment-content');
+            contentElement.textContent = data.content;
+          }
+          
+          alert(data.message);
+          closeModal();
+        } else {
+          alert(data.message);
+          submitBtn.disabled = false;
+          submitBtn.textContent = '更新留言';
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 更新留言錯誤:', error);
+        alert('更新失敗，請稍後再試');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '更新留言';
+      });
+    });
+    
+    // 自動聚焦到文字區域並選中文字
+    contentTextarea.focus();
+    contentTextarea.select();
+  }
 
   // 更新留言數量
   function updateCommentCount(postId, count) {

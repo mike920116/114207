@@ -3754,6 +3754,25 @@ body.dark-mode .comment-author {
   color: #7BA05B;
 }
 
+.author-badge {
+  background: linear-gradient(135deg, #5B7F47, #7BA05B);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+  margin-left: 6px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  box-shadow: 0 1px 3px rgba(91, 127, 71, 0.3);
+}
+
+body.dark-mode .author-badge {
+  background: linear-gradient(135deg, #4A6B38, #5B7F47);
+  box-shadow: 0 1px 3px rgba(74, 107, 56, 0.4);
+}
+
 .comment-time {
   color: #6c757d;
   font-size: 0.8rem;
@@ -3972,5 +3991,248 @@ body.dark-mode .comments-list::-webkit-scrollbar-thumb:hover {
   
   .comments-list {
     max-height: 250px;
+  }
+}
+
+/* ========== 留言編輯和刪除樣式 ========== */
+
+/* 留言操作按鈕樣式 */
+.comment-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.reply-comment-btn,
+.edit-comment-btn,
+.delete-comment-btn {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.reply-comment-btn:hover {
+  background: rgba(33, 150, 243, 0.1);
+  color: #2196F3;
+}
+
+.edit-comment-btn:hover {
+  background: rgba(255, 152, 0, 0.1);
+  color: #FF9800;
+}
+
+.delete-comment-btn:hover {
+  background: rgba(244, 67, 54, 0.1);
+  color: #F44336;
+}
+
+body.dark-mode .reply-comment-btn,
+body.dark-mode .edit-comment-btn,
+body.dark-mode .delete-comment-btn {
+  color: #aaa;
+}
+
+body.dark-mode .reply-comment-btn:hover {
+  background: rgba(33, 150, 243, 0.2);
+  color: #64B5F6;
+}
+
+body.dark-mode .edit-comment-btn:hover {
+  background: rgba(255, 152, 0, 0.2);
+  color: #FFB74D;
+}
+
+body.dark-mode .delete-comment-btn:hover {
+  background: rgba(244, 67, 54, 0.2);
+  color: #EF5350;
+}
+
+/* 留言編輯模態框樣式 */
+.edit-comment-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.edit-comment-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.edit-comment-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.edit-comment-modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1em;
+}
+
+.edit-comment-modal-body {
+  padding: 20px;
+}
+
+.edit-comment-modal-body .form-group {
+  margin-bottom: 16px;
+}
+
+.edit-comment-modal-body label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.edit-comment-modal-body .form-control {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  box-sizing: border-box;
+}
+
+.edit-comment-modal-body .form-control:focus {
+  outline: none;
+  border-color: #2196F3;
+}
+
+.edit-comment-modal-body .char-counter {
+  text-align: right;
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.edit-comment-modal-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.edit-comment-modal-footer .btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.edit-comment-modal-footer .btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.edit-comment-modal-footer .btn-secondary:hover {
+  background: #5a6268;
+}
+
+.edit-comment-modal-footer .btn-primary {
+  background: #2196F3;
+  color: white;
+}
+
+.edit-comment-modal-footer .btn-primary:hover {
+  background: #1976D2;
+}
+
+.edit-comment-modal-footer .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 深色模式 */
+body.dark-mode .edit-comment-modal {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+body.dark-mode .edit-comment-modal-header {
+  border-bottom-color: #444;
+}
+
+body.dark-mode .edit-comment-modal-header h3 {
+  color: #e0e0e0;
+}
+
+body.dark-mode .edit-comment-modal-body label {
+  color: #e0e0e0;
+}
+
+body.dark-mode .edit-comment-modal-body .form-control {
+  background: #3d3d3d;
+  border-color: #555;
+  color: #e0e0e0;
+}
+
+body.dark-mode .edit-comment-modal-body .form-control:focus {
+  border-color: #64B5F6;
+}
+
+body.dark-mode .edit-comment-modal-body .char-counter {
+  color: #aaa;
+}
+
+body.dark-mode .edit-comment-modal-footer {
+  border-top-color: #444;
+}
+
+/* 留言操作按鈕響應式 */
+@media (max-width: 768px) {
+  .comment-actions {
+    margin-top: 8px;
+  }
+  
+  .reply-comment-btn,
+  .edit-comment-btn,
+  .delete-comment-btn {
+    font-size: 0.75em;
+    padding: 3px 6px;
+  }
+  
+  .edit-comment-modal {
+    width: 95%;
+    max-height: 90vh;
+  }
+  
+  .edit-comment-modal-header {
+    padding: 12px 16px;
+  }
+  
+  .edit-comment-modal-body {
+    padding: 16px;
   }
 }

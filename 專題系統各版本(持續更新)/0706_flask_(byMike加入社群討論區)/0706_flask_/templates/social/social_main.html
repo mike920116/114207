@@ -63,7 +63,7 @@
           <span class="level-emoji">🌱</span>
         </div>
         <div class="level-info">
-          <h3 class="level-title">新手村民</h3>
+          <h3 class="level-title">{{ current_user.username if current_user.is_authenticated else '新手村民' }}</h3>
           <p class="level-description">剛加入社群的新朋友</p>
         </div>
         <div class="level-points">
@@ -96,7 +96,7 @@
         <div class="stat-item">
           <span class="stat-icon">💬</span>
           <span class="stat-value">0</span>
-          <span class="stat-label">評論</span>
+          <span class="stat-label">留言</span>
         </div>
         <div class="stat-item">
           <span class="stat-icon">📅</span>
@@ -250,9 +250,25 @@
                 {% for comment in post.comments %}
                 <div class="comment-item" data-comment-id="{{ comment.comment_id }}">
                   <div class="comment-header">
-                    <strong class="comment-author">{{ comment.username }}</strong>
+                    <strong class="comment-author">
+                      {{ comment.username }}
+                      {% if post.username == comment.username %}
+                        <span class="author-badge">作者</span>
+                      {% endif %}
+                    </strong>
                     <span class="comment-time" data-original-time="{{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') if comment.created_at.__class__.__name__ == 'datetime' else comment.created_at }}" title="發布於: {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') if comment.created_at.__class__.__name__ == 'datetime' else comment.created_at }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') if comment.created_at.__class__.__name__ == 'datetime' else comment.created_at }}</span>
-                    <button class="reply-comment-btn" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}">回覆</button>
+                    <div class="comment-actions">
+                      <button class="reply-comment-btn" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}">回覆</button>
+                      <!-- 留言作者操作按鈕（僅作者可見） -->
+                      {% if current_user.is_authenticated and comment.user_email == current_user.id %}
+                      <button class="edit-comment-btn" data-comment-id="{{ comment.comment_id }}" title="編輯留言">
+                        <span class="btn-emoji">✏️</span>
+                      </button>
+                      <button class="delete-comment-btn" data-comment-id="{{ comment.comment_id }}" title="刪除留言">
+                        <span class="btn-emoji">🗑️</span>
+                      </button>
+                      {% endif %}
+                    </div>
                   </div>
                   {% if comment.reply_to_username %}
                   <div class="reply-info">
@@ -298,6 +314,10 @@
 </div>
 {% include 'components/footer.html' %}
 
+<script>
+  // 定義當前用戶信息，供JavaScript使用
+  const currentUserEmail = '{{ current_user.id if current_user.is_authenticated else "" }}';
+</script>
 <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/social/social_main.js') }}"></script>
 </body>

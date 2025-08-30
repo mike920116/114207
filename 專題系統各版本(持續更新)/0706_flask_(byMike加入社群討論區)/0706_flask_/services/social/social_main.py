@@ -785,6 +785,158 @@ def get_comments(post_id):
             'message': f'獲取評論失敗：{str(e)}'
         }), 500
 
+@social_bp.route('/edit_comment/<int:comment_id>', methods=['GET', 'POST'])
+@login_required
+def edit_comment(comment_id):
+    """
+    編輯留言功能
+    
+    GET: 獲取留言資料
+    POST: 處理編輯提交
+    
+    Args:
+        comment_id (int): 要編輯的留言ID
+        
+    Returns:
+        GET: JSON回應包含留言資料
+        POST: JSON回應
+    """
+    database_connection = db.get_connection()
+    database_cursor = database_connection.cursor()
+    
+    # 檢查留言是否存在且屬於當前用戶
+    database_cursor.execute("""
+        SELECT Comment_id, User_Email, Content 
+        FROM Comments 
+        WHERE Comment_id = %s AND User_Email = %s
+    """, (comment_id, current_user.id))
+    
+    comment_data = database_cursor.fetchone()
+    
+    if not comment_data:
+        database_connection.close()
+        return jsonify({
+            'success': False,
+            'message': '留言不存在或您沒有權限編輯此留言'
+        }), 403
+    
+    if request.method == 'GET':
+        # 返回留言資料供前端表單使用
+        database_connection.close()
+        return jsonify({
+            'success': True,
+            'comment': {
+                'comment_id': comment_data[0],
+                'content': comment_data[2]
+            }
+        })
+    
+    elif request.method == 'POST':
+        try:
+            # 處理編輯提交
+            content = request.form.get('content', '').strip()
+            
+            # 驗證必要欄位
+            if not content:
+                return jsonify({
+                    'success': False,
+                    'message': '請輸入留言內容'
+                }), 400
+            
+            if len(content) > 500:
+                return jsonify({
+                    'success': False,
+                    'message': '留言內容不能超過500字'
+                }), 400
+            
+            # 更新留言
+            current_time = datetime.now()
+            database_cursor.execute("""
+                UPDATE Comments 
+                SET Content = %s, Updated_at = %s
+                WHERE Comment_id = %s AND User_Email = %s
+            """, (content, current_time, comment_id, current_user.id))
+            
+            database_connection.commit()
+            database_connection.close()
+            
+            return jsonify({
+                'success': True,
+                'message': '留言已成功更新',
+                'content': content
+            })
+            
+        except Exception as e:
+            return jsonify({
+                'success': False,
+                'message': f'更新失敗：{str(e)}'
+            }), 500
+
+@social_bp.route('/delete_comment/<int:comment_id>', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    """
+    刪除留言功能
+    
+    Args:
+        comment_id (int): 要刪除的留言ID
+        
+    Returns:
+        JSON: 刪除結果
+    """
+    try:
+        print(f"[DEBUG] 嘗試刪除留言 ID: {comment_id}, 用戶: {current_user.id}")
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 先檢查留言是否存在且屬於當前用戶，同時獲取貼文ID用於更新留言數
+        database_cursor.execute("""
+            SELECT User_Email, Post_id FROM Comments 
+            WHERE Comment_id = %s AND User_Email = %s
+        """, (comment_id, current_user.id))
+        
+        comment_data = database_cursor.fetchone()
+        print(f"[DEBUG] 留言查詢結果: {comment_data}")
+        
+        if not comment_data:
+            print(f"[DEBUG] 留言不存在或無權限，Comment_id: {comment_id}, User: {current_user.id}")
+            return jsonify({
+                'success': False,
+                'message': '留言不存在或您沒有權限刪除此留言'
+            }), 403
+        
+        post_id = comment_data[1]
+        
+        # 刪除留言
+        database_cursor.execute("DELETE FROM Comments WHERE Comment_id = %s", (comment_id,))
+        affected_rows = database_cursor.rowcount
+        print(f"[DEBUG] 刪除影響的行數: {affected_rows}")
+        
+        # 獲取更新後的留言數量
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM Comments WHERE Post_id = %s
+        """, (post_id,))
+        comments_count = database_cursor.fetchone()[0]
+        
+        database_connection.commit()
+        database_connection.close()
+        
+        print(f"[DEBUG] 留言 {comment_id} 刪除成功")
+        return jsonify({
+            'success': True,
+            'message': '留言已成功刪除',
+            'post_id': post_id,
+            'comments_count': comments_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 刪除留言時發生錯誤: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'刪除失敗：{str(e)}'
+        }), 500
+
 @social_bp.route('/check_like_status/<int:post_id>')
 @login_required
 def check_like_status(post_id):
