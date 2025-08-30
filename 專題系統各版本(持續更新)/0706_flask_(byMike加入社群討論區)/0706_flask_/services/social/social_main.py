@@ -484,13 +484,13 @@ def my_contributions():
         
         total_likes = database_cursor.fetchone()[0]
         
-        # 獲取用戶的評論總數
+        # 獲取用戶貼文被其他人評論的總數（不包括自己的評論）
         database_cursor.execute("""
             SELECT COUNT(*) as total_comments
             FROM Comments c
             JOIN Posts p ON c.Post_id = p.Post_id
-            WHERE p.User_Email = %s AND p.Is_public = TRUE
-        """, (current_user.id,))
+            WHERE p.User_Email = %s AND p.Is_public = TRUE AND c.User_Email != %s
+        """, (current_user.id, current_user.id))
         
         total_comments = database_cursor.fetchone()[0]
         

@@ -1193,10 +1193,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // 更新統計數據
     const statItems = levelCard.querySelectorAll('.stat-item .stat-value');
     if (statItems.length >= 4) {
-      statItems[0].textContent = stats.posts_count;     // 發文
-      statItems[1].textContent = stats.likes_received;  // 獲讚
-      statItems[2].textContent = stats.comments_made;   // 評論
-      statItems[3].textContent = stats.login_days;      // 天數
+      statItems[0].textContent = stats.posts_count;        // 發文
+      statItems[1].textContent = stats.likes_received;     // 獲讚
+      statItems[2].textContent = stats.comments_received;  // 被留言（其他人在我的貼文下留言）
+      statItems[3].textContent = stats.login_days;         // 天數
     }
     
     // 更新卡片樣式
