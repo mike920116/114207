@@ -134,7 +134,7 @@
         <article class="post-card" data-post-id="{{ post.post_id }}" data-mood="{{ post.mood or 'neutral' }}">
           <header>
             <strong>{{ post.username }}</strong>
-            <span>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            <span data-original-time="{{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') }}" title="發布於: {{ post.created_at.strftime('%Y-%m-%d %H:%M:%S') }}">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
           </header>
           
           <!-- 心情標籤 (用邏輯運算方式處理) -->
@@ -203,13 +203,13 @@
           {% endif %}
           
           <footer>
-            <button class="like-btn">
-              <span class="btn-emoji">👍</span> {{ post.likes_count }}
+            <button class="like-btn" data-post-id="{{ post.post_id }}" data-liked="{{ 'true' if post.user_liked else 'false' }}">
+              <span class="btn-emoji">{{ '👍' if post.user_liked else '🤍' }}</span> {{ post.likes_count }}
             </button>
-            <button class="comment-btn">
+            <button class="comment-btn" data-post-id="{{ post.post_id }}">
               <span class="btn-emoji">💬</span> {{ post.comments|length }}
             </button>
-            <button class="share-btn">
+            <!-- <button class="share-btn">
               <span class="btn-emoji">🔗</span> 分享
             </button>
             <button class="repost-btn">
@@ -217,8 +217,59 @@
             </button>
             <button class="report-btn">
               <span class="btn-emoji">🚩</span> 檢舉
-            </button>
+            </button> -->
           </footer>
+
+          <!-- 留言區域 -->
+          <div class="comments-section" id="comments-{{ post.post_id }}" style="display: none;">
+            <div class="comments-header">
+              <h4>💬 留言區</h4>
+              <button class="close-comments" data-post-id="{{ post.post_id }}">×</button>
+            </div>
+            
+            <!-- 新增留言表單 -->
+            <form class="comment-form" data-post-id="{{ post.post_id }}">
+              <div class="reply-indicator" style="display: none;">
+                <span class="reply-text">回覆 <strong class="reply-target"></strong>：</span>
+                <button type="button" class="cancel-reply">×</button>
+              </div>
+              <div class="comment-input-group">
+                <textarea name="content" placeholder="寫下您的留言..." maxlength="500" required></textarea>
+                <button type="submit" class="submit-comment-btn">發送</button>
+              </div>
+              <div class="comment-char-count">
+                <span class="char-count">0</span>/500 字
+              </div>
+              <input type="hidden" name="reply_to_id" value="">
+              <input type="hidden" name="reply_to_username" value="">
+            </form>
+
+            <!-- 留言列表 -->
+            <div class="comments-list" id="comments-list-{{ post.post_id }}">
+              {% if post.comments %}
+                {% for comment in post.comments %}
+                <div class="comment-item" data-comment-id="{{ comment.comment_id }}">
+                  <div class="comment-header">
+                    <strong class="comment-author">{{ comment.username }}</strong>
+                    <span class="comment-time" data-original-time="{{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') if comment.created_at.__class__.__name__ == 'datetime' else comment.created_at }}" title="發布於: {{ comment.created_at.strftime('%Y-%m-%d %H:%M:%S') if comment.created_at.__class__.__name__ == 'datetime' else comment.created_at }}">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') if comment.created_at.__class__.__name__ == 'datetime' else comment.created_at }}</span>
+                    <button class="reply-comment-btn" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}">回覆</button>
+                  </div>
+                  {% if comment.reply_to_username %}
+                  <div class="reply-info">
+                    <span class="reply-prefix">回覆</span>
+                    <span class="reply-target">{{ comment.reply_to_username }}</span>：
+                  </div>
+                  {% endif %}
+                  <div class="comment-content">{{ comment.content }}</div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="no-comments">
+                  <p>目前還沒有留言，成為第一個留言的人吧！</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
         </article>
         {% endfor %}
       {% else %}
