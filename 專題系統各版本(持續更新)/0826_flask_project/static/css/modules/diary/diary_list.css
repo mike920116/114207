@@ -750,20 +750,50 @@ body.dark-mode .page-info {
 .action-buttons {
   margin-top: 36px;
   text-align: center;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
-.btn-add {
+
+.btn-add, .btn-export {
   display: inline-block;
   padding: 14px 36px;
   background: linear-gradient(90deg, #3A8B55, #58D88B); /* 淺色模式漸層 */
   color: #F5F5F5;
+  border: none;
   border-radius: 16px;
   font-size: 18px;
   transition: background 0.3s, transform 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(58, 139, 85, 0.3);
 }
 
-.btn-add:hover {
-  background: linear-gradient(90deg, #5BBE80, #88F0AE); /* 淺色 hover */
+.btn-export {
+  background: linear-gradient(90deg, #DC143C, #FF6B6B);
+}
+
+.btn-add:hover, .btn-export:hover {
   transform: scale(1.03);
+  box-shadow: 0 6px 20px rgba(58, 139, 85, 0.4);
+}
+
+.btn-export:hover {
+  background: linear-gradient(90deg, #FF6B6B, #FF8E8E);
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
+}
+
+.btn-add:disabled, .btn-export:disabled {
+  background: #B8D4BC;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-add:disabled:hover, .btn-export:disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 12px rgba(58, 139, 85, 0.3);
 }
 
 body.dark-mode .btn-add {
@@ -774,6 +804,28 @@ body.dark-mode .btn-add {
 body.dark-mode .btn-add:hover {
   background: linear-gradient(90deg, #4A6D99, #6A9FC4); /* 深色 hover */
   transform: scale(1.03);
+}
+
+body.dark-mode .btn-export {
+  background: linear-gradient(90deg, #8B1538, #B91E4B);
+}
+
+body.dark-mode .btn-export:hover {
+  background: linear-gradient(90deg, #B91E4B, #DC245A);
+}
+
+/* 響應式設計 */
+@media (max-width: 576px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn-add, .btn-export {
+    font-size: 16px;
+    padding: 12px 24px;
+    width: 200px;
+  }
 }
 
 /* 飄落葉子動畫 - 增強版 */
@@ -965,10 +1017,16 @@ body.dark-mode .btn-add:hover {
   position: relative;
 }
 
-.delete-diary-btn {
+.diary-actions {
   position: absolute;
   top: 15px;
   right: 15px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.delete-diary-btn, .export-single-btn {
   background: none;
   border: 1px solid rgba(91, 127, 71, 0.3);
   border-radius: 6px;
@@ -980,7 +1038,6 @@ body.dark-mode .btn-add:hover {
   display: flex;
   align-items: center;
   gap: 4px;
-  z-index: 10;
 }
 
 .delete-diary-btn:hover {
@@ -989,12 +1046,27 @@ body.dark-mode .btn-add:hover {
   color: #F44336;
 }
 
-.delete-diary-btn .btn-emoji {
+.export-single-btn {
+  border-color: rgba(74, 144, 226, 0.3);
+}
+
+.export-single-btn:hover {
+  background: rgba(74, 144, 226, 0.1);
+  border-color: #4A90E2;
+  color: #4A90E2;
+}
+
+.delete-diary-btn .btn-emoji, .export-single-btn .btn-emoji {
   font-size: 1em;
 }
 
+.delete-diary-btn:disabled, .export-single-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* 深色模式支援 */
-body.dark-mode .delete-diary-btn {
+body.dark-mode .delete-diary-btn, body.dark-mode .export-single-btn {
   border-color: rgba(91, 127, 71, 0.4);
   color: #aaa;
 }
@@ -1003,6 +1075,12 @@ body.dark-mode .delete-diary-btn:hover {
   background: rgba(244, 67, 54, 0.2);
   border-color: #F44336;
   color: #F44336;
+}
+
+body.dark-mode .export-single-btn:hover {
+  background: rgba(74, 144, 226, 0.2);
+  border-color: #4A90E2;
+  color: #4A90E2;
 }
 
 /* === 刪除確認彈窗樣式 === */

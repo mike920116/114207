@@ -361,6 +361,67 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeDiaryDeleteModal = closeDiaryDeleteModal;
     window.confirmDiaryDelete = confirmDiaryDelete;
 
+    /* --- 匯出功能 --- */
+    window.exportAllDiaries = function() {
+        // 顯示載入提示
+        const originalText = event.target.textContent;
+        event.target.textContent = '生成全部PDF中...';
+        event.target.disabled = true;
+        
+        // 建立下載連結
+        const downloadLink = document.createElement('a');
+        downloadLink.href = '/diary/export';
+        downloadLink.style.display = 'none';
+        
+        // 添加到DOM並觸發下載
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // 恢復按鈕狀態
+        setTimeout(() => {
+            event.target.textContent = originalText;
+            event.target.disabled = false;
+        }, 2000); // PDF生成時間較長，延長恢復時間
+    };
+
+    /* --- 單筆匯出功能 --- */
+    function exportSingleDiary(diaryId) {
+        // 建立下載連結
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/diary/export/${diaryId}`;
+        downloadLink.style.display = 'none';
+        
+        // 添加到DOM並觸發下載
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    /* --- 初始化單筆匯出按鈕事件 --- */
+    const exportSingleButtons = document.querySelectorAll('.export-single-btn');
+    exportSingleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation(); // 防止事件冒泡
+            
+            const diaryId = this.dataset.diaryId;
+            const originalText = this.textContent;
+            
+            // 顯示載入狀態
+            this.textContent = '📄 生成中...';
+            this.disabled = true;
+            
+            // 執行匯出
+            exportSingleDiary(diaryId);
+            
+            // 恢復按鈕狀態
+            setTimeout(() => {
+                this.textContent = originalText;
+                this.disabled = false;
+            }, 1500);
+        });
+    });
+
     /* --- 初始化 --- */
     // 初始化成長系統
     initGrowthSystem();
