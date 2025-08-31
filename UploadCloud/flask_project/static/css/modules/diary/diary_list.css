@@ -750,20 +750,50 @@ body.dark-mode .page-info {
 .action-buttons {
   margin-top: 36px;
   text-align: center;
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
-.btn-add {
+
+.btn-add, .btn-export {
   display: inline-block;
   padding: 14px 36px;
   background: linear-gradient(90deg, #3A8B55, #58D88B); /* 淺色模式漸層 */
   color: #F5F5F5;
+  border: none;
   border-radius: 16px;
   font-size: 18px;
   transition: background 0.3s, transform 0.2s;
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(58, 139, 85, 0.3);
 }
 
-.btn-add:hover {
-  background: linear-gradient(90deg, #5BBE80, #88F0AE); /* 淺色 hover */
+.btn-export {
+  background: linear-gradient(90deg, #DC143C, #FF6B6B);
+}
+
+.btn-add:hover, .btn-export:hover {
   transform: scale(1.03);
+  box-shadow: 0 6px 20px rgba(58, 139, 85, 0.4);
+}
+
+.btn-export:hover {
+  background: linear-gradient(90deg, #FF6B6B, #FF8E8E);
+  box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
+}
+
+.btn-add:disabled, .btn-export:disabled {
+  background: #B8D4BC;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-add:disabled:hover, .btn-export:disabled:hover {
+  transform: none;
+  box-shadow: 0 4px 12px rgba(58, 139, 85, 0.3);
 }
 
 body.dark-mode .btn-add {
@@ -774,6 +804,28 @@ body.dark-mode .btn-add {
 body.dark-mode .btn-add:hover {
   background: linear-gradient(90deg, #4A6D99, #6A9FC4); /* 深色 hover */
   transform: scale(1.03);
+}
+
+body.dark-mode .btn-export {
+  background: linear-gradient(90deg, #8B1538, #B91E4B);
+}
+
+body.dark-mode .btn-export:hover {
+  background: linear-gradient(90deg, #B91E4B, #DC245A);
+}
+
+/* 響應式設計 */
+@media (max-width: 576px) {
+  .action-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .btn-add, .btn-export {
+    font-size: 16px;
+    padding: 12px 24px;
+    width: 200px;
+  }
 }
 
 /* 飄落葉子動畫 - 增強版 */
@@ -958,4 +1010,173 @@ body.dark-mode .btn-add:hover {
   .search-box {
     flex: none;
   }
+}
+
+/* === 刪除日記按鈕樣式 === */
+.diary-item {
+  position: relative;
+}
+
+.diary-actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.delete-diary-btn, .export-single-btn {
+  background: none;
+  border: 1px solid rgba(91, 127, 71, 0.3);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.delete-diary-btn:hover {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: #F44336;
+  color: #F44336;
+}
+
+.export-single-btn {
+  border-color: rgba(74, 144, 226, 0.3);
+}
+
+.export-single-btn:hover {
+  background: rgba(74, 144, 226, 0.1);
+  border-color: #4A90E2;
+  color: #4A90E2;
+}
+
+.delete-diary-btn .btn-emoji, .export-single-btn .btn-emoji {
+  font-size: 1em;
+}
+
+.delete-diary-btn:disabled, .export-single-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 深色模式支援 */
+body.dark-mode .delete-diary-btn, body.dark-mode .export-single-btn {
+  border-color: rgba(91, 127, 71, 0.4);
+  color: #aaa;
+}
+
+body.dark-mode .delete-diary-btn:hover {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: #F44336;
+  color: #F44336;
+}
+
+body.dark-mode .export-single-btn:hover {
+  background: rgba(74, 144, 226, 0.2);
+  border-color: #4A90E2;
+  color: #4A90E2;
+}
+
+/* === 刪除確認彈窗樣式 === */
+.delete-modal-overlay {
+  display: none;
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+}
+
+.delete-modal-overlay.active {
+  display: flex;
+}
+
+.delete-modal-box {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.delete-modal-box h3 {
+  margin-top: 0;
+  color: #F44336;
+  font-size: 1.3em;
+}
+
+.delete-modal-box p {
+  margin: 15px 0 25px 0;
+  color: #333;
+  line-height: 1.5;
+}
+
+.delete-modal-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.delete-modal-buttons button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.btn-cancel {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.btn-cancel:hover {
+  background-color: #e0e0e0;
+}
+
+.btn-confirm {
+  background-color: #F44336;
+  color: white;
+}
+
+.btn-confirm:hover {
+  background-color: #d32f2f;
+}
+
+.btn-confirm:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* 深色模式支援 */
+body.dark-mode .delete-modal-box {
+  background-color: #2a2a2a;
+}
+
+body.dark-mode .delete-modal-box h3 {
+  color: #F44336;
+}
+
+body.dark-mode .delete-modal-box p {
+  color: #ccc;
+}
+
+body.dark-mode .btn-cancel {
+  background-color: #404040;
+  color: #ccc;
+}
+
+body.dark-mode .btn-cancel:hover {
+  background-color: #505050;
 }

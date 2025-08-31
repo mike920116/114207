@@ -48,7 +48,11 @@
           <div class="user-details">
             <div class="user-avatar">
               {% if report.User_Avatar %}
-              <img src="{{ url_for('static', filename=report.User_Avatar) }}" alt="User Avatar">
+                {% if report.User_Avatar.startswith(('http://', 'https://')) %}
+                  <img src="{{ report.User_Avatar }}" alt="User Avatar">
+                {% else %}
+                  <img src="{{ url_for('static', filename=report.User_Avatar) }}" alt="User Avatar">
+                {% endif %}
               {% else %}
               <div class="avatar-placeholder">{{ report.User_Email[0].upper() }}</div>
               {% endif %}

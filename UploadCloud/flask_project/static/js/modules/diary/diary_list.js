@@ -266,6 +266,162 @@ document.addEventListener('DOMContentLoaded', () => {
         applySort();
     });
 
+    /* --- 刪除日記功能 --- */
+    let currentDiaryId = null;
+    let currentDiaryItem = null;
+    
+    const deleteButtons = document.querySelectorAll('.delete-diary-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation(); // 防止事件冒泡
+            
+            currentDiaryId = this.dataset.diaryId;
+            currentDiaryItem = this.closest('.diary-item');
+            
+            // 顯示彈窗（使用固定內容，不顯示日記摘要）
+            showDiaryDeleteModal();
+        });
+    });
+
+    // 彈窗控制函數
+    function showDiaryDeleteModal() {
+        const modal = document.getElementById('delete-diary-modal');
+        modal.classList.add('active');
+    }
+
+    function closeDiaryDeleteModal() {
+        const modal = document.getElementById('delete-diary-modal');
+        modal.classList.remove('active');
+        currentDiaryId = null;
+        currentDiaryItem = null;
+    }
+
+    function confirmDiaryDelete() {
+        if (!currentDiaryId || !currentDiaryItem) return;
+        
+        // 禁用按鈕防止重複點擊
+        const confirmBtn = document.querySelector('.btn-confirm');
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = '刪除中...';
+        
+        // 發送刪除請求
+        fetch(`/diary/delete/${currentDiaryId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 添加淡出動畫
+                currentDiaryItem.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                currentDiaryItem.style.opacity = '0';
+                currentDiaryItem.style.transform = 'translateX(-100%)';
+                
+                setTimeout(() => {
+                    currentDiaryItem.remove();
+                    
+                    // 更新日記計數和成長系統
+                    const remainingItems = document.querySelectorAll('.diary-item').length;
+                    if (remainingItems === 0) {
+                        // 如果沒有日記了，顯示空狀態訊息
+                        const emptyMessage = `
+                            <div class="empty-message">
+                                <div class="empty-icon">📝</div>
+                                <h3>您的日記旅程還未開始</h3>
+                                <p>記錄您的情緒和感受，開始追蹤您的心理健康。</p>
+                                <p>每天幾分鐘的心情筆記，就能幫助您更好地了解自己。</p>
+                            </div>
+                        `;
+                        diaryList.innerHTML = emptyMessage;
+                    } else {
+                        // 重新初始化過濾和分頁系統
+                        location.reload(); // 簡單的重新載入頁面來更新所有狀態
+                    }
+                    
+                    // 關閉彈窗
+                    closeDiaryDeleteModal();
+                }, 300);
+            } else {
+                alert(data.message || '刪除失敗，請稍後再試');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '確定刪除';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('刪除失敗，請稍後再試');
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = '確定刪除';
+        });
+    }
+
+    // 將函數設為全域函數以供HTML onclick使用
+    window.closeDiaryDeleteModal = closeDiaryDeleteModal;
+    window.confirmDiaryDelete = confirmDiaryDelete;
+
+    /* --- 匯出功能 --- */
+    window.exportAllDiaries = function() {
+        // 顯示載入提示
+        const originalText = event.target.textContent;
+        event.target.textContent = '生成全部PDF中...';
+        event.target.disabled = true;
+        
+        // 建立下載連結
+        const downloadLink = document.createElement('a');
+        downloadLink.href = '/diary/export';
+        downloadLink.style.display = 'none';
+        
+        // 添加到DOM並觸發下載
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+        
+        // 恢復按鈕狀態
+        setTimeout(() => {
+            event.target.textContent = originalText;
+            event.target.disabled = false;
+        }, 2000); // PDF生成時間較長，延長恢復時間
+    };
+
+    /* --- 單筆匯出功能 --- */
+    function exportSingleDiary(diaryId) {
+        // 建立下載連結
+        const downloadLink = document.createElement('a');
+        downloadLink.href = `/diary/export/${diaryId}`;
+        downloadLink.style.display = 'none';
+        
+        // 添加到DOM並觸發下載
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    }
+
+    /* --- 初始化單筆匯出按鈕事件 --- */
+    const exportSingleButtons = document.querySelectorAll('.export-single-btn');
+    exportSingleButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation(); // 防止事件冒泡
+            
+            const diaryId = this.dataset.diaryId;
+            const originalText = this.textContent;
+            
+            // 顯示載入狀態
+            this.textContent = '📄 生成中...';
+            this.disabled = true;
+            
+            // 執行匯出
+            exportSingleDiary(diaryId);
+            
+            // 恢復按鈕狀態
+            setTimeout(() => {
+                this.textContent = originalText;
+                this.disabled = false;
+            }, 1500);
+        });
+    });
+
     /* --- 初始化 --- */
     // 初始化成長系統
     initGrowthSystem();

@@ -96,8 +96,18 @@
             {% if diaries and diaries|length > 0 %}
                 {% for diary in diaries %}
                     <div class="diary-item" data-emotion="{{ diary.analysis.split(':')[0] if diary.analysis and ':' in diary.analysis else diary.analysis }}">
-                        <div class="diary-date">
-                            <i>📅</i> {{ diary.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        <div class="diary-actions">
+                            <button class="export-single-btn" data-diary-id="{{ diary.id }}" title="匯出此篇日記為PDF">
+                                <span class="btn-emoji">📄</span> 匯出
+                            </button>
+                            <button class="delete-diary-btn" data-diary-id="{{ diary.id }}" title="刪除日記">
+                                <span class="btn-emoji">🗑️</span> 刪除
+                            </button>
+                        </div>
+                        <div class="diary-header">
+                            <div class="diary-date">
+                                <i>📅</i> {{ diary.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            </div>
                         </div>
                         <div class="diary-content">{{ diary.content }}</div>
                         {% if diary.analysis %}
@@ -120,6 +130,21 @@
         <!-- 操作按鈕 -->
         <div class="action-buttons">
             <a href="{{ url_for('diary.diary_form') }}" class="btn-add">新增日記</a>
+            {% if diaries and diaries|length > 0 %}
+                <button class="btn-export" onclick="exportAllDiaries()">匯出全部PDF</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- 刪除確認彈窗 -->
+    <div id="delete-diary-modal" class="delete-modal-overlay">
+        <div class="delete-modal-box">
+            <h3>刪除日記</h3>
+            <p id="delete-diary-content">確定要刪除這篇日記嗎？<br><br>此操作無法復原。</p>
+            <div class="delete-modal-buttons">
+                <button class="btn-cancel" onclick="closeDiaryDeleteModal()">取消</button>
+                <button class="btn-confirm" onclick="confirmDiaryDelete()">確定刪除</button>
+            </div>
         </div>
     </div>
 {% endblock %}
