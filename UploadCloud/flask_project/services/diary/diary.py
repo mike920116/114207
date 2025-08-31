@@ -298,6 +298,298 @@ def check_encryption_key_validity():
     except Exception as e:
         return False, f"key check failed: {str(e)}"
 
+
+def register_chinese_font():
+    """
+    跨平台註冊中文字體
+    
+    Returns:
+        str: 可用的字體名稱
+    """
+    import platform
+    
+    try:
+        system = platform.system().lower()
+        logging.info(f"Detecting system: {system}")
+        
+        # 根據不同作業系統設定字體路徑
+        font_paths = []
+        
+        if system == 'windows':
+            font_paths = [
+                "C:/Windows/Fonts/msyh.ttc",     # 微軟雅黑
+                "C:/Windows/Fonts/simhei.ttf",   # 黑體  
+                "C:/Windows/Fonts/simsun.ttc",   # 宋體
+                "C:/Windows/Fonts/msjh.ttc"      # 微軟正黑體
+            ]
+        elif system == 'linux':
+            font_paths = [
+                # Ubuntu/Debian 標準字體路徑
+                "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",      # 文泉驛微米黑
+                "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",        # 文泉驛正黑
+                "/usr/share/fonts/truetype/arphic/uming.ttc",          # 文鼎明體
+                "/usr/share/fonts/truetype/arphic/ukai.ttc",           # 文鼎楷體
+                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",  # Noto中文
+                "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",     # DejaVu
+                "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",  # Liberation
+                
+                # CentOS/RHEL 路徑
+                "/usr/share/fonts/wqy-microhei/wqy-microhei.ttc",
+                "/usr/share/fonts/wqy-zenhei/wqy-zenhei.ttc",
+                
+                # 其他可能的路徑
+                "/usr/share/fonts/TTF/simhei.ttf",
+                "/usr/share/fonts/chinese/simhei.ttf",
+                "/opt/fonts/chinese/simhei.ttf",
+                
+                # Docker 容器中常見路徑
+                "/fonts/wqy-microhei.ttc",
+                "/fonts/NotoSansCJK-Regular.ttc"
+            ]
+        elif system == 'darwin':  # macOS
+            font_paths = [
+                "/System/Library/Fonts/PingFang.ttc",
+                "/System/Library/Fonts/Hiragino Sans GB.ttc",
+                "/System/Library/Fonts/STHeiti Light.ttc"
+            ]
+        
+        # 嘗試註冊字體
+        for font_path in font_paths:
+            if os.path.exists(font_path):
+                try:
+                    pdfmetrics.registerFont(TTFont('ChineseFont', font_path))
+                    logging.info(f"Chinese font registered successfully: {font_path}")
+                    return 'ChineseFont'
+                except Exception as e:
+                    logging.warning(f"Failed to register font {font_path}: {e}")
+                    continue
+        
+        # 如果都失敗，嘗試內建字體的 Unicode 處理
+        try:
+            # 檢查是否已有內建的 Unicode 字體
+            from reportlab.pdfbase import _fontdata
+            available_fonts = list(_fontdata.standardFonts.keys())
+            
+            # 優先使用支援 Unicode 的字體
+            unicode_fonts = ['Helvetica', 'Times-Roman', 'Courier']
+            for font in unicode_fonts:
+                if font in available_fonts:
+                    logging.info(f"Using built-in font with Unicode fallback: {font}")
+                    return font
+                    
+        except Exception as e:
+            logging.warning(f"Built-in font check failed: {e}")
+        
+        # 嘗試動態下載字體（僅限於開發環境）
+        try:
+            if download_chinese_font():
+                return 'ChineseFont'
+        except Exception as e:
+            logging.warning(f"Dynamic font download failed: {e}")
+        
+        # 最後的回退方案 - 使用ASCII轉換
+        logging.warning("No suitable Chinese font found, will use ASCII conversion for Chinese characters")
+        return 'Helvetica-ASCII-Fallback'
+        
+    except Exception as e:
+        logging.error(f"Font registration process failed: {e}")
+        return 'Helvetica'
+
+
+def download_chinese_font():
+    """
+    在開發環境中嘗試下載中文字體（僅限緊急情況使用）
+    
+    Returns:
+        bool: 是否成功下載並註冊字體
+    """
+    try:
+        import urllib.request
+        
+        # 檢查是否為開發環境
+        if not os.getenv('FLASK_ENV') == 'development':
+            return False
+        
+        font_dir = os.path.join(os.getcwd(), 'fonts')
+        os.makedirs(font_dir, exist_ok=True)
+        
+        font_file = os.path.join(font_dir, 'wqy-microhei.ttc')
+        
+        if not os.path.exists(font_file):
+            # 注意：這個URL僅供示例，實際使用時請替換為有效的字體下載源
+            font_url = "https://github.com/anthonyfok/fonts-wqy-microhei/raw/master/wqy-microhei.ttc"
+            
+            logging.info(f"Attempting to download Chinese font from: {font_url}")
+            urllib.request.urlretrieve(font_url, font_file)
+            
+        if os.path.exists(font_file):
+            pdfmetrics.registerFont(TTFont('ChineseFont', font_file))
+            logging.info(f"Downloaded and registered Chinese font: {font_file}")
+            return True
+            
+    except Exception as e:
+        logging.warning(f"Failed to download Chinese font: {e}")
+        
+    return False
+
+
+def safe_unicode_encode(text):
+    """
+    安全地處理Unicode文本以供PDF使用
+    
+    Args:
+        text (str): 要處理的文本
+        
+    Returns:
+        str: 處理後的安全文本
+    """
+    try:
+        if not text:
+            return ""
+        
+        # 確保文本是字符串
+        if not isinstance(text, str):
+            text = str(text)
+        
+        # 首先嘗試保持原始編碼
+        safe_text = text
+        
+        # 轉換HTML特殊字符
+        html_escapes = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        }
+        
+        for char, escape in html_escapes.items():
+            safe_text = safe_text.replace(char, escape)
+        
+        # 檢查並清理可能導致問題的字符
+        # 移除或替換控制字符，但保留換行符和制表符
+        import re
+        safe_text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', safe_text)
+        
+        # 確保UTF-8編碼正確
+        try:
+            safe_text.encode('utf-8')
+            return safe_text
+        except UnicodeEncodeError:
+            # 如果有編碼問題，使用替換策略
+            return safe_text.encode('utf-8', errors='replace').decode('utf-8')
+            
+    except Exception as e:
+        logging.warning(f"Unicode encoding error: {e}")
+        # 如果所有方法都失敗，返回ASCII安全版本
+        try:
+            return str(text).encode('ascii', errors='ignore').decode('ascii')
+        except Exception:
+            return "[Text encoding error]"
+
+
+def convert_chinese_to_pinyin_fallback(text):
+    """
+    當無法使用中文字體時，將中文轉換為拼音
+    這是最後的回退方案
+    
+    Args:
+        text (str): 包含中文的文本
+        
+    Returns:
+        str: 轉換後的文本
+    """
+    try:
+        # 簡單的中文字符檢測
+        import re
+        chinese_pattern = re.compile(r'[\u4e00-\u9fff]+')
+        
+        if not chinese_pattern.search(text):
+            return text  # 沒有中文字符，直接返回
+        
+        # 基本的中文轉拼音映射（僅處理常見字符）
+        chinese_to_pinyin = {
+            '日': 'ri', '記': 'ji', '情': 'qing', '緒': 'xu', '分': 'fen', '析': 'xi',
+            '心': 'xin', '情': 'qing', '快': 'kuai', '樂': 'le', '悲': 'bei', '傷': 'shang',
+            '焦': 'jiao', '慮': 'lv', '憤': 'fen', '怒': 'nu', '平': 'ping', '靜': 'jing',
+            '今': 'jin', '天': 'tian', '昨': 'zuo', '明': 'ming', '很': 'hen', '感': 'gan',
+            '覺': 'jue', '想': 'xiang', '我': 'wo', '你': 'ni', '他': 'ta', '她': 'ta',
+            '工': 'gong', '作': 'zuo', '學': 'xue', '習': 'xi', '生': 'sheng', '活': 'huo'
+        }
+        
+        result = text
+        for chinese, pinyin in chinese_to_pinyin.items():
+            result = result.replace(chinese, f"[{pinyin}]")
+        
+        # 對於未映射的中文字符，使用Unicode編號
+        remaining_chinese = chinese_pattern.findall(result)
+        for chinese_char in remaining_chinese:
+            unicode_repr = f"[U+{ord(chinese_char):04X}]"
+            result = result.replace(chinese_char, unicode_repr)
+        
+        return result
+        
+    except Exception as e:
+        logging.warning(f"Chinese to pinyin conversion failed: {e}")
+        return text  # 轉換失敗時返回原文
+
+
+def safe_unicode_encode(text):
+    """
+    安全地處理Unicode文本以供PDF使用
+    根據可用的字體採用不同的策略
+    
+    Args:
+        text (str): 要處理的文本
+        
+    Returns:
+        str: 處理後的安全文本
+    """
+    try:
+        if not text:
+            return ""
+        
+        # 確保文本是字符串
+        if not isinstance(text, str):
+            text = str(text)
+        
+        # 檢查當前使用的字體
+        current_font = getattr(safe_unicode_encode, 'current_font', 'Helvetica')
+        
+        # 如果使用ASCII回退模式，轉換中文
+        if current_font == 'Helvetica-ASCII-Fallback':
+            text = convert_chinese_to_pinyin_fallback(text)
+        
+        # 轉換HTML特殊字符
+        html_escapes = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#x27;'
+        }
+        
+        for char, escape in html_escapes.items():
+            text = text.replace(char, escape)
+        
+        # 清理控制字符
+        import re
+        text = re.sub(r'[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]', '', text)
+        
+        # 確保UTF-8編碼正確
+        try:
+            text.encode('utf-8')
+            return text
+        except UnicodeEncodeError:
+            return text.encode('utf-8', errors='replace').decode('utf-8')
+            
+    except Exception as e:
+        logging.warning(f"Unicode encoding error: {e}")
+        try:
+            return str(text).encode('ascii', errors='ignore').decode('ascii')
+        except Exception:
+            return "[Text encoding error]"
+
 @diary_bp.route('/delete/<int:diary_id>', methods=['POST'])
 @login_required
 def delete_diary(diary_id):
@@ -512,34 +804,12 @@ def generate_diary_pdf(rows, title_suffix=""):
     encoded_key = session.get('encryption_key')
     aes_key = base64.b64decode(encoded_key)
     
-    # 註冊中文字體 (使用系統字體)
-    default_font = 'Helvetica'
-    try:
-        # Windows 系統字體路徑 - 使用支援中文的字體
-        font_paths = [
-            "C:/Windows/Fonts/msyh.ttc",  # 微軟雅黑
-            "C:/Windows/Fonts/simhei.ttf", # 黑體
-            "C:/Windows/Fonts/simsun.ttc"  # 宋體
-        ]
-        
-        font_registered = False
-        for font_path in font_paths:
-            if os.path.exists(font_path):
-                try:
-                    pdfmetrics.registerFont(TTFont('ChineseFont', font_path))
-                    default_font = 'ChineseFont'
-                    font_registered = True
-                    logging.info(f"Chinese font registered successfully: {font_path}")
-                    break
-                except Exception as e:
-                    logging.warning(f"Failed to register font {font_path}: {e}")
-                    continue
-        
-        if not font_registered:
-            logging.warning("No Chinese font found, using default Helvetica font")
-            
-    except Exception as e:
-        logging.warning(f"Font registration failed: {e}")
+    # 跨平台中文字體註冊
+    default_font = register_chinese_font()
+    logging.info(f"PDF generation using font: {default_font}")
+    
+    # 設置當前字體給安全編碼函數使用
+    safe_unicode_encode.current_font = default_font
     
     # 建立PDF文件 - 使用英文屬性避免編碼問題
     buffer = io.BytesIO()
@@ -639,8 +909,7 @@ def generate_diary_pdf(rows, title_suffix=""):
             story.append(Paragraph("Content:", styles['Heading3']))
             # 處理可能的特殊字符和確保UTF-8編碼
             try:
-                safe_content = content.encode('utf-8').decode('utf-8')
-                safe_content = safe_content.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;')
+                safe_content = safe_unicode_encode(content)
                 story.append(Paragraph(safe_content, content_style))
             except UnicodeError:
                 story.append(Paragraph("[Content encoding error]", content_style))
@@ -648,8 +917,7 @@ def generate_diary_pdf(rows, title_suffix=""):
             # AI分析 - 安全處理中文字符
             story.append(Paragraph("AI Analysis:", styles['Heading3']))
             try:
-                safe_analysis = analysis.encode('utf-8').decode('utf-8')
-                safe_analysis = safe_analysis.replace('<', '&lt;').replace('>', '&gt;').replace('&', '&amp;')
+                safe_analysis = safe_unicode_encode(analysis)
                 story.append(Paragraph(safe_analysis, analysis_style))
             except UnicodeError:
                 story.append(Paragraph("[Analysis encoding error]", analysis_style))
