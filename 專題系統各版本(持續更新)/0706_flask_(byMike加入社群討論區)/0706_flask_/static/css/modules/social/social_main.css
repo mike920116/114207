@@ -4684,9 +4684,9 @@ body.dark-mode .btn-primary:hover {
 .follow-btn {
   background: linear-gradient(135deg, #5B7F47, #7BA05B);
   border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.85em;
+  border-radius: 12px; /* 更小的圓角 */
+  padding: 6px 10px;   /* 縮小按鈕尺寸 */
+  font-size: 0.8em;    /* 較小的文字 */
   cursor: pointer;
   transition: all 0.2s ease;
   color: white;
@@ -4984,9 +4984,9 @@ body.dark-mode .social-stat-item:hover {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 25px;
-  font-size: 0.9em;
+  padding: 6px 12px;    /* 縮小按鈕尺寸 */
+  border-radius: 12px;  /* 更小的圓角 */
+  font-size: 0.8em;     /* 較小的文字 */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -4995,9 +4995,9 @@ body.dark-mode .social-stat-item:hover {
   overflow: hidden;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   text-decoration: none;
-  min-width: 120px;
+  min-width: 90px;      /* 更小的最小寬度 */
   justify-content: center;
 }
 
@@ -5579,8 +5579,8 @@ body.dark-mode .social-stat-label {
   }
   
   .follow-btn, .unfollow-btn {
-    padding: 8px 16px;
-    font-size: 0.85em;
-    min-width: 100px;
+    padding: 6px 12px;
+    font-size: 0.8em;
+    min-width: 80px;
   }
 }
