@@ -3775,6 +3775,12 @@ body.dark-mode .comment-item:hover {
   gap: 8px;
 }
 
+.comment-author-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .comment-author {
   color: #5B7F47;
   font-size: 0.9rem;
@@ -3782,6 +3788,53 @@ body.dark-mode .comment-item:hover {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* 留言區追蹤按鈕樣式 */
+.follow-btn-comment {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  padding: 1px 4px;
+  border-radius: 8px;
+  font-size: 0.65em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.follow-btn-comment:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-1px);
+  box-shadow: 0 1px 4px rgba(0, 123, 255, 0.3);
+}
+
+.follow-btn-comment:active {
+  transform: translateY(0);
+}
+
+.follow-btn-comment.following {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.follow-btn-comment.following:hover {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.follow-btn-comment .btn-emoji {
+  font-size: 0.8em;
+}
+
+.follow-btn-comment.following .btn-emoji::before {
+  content: '✓';
+}
+
+.follow-btn-comment.following:hover .btn-emoji::before {
+  content: '✕';
 }
 
 .comment-author::before {
@@ -4282,6 +4335,59 @@ body.dark-mode .edit-comment-modal-footer {
   margin: 10px 0;
   padding: 8px 0;
   border-top: 1px solid var(--border-color);
+}
+
+/* 新增：內聯追蹤按鈕樣式 */
+.post-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.follow-btn-inline {
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  border: none;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 0.7em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.follow-btn-inline:hover {
+  background: linear-gradient(135deg, #0056b3, #004085);
+  transform: translateY(-1px);
+  box-shadow: 0 1px 4px rgba(0, 123, 255, 0.3);
+}
+
+.follow-btn-inline:active {
+  transform: translateY(0);
+}
+
+.follow-btn-inline.following {
+  background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.follow-btn-inline.following:hover {
+  background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.follow-btn-inline .btn-emoji {
+  font-size: 0.8em;
+}
+
+.follow-btn-inline.following .btn-emoji::before {
+  content: '✓';
+}
+
+.follow-btn-inline.following:hover .btn-emoji::before {
+  content: '✕';
 }
 
 .follow-btn {

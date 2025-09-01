@@ -183,7 +183,18 @@
         {% for post in posts %}
         <article class="post-card" data-post-id="{{ post.post_id }}" data-mood="{{ post.mood or 'neutral' }}">
           <header>
-            <strong><a href="{{ url_for('social.user_posts', user_email=post.user_email) }}">{{ post.username }}</a></strong>
+            <div class="post-header-left">
+              <strong><a href="{{ url_for('social.user_posts', user_email=post.user_email) }}">{{ post.username }}</a></strong>
+              <!-- 追蹤按鈕（僅非作者且非匿名貼文可見） -->
+              {% if current_user.is_authenticated and post.user_email != current_user.id and not post.is_anonymous %}
+              <button class="follow-btn follow-btn-inline" 
+                      data-user-email="{{ post.user_email }}" 
+                      data-action="follow"
+                      title="追蹤 {{ post.username }}">
+                <span class="btn-emoji">➕</span> 追蹤
+              </button>
+              {% endif %}
+            </div>
             <span data-original-time="{{ post.created_at }}" title="發布於: {{ post.created_at }}">{{ post.created_at }}</span>
           </header>
           
@@ -252,18 +263,6 @@
           </div>
           {% endif %}
           
-          <!-- 追蹤按鈕（僅非作者且非匿名貼文可見） -->
-          {% if current_user.is_authenticated and post.user_email != current_user.id and not post.is_anonymous %}
-          <div class="follow-actions">
-            <button class="follow-btn" 
-                    data-user-email="{{ post.user_email }}" 
-                    data-action="follow"
-                    title="追蹤 {{ post.username }}">
-              <span class="btn-emoji">➕</span> 追蹤
-            </button>
-          </div>
-          {% endif %}
-          
           <footer>
             <button class="like-btn" data-post-id="{{ post.post_id }}" data-liked="{{ 'true' if post.user_liked else 'false' }}">
               <span class="btn-emoji">{{ '👍' if post.user_liked else '🤍' }}</span> {{ post.likes_count }}
@@ -312,12 +311,23 @@
                 {% for comment in post.comments %}
                 <div class="comment-item" data-comment-id="{{ comment.comment_id }}">
                   <div class="comment-header">
-                    <strong class="comment-author">
-                      {{ comment.username }}
-                      {% if post.username == comment.username %}
-                        <span class="author-badge">作者</span>
+                    <div class="comment-author-section">
+                      <strong class="comment-author">
+                        {{ comment.username }}
+                        {% if post.username == comment.username %}
+                          <span class="author-badge">作者</span>
+                        {% endif %}
+                      </strong>
+                      <!-- 留言區追蹤按鈕（僅非作者且非匿名用戶可見） -->
+                      {% if current_user.is_authenticated and comment.user_email != current_user.id and comment.user_email != post.user_email %}
+                      <button class="follow-btn follow-btn-comment" 
+                              data-user-email="{{ comment.user_email }}" 
+                              data-action="follow"
+                              title="追蹤 {{ comment.username }}">
+                        <span class="btn-emoji">➕</span> 追蹤
+                      </button>
                       {% endif %}
-                    </strong>
+                    </div>
                     <span class="comment-time" data-original-time="{{ comment.created_at }}" title="發布於: {{ comment.created_at }}">{{ comment.created_at }}</span>
                     <div class="comment-actions">
                       <button class="reply-comment-btn" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}">回覆</button>

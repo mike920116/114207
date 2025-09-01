@@ -202,7 +202,8 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(error => {
       console.error('追蹤操作失敗:', error);
-      showNotification('網路錯誤，請稍後再試', 'error');
+      // 已移除使用者提示: '網路錯誤，請稍後再試'
+      // 改為僅在 console 記錄錯誤以免打擾使用者
       btn.textContent = originalText;
     })
     .finally(() => {
@@ -227,7 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(error => {
       console.error('載入列表失敗:', error);
-      showNotification('網路錯誤，請稍後再試', 'error');
+      // 已移除使用者提示: '網路錯誤，請稍後再試'
+      // 保留錯誤日誌供開發除錯
     });
   }
 
@@ -349,7 +351,8 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .catch(error => {
       console.error('移除粉絲失敗:', error);
-      showNotification('網路錯誤，請稍後再試', 'error');
+      // 已移除使用者提示: '網路錯誤，請稍後再試'
+      // 保留錯誤日誌供開發除錯
     });
   }
 
@@ -390,8 +393,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const statItem = e.target.closest('.social-stat-item');
       const statType = statItem.getAttribute('data-stat');
       
-      if (statType === 'followers' || statType === 'following') {
-        showFollowModal(statType);
+      if (statType === 'followers') {
+        window.showFollowersList();
+      } else if (statType === 'following') {
+        window.showFollowingList();
       }
     }
   });
@@ -2099,8 +2104,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 初始化追蹤功能
 function initFollowFunctionality() {
-  // 綁定所有追蹤按鈕事件
-  document.querySelectorAll('.follow-btn').forEach(followBtn => {
+  // 綁定所有追蹤按鈕事件（包括內聯和留言區按鈕）
+  document.querySelectorAll('.follow-btn, .follow-btn-inline, .follow-btn-comment').forEach(followBtn => {
     bindFollowButton(followBtn);
   });
   
@@ -2209,7 +2214,7 @@ function updateSocialStatsDisplay(followingCount, followersCount) {
 
 // 檢查現有貼文的追蹤狀態
 function checkExistingFollowStatus() {
-  const followBtns = document.querySelectorAll('.follow-btn[data-user-email]');
+  const followBtns = document.querySelectorAll('.follow-btn[data-user-email], .follow-btn-inline[data-user-email], .follow-btn-comment[data-user-email]');
   const userEmails = Array.from(followBtns).map(btn => btn.dataset.userEmail);
   
   // 為了性能，我們可以批量檢查追蹤狀態
@@ -2237,7 +2242,7 @@ function checkFollowStatus(userEmail) {
 
 // 更新追蹤按鈕狀態
 function updateFollowButtonStatus(userEmail, isFollowing) {
-  const followBtns = document.querySelectorAll(`[data-user-email="${userEmail}"].follow-btn`);
+  const followBtns = document.querySelectorAll(`[data-user-email="${userEmail}"].follow-btn, [data-user-email="${userEmail}"].follow-btn-inline, [data-user-email="${userEmail}"].follow-btn-comment`);
   followBtns.forEach(btn => {
     if (isFollowing) {
       btn.classList.add('following');
