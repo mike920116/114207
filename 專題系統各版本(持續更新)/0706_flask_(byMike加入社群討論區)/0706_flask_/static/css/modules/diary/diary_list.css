@@ -1,0 +1,204 @@
+/* === Diary List – Visual Style: 淺色為科技綠系，深色保留原樣 === */
+.diary-container {
+  max-width: 900px;
+  margin: 100px auto 40px;
+  padding: 40px 30px;
+  background: linear-gradient(135deg, #F0F7F2, #E4F5E9);
+  border-radius: 24px;
+  box-shadow: 0 8px 24px rgba(0, 30, 10, 0.15);
+}
+body.dark-mode .diary-container {
+  background: #1A3C5A;
+  color: #E6F0FA;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
+}
+
+.diary-title {
+  font-size: 32px;
+  margin-bottom: 28px;
+  text-align: center;
+  color: #3A8B55;
+}
+body.dark-mode .diary-title {
+  color: #E6F0FA;
+}
+
+/* ---------- Filter & Search ---------- */
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.filter-label {
+  font-weight: 600;
+}
+.filter-select {
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #A0D4A4;
+  background-color: #F0FAF4;
+  color: #2E6B40;
+}
+body.dark-mode .filter-select {
+  background: #27496D;
+  color: #E6F0FA;
+  border-color: #4A7B9D;
+}
+
+.search-box {
+  position: relative;
+  flex: 1 1 240px;
+}
+.search-input {
+  width: 100%;
+  padding: 8px 38px 8px 12px;
+  border-radius: 12px;
+  border: 1px solid #A0D4A4;
+  background-color: #F0FAF4;
+  color: #2E6B40;
+}
+body.dark-mode .search-input {
+  background: #27496D;
+  color: #E6F0FA;
+  border-color: #4A7B9D;
+}
+.search-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* ---------- Diary Item ---------- */
+.diary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.diary-item {
+  padding: 20px 24px;
+  border-radius: 20px;
+  background: #FFFFFF;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .05);
+  transition: transform .2s;
+}
+.diary-item:hover {
+  transform: translateY(-4px);
+}
+body.dark-mode .diary-item {
+  background: #27496D;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+}
+
+.diary-date {
+  font-size: 14px;
+  color: #5B9B6B;
+  margin-bottom: 6px;
+}
+body.dark-mode .diary-date {
+  color: #8AB6D6;
+}
+
+.diary-content {
+  font-size: 17px;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+/* Emotion badge */
+.diary-emotion {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 14px;
+  border-radius: 14px;
+  background: #B2E3BD;
+  color: #3A8B55;
+}
+body.dark-mode .diary-emotion {
+  background: #4A7B9D;
+  color: #E6F0FA;
+}
+
+/* ---------- Empty State ---------- */
+.empty-message {
+  text-align: center;
+  padding: 40px 20px;
+}
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+/* ---------- Pagination (簡易美化) ---------- */
+.pagination {
+  justify-content: center;
+  margin-top: 32px;
+}
+.page-link {
+  border-radius: 12px;
+  margin: 0 4px;
+}
+.page-item.active .page-link {
+  background: #3A8B55;
+  border-color: #3A8B55;
+}
+body.dark-mode .page-item.active .page-link {
+  background: #8AB6D6;
+  border-color: #8AB6D6;
+}
+
+/* ---------- Action Button ---------- */
+.action-buttons {
+  margin-top: 36px;
+  text-align: center;
+}
+.btn-add {
+  display: inline-block;
+  padding: 14px 36px;
+  background: linear-gradient(90deg, #3A8B55, #58D88B); /* 淺色模式漸層 */
+  color: #F5F5F5;
+  border-radius: 16px;
+  font-size: 18px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.btn-add:hover {
+  background: linear-gradient(90deg, #5BBE80, #88F0AE); /* 淺色 hover */
+  transform: scale(1.03);
+}
+
+body.dark-mode .btn-add {
+  background: linear-gradient(90deg, #2A4B7C, #4A6D99); /* 深色模式漸層 */
+  color: #E6F0FA;
+}
+
+body.dark-mode .btn-add:hover {
+  background: linear-gradient(90deg, #4A6D99, #6A9FC4); /* 深色 hover */
+  transform: scale(1.03);
+}
+
+
+/* ---------- RWD ---------- */
+@media (max-width: 576px) {
+  .diary-container {
+    margin: 80px 16px 32px;
+    padding: 28px 20px;
+  }
+  .diary-title {
+    font-size: 28px;
+  }
+  .filter-options {
+    gap: 12px;
+  }
+  .btn-add {
+    font-size: 16px;
+  }
+}
