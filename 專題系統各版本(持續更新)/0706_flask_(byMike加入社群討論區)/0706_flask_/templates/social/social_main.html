@@ -92,50 +92,50 @@
   <section class="scroll-area">
 
     <!-- 用戶等級信息卡片 -->
-    <div class="user-level-card" id="user-level-card" data-level="{{ user.level_name if user is defined and user.level_name is defined else '新手村民' }}">
+    <div class="user-level-card" id="user-level-card" data-level="{{ user_level_info.current_level.title if user_level_info and user_level_info.current_level else '新手村民' }}">
       <div class="level-header">
         <div class="level-icon">
-          <span class="level-emoji">🌱</span>
+          <span class="level-emoji">{{ user_level_info.current_level.emoji if user_level_info and user_level_info.current_level else '🌱' }}</span>
         </div>
         <div class="level-info">
           <h3 class="level-title">{{ current_user.username if current_user.is_authenticated else '新手村民' }}</h3>
-          <p class="level-description">剛加入社群的新朋友</p>
+          <p class="level-description">{{ user_level_info.current_level.description if user_level_info and user_level_info.current_level else '剛加入社群的新朋友' }}</p>
         </div>
         <div class="level-points">
-          <span class="points-value">0</span>
+          <span class="points-value">{{ user_level_info.points if user_level_info else 0 }}</span>
           <span class="points-label">積分</span>
         </div>
       </div>
       
       <div class="level-progress">
         <div class="progress-bar">
-          <div class="progress-fill" style="width: 0%"></div>
+          <div class="progress-fill" style="width: {{ user_level_info.progress_to_next if user_level_info else 0 }}%"></div>
         </div>
         <div class="progress-text">
-          <span class="current-progress">0%</span>
-          <span class="next-level">下一級：活躍居民</span>
+          <span class="current-progress">{{ user_level_info.progress_to_next if user_level_info else 0 }}%</span>
+          <span class="next-level">下一級：{{ user_level_info.next_level.title if user_level_info and user_level_info.next_level else '活躍居民' }}</span>
         </div>
       </div>
       
       <div class="level-stats">
         <div class="stat-item">
           <span class="stat-icon">📝</span>
-          <span class="stat-value">0</span>
+          <span class="stat-value">{{ user_level_info.stats.posts_count if user_level_info and user_level_info.stats else 0 }}</span>
           <span class="stat-label">發文</span>
         </div>
         <div class="stat-item">
           <span class="stat-icon">👍</span>
-          <span class="stat-value">0</span>
+          <span class="stat-value">{{ user_level_info.stats.likes_received if user_level_info and user_level_info.stats else 0 }}</span>
           <span class="stat-label">獲讚</span>
         </div>
         <div class="stat-item">
           <span class="stat-icon">💬</span>
-          <span class="stat-value">0</span>
+          <span class="stat-value">{{ user_level_info.stats.comments_received if user_level_info and user_level_info.stats else 0 }}</span>
           <span class="stat-label">留言</span>
         </div>
         <div class="stat-item">
           <span class="stat-icon">📅</span>
-          <span class="stat-value">1</span>
+          <span class="stat-value">{{ user_level_info.stats.login_days if user_level_info and user_level_info.stats else 1 }}</span>
           <span class="stat-label">天數</span>
         </div>
       </div>

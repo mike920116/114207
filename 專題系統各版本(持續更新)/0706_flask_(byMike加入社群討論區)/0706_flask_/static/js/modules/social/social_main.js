@@ -1,5 +1,98 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+  /* --- 初始化用戶數據 --- */
+  function initializeUserData() {
+    // 獲取用戶等級信息
+    fetch('/social/user_level_info')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          updateUserLevelCard(data);
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 獲取用戶等級信息失敗:', error);
+      });
+
+    // 獲取社交統計數據
+    fetch('/social/get_social_stats')
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          updateSocialStats(data);
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 獲取社交統計失敗:', error);
+      });
+  }
+
+  /* --- 更新用戶等級卡片 --- */
+  function updateUserLevelCard(levelInfo) {
+    try {
+      // 更新等級標題和描述
+      const levelTitle = document.querySelector('.level-title');
+      const levelDescription = document.querySelector('.level-description');
+      const levelEmoji = document.querySelector('.level-emoji');
+      const pointsValue = document.querySelector('.points-value');
+      const progressFill = document.querySelector('.progress-fill');
+      const currentProgress = document.querySelector('.current-progress');
+      const nextLevel = document.querySelector('.next-level');
+
+      if (levelInfo.current_level) {
+        if (levelEmoji) levelEmoji.textContent = levelInfo.current_level.emoji;
+        if (levelDescription) levelDescription.textContent = levelInfo.current_level.description;
+      }
+
+      if (pointsValue) pointsValue.textContent = levelInfo.points || 0;
+      
+      if (progressFill) {
+        const progress = levelInfo.progress_to_next || 0;
+        progressFill.style.width = `${progress}%`;
+      }
+      
+      if (currentProgress) {
+        currentProgress.textContent = `${levelInfo.progress_to_next || 0}%`;
+      }
+
+      if (nextLevel && levelInfo.next_level) {
+        nextLevel.textContent = `下一級：${levelInfo.next_level.title}`;
+      }
+
+      // 更新統計數據
+      if (levelInfo.stats) {
+        const statItems = document.querySelectorAll('.stat-item');
+        statItems.forEach(item => {
+          const statValue = item.querySelector('.stat-value');
+          const statLabel = item.querySelector('.stat-label');
+          
+          if (statLabel && statValue) {
+            const label = statLabel.textContent;
+            switch (label) {
+              case '發文':
+                statValue.textContent = levelInfo.stats.posts_count || 0;
+                break;
+              case '獲讚':
+                statValue.textContent = levelInfo.stats.likes_received || 0;
+                break;
+              case '留言':
+                statValue.textContent = levelInfo.stats.comments_received || 0;
+                break;
+              case '天數':
+                statValue.textContent = levelInfo.stats.login_days || 1;
+                break;
+            }
+          }
+        });
+      }
+    } catch (error) {
+      console.error('[ERROR] 更新用戶等級卡片失敗:', error);
+    }
+  }
+
+  // 初始化用戶數據
+  initializeUserData();
+
   /* --- 通知系統 --- */
   function showNotification(message, type = 'info') {
     // 移除現有的通知

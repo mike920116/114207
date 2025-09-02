@@ -338,9 +338,79 @@ def main():
         
         formatted_post_data.append(complete_post_data)
     
+    # 獲取社交統計數據
+    try:
+        # 獲取粉絲數（追蹤我的人）
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (current_user.id,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        # 獲取追蹤數（我追蹤的人）
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        social_stats = {
+            'followers_count': followers_count,
+            'following_count': following_count
+        }
+    except Exception as e:
+        print(f"[ERROR] 獲取社交統計失敗: {str(e)}")
+        social_stats = {
+            'followers_count': 0,
+            'following_count': 0
+        }
+    
     database_connection.close()
 
-    return render_template('social/social_main.html', posts=formatted_post_data, current_tab=tab)
+    # 獲取用戶等級信息
+    try:
+        user_level_info = get_user_level_info(current_user.id)
+        if not user_level_info.get('success', False):
+            user_level_info = {
+                'success': True,
+                'current_level': {
+                    'level': 1,
+                    'title': '新手村民',
+                    'emoji': '🌱',
+                    'description': '剛加入社群的新朋友'
+                },
+                'points': 0,
+                'progress_to_next': 0,
+                'stats': {
+                    'posts_count': 0,
+                    'likes_received': 0,
+                    'comments_received': 0,
+                    'login_days': 1
+                }
+            }
+    except Exception as e:
+        print(f"[ERROR] 獲取用戶等級信息失敗: {str(e)}")
+        user_level_info = {
+            'success': True,
+            'current_level': {
+                'level': 1,
+                'title': '新手村民',
+                'emoji': '🌱',
+                'description': '剛加入社群的新朋友'
+            },
+            'points': 0,
+            'progress_to_next': 0,
+            'stats': {
+                'posts_count': 0,
+                'likes_received': 0,
+                'comments_received': 0,
+                'login_days': 1
+            }
+        }
+
+    return render_template('social/social_main.html', 
+                         posts=formatted_post_data, 
+                         current_tab=tab,
+                         social_stats=social_stats,
+                         user_level_info=user_level_info)
 
 @social_bp.route('/delete_post/<int:post_id>', methods=['POST'])
 @login_required
