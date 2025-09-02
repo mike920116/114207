@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('[DEBUG] DOM 載入完成，開始初始化社群功能');
 
   /* --- 初始化用戶數據 --- */
   function initializeUserData() {
@@ -390,6 +391,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const postId = this.getAttribute('data-post-id');
       const isLiked = this.getAttribute('data-liked') === 'true';
       
+      // 禁用按鈕防止重複點擊
+      this.disabled = true;
+      
       fetch(`/social/toggle_like/${postId}`, {
         method: 'POST',
         headers: {
@@ -400,13 +404,37 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(data => {
         if (data.success) {
           const emoji = this.querySelector('.btn-emoji');
-          emoji.textContent = data.liked ? '👍' : '🤍';
-          this.setAttribute('data-liked', data.liked);
-          this.childNodes[1].textContent = ` ${data.likes_count}`;
+          // 修復：使用 API 返回的 is_liked 而不是 liked
+          const newIsLiked = data.is_liked;
+          emoji.textContent = newIsLiked ? '👍' : '🤍';
+          this.setAttribute('data-liked', newIsLiked);
+          
+          // 查找並更新數字部分（跳過表情符號）
+          const textNodes = Array.from(this.childNodes).filter(node => 
+            node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ''
+          );
+          if (textNodes.length > 0) {
+            textNodes[0].textContent = ` ${data.likes_count}`;
+          } else {
+            // 如果沒有文字節點，在表情符號後面添加
+            this.appendChild(document.createTextNode(` ${data.likes_count}`));
+          }
+          
+          // 如果有等級提升通知
+          if (data.level_up) {
+            showNotification(data.level_up.message, 'success');
+          }
+        } else {
+          showNotification(data.message || '按讚操作失敗', 'error');
         }
       })
       .catch(error => {
         console.error('按讚操作失敗:', error);
+        showNotification('網路錯誤，請稍後再試', 'error');
+      })
+      .finally(() => {
+        // 重新啟用按鈕
+        this.disabled = false;
       });
     });
   });
@@ -417,22 +445,42 @@ document.addEventListener('DOMContentLoaded', () => {
       const postId = this.getAttribute('data-post-id');
       const commentsSection = document.getElementById(`comments-${postId}`);
       
-      if (commentsSection.style.display === 'none' || !commentsSection.style.display) {
-        commentsSection.style.display = 'block';
-        loadComments(postId);
+      console.log(`[DEBUG] 點擊留言按鈕，PostID: ${postId}`);
+      console.log(`[DEBUG] 留言區元素:`, commentsSection);
+      
+      if (commentsSection) {
+        if (commentsSection.style.display === 'none' || !commentsSection.style.display) {
+          commentsSection.style.display = 'block';
+          loadComments(postId);
+          console.log(`[DEBUG] 顯示留言區並載入留言`);
+        } else {
+          commentsSection.style.display = 'none';
+          console.log(`[DEBUG] 隱藏留言區`);
+        }
       } else {
-        commentsSection.style.display = 'none';
+        console.error(`[ERROR] 找不到留言區元素: comments-${postId}`);
       }
     });
   });
 
   // 載入留言
   function loadComments(postId) {
+    console.log(`[DEBUG] 開始載入留言，PostID: ${postId}`);
+    
     fetch(`/social/get_comments/${postId}`)
-      .then(response => response.json())
+      .then(response => {
+        console.log(`[DEBUG] 留言請求響應狀態:`, response.status);
+        return response.json();
+      })
       .then(data => {
+        console.log(`[DEBUG] 留言數據:`, data);
         if (data.success) {
           const commentsList = document.getElementById(`comments-list-${postId}`);
+          if (!commentsList) {
+            console.error(`[ERROR] 找不到留言列表元素: comments-list-${postId}`);
+            return;
+          }
+          
           commentsList.innerHTML = '';
           
           if (data.comments.length > 0) {
@@ -440,13 +488,19 @@ document.addEventListener('DOMContentLoaded', () => {
               const commentHTML = createCommentHTML(comment);
               commentsList.innerHTML += commentHTML;
             });
+            console.log(`[DEBUG] 成功載入 ${data.comments.length} 條留言`);
           } else {
             commentsList.innerHTML = '<div class="no-comments"><p>目前還沒有留言，成為第一個留言的人吧！</p></div>';
+            console.log(`[DEBUG] 沒有留言，顯示空狀態`);
           }
+        } else {
+          console.error(`[ERROR] 載入留言失敗:`, data.message);
+          showNotification(data.message || '載入留言失敗', 'error');
         }
       })
       .catch(error => {
-        console.error('載入留言失敗:', error);
+        console.error('[ERROR] 載入留言失敗:', error);
+        showNotification('載入留言失敗，請稍後再試', 'error');
       });
   }
 
@@ -471,6 +525,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const postId = form.getAttribute('data-post-id');
       const formData = new FormData(form);
       
+      console.log(`[DEBUG] 提交留言表單，PostID: ${postId}`);
+      
       const submitBtn = form.querySelector('.submit-comment-btn');
       const originalText = submitBtn.textContent;
       submitBtn.disabled = true;
@@ -480,12 +536,19 @@ document.addEventListener('DOMContentLoaded', () => {
         method: 'POST',
         body: formData
       })
-      .then(response => response.json())
+      .then(response => {
+        console.log(`[DEBUG] 留言提交響應狀態:`, response.status);
+        return response.json();
+      })
       .then(data => {
+        console.log(`[DEBUG] 留言提交響應:`, data);
         if (data.success) {
           // 清空表單
           form.reset();
-          form.querySelector('.char-count').textContent = '0';
+          const charCount = form.querySelector('.char-count');
+          if (charCount) {
+            charCount.textContent = '0';
+          }
           
           // 重新載入留言
           loadComments(postId);
@@ -493,9 +556,14 @@ document.addEventListener('DOMContentLoaded', () => {
           // 更新留言數量
           const commentBtn = document.querySelector(`[data-post-id="${postId}"].comment-btn`);
           if (commentBtn && data.comments_count !== undefined) {
-            const countText = commentBtn.childNodes[1];
-            if (countText) {
-              countText.textContent = ` ${data.comments_count}`;
+            // 找到按鈕中的文字節點並更新
+            const textNodes = Array.from(commentBtn.childNodes).filter(node => 
+              node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== ''
+            );
+            if (textNodes.length > 0) {
+              textNodes[0].textContent = ` ${data.comments_count}`;
+            } else {
+              commentBtn.appendChild(document.createTextNode(` ${data.comments_count}`));
             }
           }
           
@@ -512,7 +580,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       })
       .catch(error => {
-        console.error('留言發布失敗:', error);
+        console.error('[ERROR] 留言發布失敗:', error);
         showNotification('網路錯誤，請稍後再試', 'error');
       })
       .finally(() => {
