@@ -1501,11 +1501,11 @@ def follow():
             VALUES (%s, %s, %s)
         """, (current_user.id, user_email, current_time))
         
-        # 獲取更新後的追蹤數據
+        # 獲取更新後的當前用戶統計數據（只返回當前用戶的數據）
         database_cursor.execute("""
             SELECT COUNT(*) FROM follows WHERE following_email = %s
-        """, (user_email,))
-        followers_count = database_cursor.fetchone()[0]
+        """, (current_user.id,))
+        current_user_followers_count = database_cursor.fetchone()[0]
         
         database_cursor.execute("""
             SELECT COUNT(*) FROM follows WHERE follower_email = %s
@@ -1519,7 +1519,7 @@ def follow():
             'success': True,
             'message': '追蹤成功',
             'is_following': True,
-            'followers_count': followers_count,
+            'followers_count': current_user_followers_count,
             'following_count': following_count
         })
         
@@ -1573,11 +1573,11 @@ def unfollow():
             WHERE follower_email = %s AND following_email = %s
         """, (current_user.id, user_email))
         
-        # 獲取更新後的追蹤數據
+        # 獲取更新後的當前用戶統計數據（只返回當前用戶的數據）
         database_cursor.execute("""
             SELECT COUNT(*) FROM follows WHERE following_email = %s
-        """, (user_email,))
-        followers_count = database_cursor.fetchone()[0]
+        """, (current_user.id,))
+        current_user_followers_count = database_cursor.fetchone()[0]
         
         database_cursor.execute("""
             SELECT COUNT(*) FROM follows WHERE follower_email = %s
@@ -1591,7 +1591,7 @@ def unfollow():
             'success': True,
             'message': '取消追蹤成功',
             'is_following': False,
-            'followers_count': followers_count,
+            'followers_count': current_user_followers_count,
             'following_count': following_count
         })
         

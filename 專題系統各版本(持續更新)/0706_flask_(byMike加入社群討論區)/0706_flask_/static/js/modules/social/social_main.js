@@ -288,9 +288,8 @@ document.addEventListener('DOMContentLoaded', () => {
           }
         });
         
-        // 更新社交統計
+        // 更新社交統計 - 追蹤/取消追蹤只影響自己的追蹤數
         updateSocialStats({
-          followers_count: data.followers_count,
           following_count: data.following_count
         });
         
@@ -337,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const followersCount = document.querySelector('[data-stat="followers"] .social-stat-number');
     const followingCount = document.querySelector('[data-stat="following"] .social-stat-number');
     
+    // 只更新提供的統計數據
     if (followersCount && stats.followers_count !== undefined) {
       followersCount.textContent = stats.followers_count;
     }
@@ -793,10 +793,23 @@ function handleUnfollowUser(userEmail, username, btnElement) {
       // 更新社交統計
       window.showNotification(`已取消追蹤 ${username}`, 'success');
       
-      // 重新載入追蹤列表
-      setTimeout(() => {
-        window.showFollowingList();
-      }, 1000);
+      // 檢查列表是否為空，如果為空則顯示空狀態
+      const modalBody = document.querySelector('.follow-modal-body');
+      const remainingItems = modalBody.querySelectorAll('.follow-user-item');
+      if (remainingItems.length === 0) {
+        modalBody.innerHTML = `
+          <div class="empty-follow-list">
+            <div class="empty-icon">👥</div>
+            <h4>還沒有追蹤任何人</h4>
+            <p>開始追蹤其他用戶，在這裡查看他們的最新動態</p>
+            <button class="btn btn-primary empty-follow-action-btn" data-type="following">
+              <span class="btn-emoji">🔍</span> 探索用戶
+            </button>
+          </div>
+        `;
+        // 為新添加的按鈕綁定事件
+        bindEmptyActionButton();
+      }
     } else {
       btnElement.disabled = false;
       btnElement.innerHTML = '<span class="btn-emoji">✕</span> 取消追蹤';
@@ -847,10 +860,23 @@ function handleRemoveFollower(userEmail, username, btnElement) {
       
       window.showNotification(`已移除粉絲 ${username}`, 'success');
       
-      // 重新載入粉絲列表
-      setTimeout(() => {
-        window.showFollowersList();
-      }, 1000);
+      // 檢查列表是否為空，如果為空則顯示空狀態
+      const modalBody = document.querySelector('.follow-modal-body');
+      const remainingItems = modalBody.querySelectorAll('.follow-user-item');
+      if (remainingItems.length === 0) {
+        modalBody.innerHTML = `
+          <div class="empty-follow-list">
+            <div class="empty-icon">🙋‍♂️</div>
+            <h4>還沒有粉絲</h4>
+            <p>分享更多精彩內容，吸引更多粉絲關注您</p>
+            <button class="btn btn-primary empty-follow-action-btn" data-type="followers">
+              <span class="btn-emoji">✏️</span> 發布貼文
+            </button>
+          </div>
+        `;
+        // 為新添加的按鈕綁定事件
+        bindEmptyActionButton();
+      }
     } else {
       btnElement.disabled = false;
       btnElement.innerHTML = '<span class="btn-emoji">🗑️</span> 移除粉絲';
