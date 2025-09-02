@@ -187,11 +187,15 @@
               <strong><a href="{{ url_for('social.user_posts', user_email=post.user_email) }}">{{ post.username }}</a></strong>
               <!-- 追蹤按鈕（僅非作者且非匿名貼文可見） -->
               {% if current_user.is_authenticated and post.user_email != current_user.id and not post.is_anonymous %}
-              <button class="follow-btn follow-btn-inline" 
+              <button class="follow-btn follow-btn-inline {{ 'following' if post.is_following else '' }}" 
                       data-user-email="{{ post.user_email }}" 
-                      data-action="follow"
-                      title="追蹤 {{ post.username }}">
-                <span class="btn-emoji">➕</span> 追蹤
+                      data-action="{{ 'unfollow' if post.is_following else 'follow' }}"
+                      title="{{ '取消追蹤' if post.is_following else '追蹤' }} {{ post.username }}">
+                {% if post.is_following %}
+                  <span class="btn-emoji">✓</span> 已追蹤
+                {% else %}
+                  <span class="btn-emoji">➕</span> 追蹤
+                {% endif %}
               </button>
               {% endif %}
             </div>
@@ -320,11 +324,15 @@
                       </strong>
                       <!-- 留言區追蹤按鈕（僅非作者且非匿名用戶可見） -->
                       {% if current_user.is_authenticated and comment.user_email != current_user.id and comment.user_email != post.user_email %}
-                      <button class="follow-btn follow-btn-comment" 
+                      <button class="follow-btn follow-btn-comment {{ 'following' if comment.is_following else '' }}" 
                               data-user-email="{{ comment.user_email }}" 
-                              data-action="follow"
-                              title="追蹤 {{ comment.username }}">
-                        <span class="btn-emoji">➕</span> 追蹤
+                              data-action="{{ 'unfollow' if comment.is_following else 'follow' }}"
+                              title="{{ '取消追蹤' if comment.is_following else '追蹤' }} {{ comment.username }}">
+                        {% if comment.is_following %}
+                          <span class="btn-emoji">✓</span> 已追蹤
+                        {% else %}
+                          <span class="btn-emoji">➕</span> 追蹤
+                        {% endif %}
                       </button>
                       {% endif %}
                     </div>

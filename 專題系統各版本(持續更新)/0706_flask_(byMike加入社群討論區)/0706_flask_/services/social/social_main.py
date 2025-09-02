@@ -307,6 +307,38 @@ def main():
         
         comments_data = database_cursor.fetchall()
         
+        # 檢查當前用戶是否已追蹤該貼文作者（僅非匿名貼文）
+        is_following = False
+        if not post_item[6] and post_item[1] != current_user.id:  # 非匿名且非自己的貼文
+            database_cursor.execute("""
+                SELECT id FROM follows 
+                WHERE follower_email = %s AND following_email = %s
+            """, (current_user.id, post_item[1]))
+            is_following = database_cursor.fetchone() is not None
+
+        # 為評論添加追蹤狀態
+        comments_with_follow_status = []
+        for comment_item in comments_data:
+            comment_following = False
+            if comment_item[1] != current_user.id and comment_item[1] != post_item[1]:  # 非自己且非貼文作者
+                database_cursor.execute("""
+                    SELECT id FROM follows 
+                    WHERE follower_email = %s AND following_email = %s
+                """, (current_user.id, comment_item[1]))
+                comment_following = database_cursor.fetchone() is not None
+            
+            comments_with_follow_status.append({
+                'comment_id': comment_item[0],
+                'user_email': comment_item[1],
+                'username': comment_item[2],
+                'content': comment_item[3],
+                'reply_to_id': comment_item[4],
+                'reply_to_username': comment_item[5],
+                'is_public': comment_item[6],
+                'created_at': format_datetime(comment_item[7]),
+                'is_following': comment_following
+            })
+        
         # 組裝完整的貼文資料
         complete_post_data = {
             'post_id': post_item[0],
@@ -321,19 +353,8 @@ def main():
             'created_at': format_datetime(post_item[9]),
             'likes_count': post_item[10],
             'user_liked': bool(post_item[11]),  # 當前用戶是否已按讚
-            'comments': [
-                {
-                    'comment_id': comment_item[0],
-                    'user_email': comment_item[1],
-                    'username': comment_item[2],
-                    'content': comment_item[3],
-                    'reply_to_id': comment_item[4],
-                    'reply_to_username': comment_item[5],
-                    'is_public': comment_item[6],
-                    'created_at': format_datetime(comment_item[7])
-                }
-                for comment_item in comments_data
-            ]
+            'is_following': is_following,  # 當前用戶是否已追蹤該作者
+            'comments': comments_with_follow_status
         }
         
         formatted_post_data.append(complete_post_data)

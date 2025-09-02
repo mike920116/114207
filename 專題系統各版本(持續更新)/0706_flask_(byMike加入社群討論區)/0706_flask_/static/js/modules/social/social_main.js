@@ -251,13 +251,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* --- 追蹤功能 --- */
   function handleFollowAction(userEmail, action) {
-    const btn = document.querySelector(`[data-user-email="${userEmail}"]`);
-    if (!btn) return;
+    // 找到所有該用戶的追蹤按鈕
+    const buttons = document.querySelectorAll(`[data-user-email="${userEmail}"]`);
+    if (buttons.length === 0) return;
 
-    // 禁用按鈕防止重複點擊
-    btn.disabled = true;
-    const originalText = btn.textContent;
-    btn.innerHTML = '<span class="btn-emoji">⏳</span> 處理中...';
+    // 禁用所有按鈕防止重複點擊
+    buttons.forEach(btn => {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-emoji">⏳</span> 處理中...';
+    });
 
     const url = action === 'follow' ? '/social/follow' : '/social/unfollow';
     
@@ -271,13 +273,20 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        if (action === 'follow') {
-          btn.innerHTML = '<span class="btn-emoji">✓</span> 已追蹤';
-          btn.setAttribute('data-action', 'unfollow');
-        } else {
-          btn.innerHTML = '<span class="btn-emoji">➕</span> 追蹤';
-          btn.setAttribute('data-action', 'follow');
-        }
+        // 更新所有該用戶的追蹤按鈕
+        buttons.forEach(btn => {
+          if (action === 'follow') {
+            btn.innerHTML = '<span class="btn-emoji">✓</span> 已追蹤';
+            btn.setAttribute('data-action', 'unfollow');
+            btn.classList.add('following');
+            btn.setAttribute('title', btn.getAttribute('title').replace('追蹤', '取消追蹤'));
+          } else {
+            btn.innerHTML = '<span class="btn-emoji">➕</span> 追蹤';
+            btn.setAttribute('data-action', 'follow');
+            btn.classList.remove('following');
+            btn.setAttribute('title', btn.getAttribute('title').replace('取消追蹤', '追蹤'));
+          }
+        });
         
         // 更新社交統計
         updateSocialStats({
@@ -285,19 +294,41 @@ document.addEventListener('DOMContentLoaded', () => {
           following_count: data.following_count
         });
         
-        showNotification(data.message, 'success');
+        const actionText = action === 'follow' ? '追蹤' : '取消追蹤';
+        showNotification(`${actionText}成功！`, 'success');
       } else {
-        btn.innerHTML = originalText;
+        // 恢復按鈕原狀
+        buttons.forEach(btn => {
+          if (action === 'follow') {
+            btn.innerHTML = '<span class="btn-emoji">➕</span> 追蹤';
+            btn.classList.remove('following');
+          } else {
+            btn.innerHTML = '<span class="btn-emoji">✓</span> 已追蹤';
+            btn.classList.add('following');
+          }
+        });
         showNotification(data.message || '操作失敗', 'error');
       }
     })
     .catch(error => {
       console.error('追蹤操作失敗:', error);
-      btn.innerHTML = originalText;
+      // 恢復按鈕原狀
+      buttons.forEach(btn => {
+        if (action === 'follow') {
+          btn.innerHTML = '<span class="btn-emoji">➕</span> 追蹤';
+          btn.classList.remove('following');
+        } else {
+          btn.innerHTML = '<span class="btn-emoji">✓</span> 已追蹤';
+          btn.classList.add('following');
+        }
+      });
       showNotification('網路錯誤，請稍後再試', 'error');
     })
     .finally(() => {
-      btn.disabled = false;
+      // 重新啟用所有按鈕
+      buttons.forEach(btn => {
+        btn.disabled = false;
+      });
     });
   }
 
