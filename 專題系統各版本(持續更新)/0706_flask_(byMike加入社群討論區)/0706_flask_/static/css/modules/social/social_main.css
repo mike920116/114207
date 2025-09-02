@@ -1,4 +1,5 @@
 /* ========== 等級升級通知動畫 ========== */
+/* 等級升級通知動畫區段：控制彈出通知的 keyframes 與整體容器樣式 */
 @keyframes slideInRight {
   0% {
     transform: translateX(100%);
@@ -22,10 +23,12 @@
 }
 
 .level-up-notification {
+  /* 升級通知容器：包覆整個升級提示（位置、字型等） */
   font-family: inherit;
 }
 
 .level-up-content {
+  /* 升級通知內容：水平排列圖示與文字 */
   display: flex;
   align-items: center;
   gap: 15px;
@@ -33,6 +36,7 @@
 }
 
 .level-up-icon {
+  /* 通知圖示：顯示 emoji 或 icon，並帶有跳動動畫 */
   font-size: 2.5rem;
   animation: bounce 1s ease infinite alternate;
 }
@@ -43,18 +47,21 @@
 }
 
 .level-up-text h3 {
+  /* 通知標題：升級標題文字 */
   margin: 0 0 5px 0;
   font-size: 1.1rem;
   font-weight: 600;
 }
 
 .level-up-text p {
+  /* 通知內文：簡短說明（例如獲得多少點、達成何等級） */
   margin: 0;
   font-size: 0.9rem;
   opacity: 0.9;
 }
 
 .level-up-close {
+  /* 關閉按鈕：通知右上角的圓形關閉按鈕 */
   position: absolute;
   top: -5px;
   right: -5px;
@@ -78,6 +85,7 @@
 }
 
 /* ========== 用戶等級卡片樣式增強 ========== */
+/* 用戶等級卡片主要樣式：控制卡片大小、內距、背景與文字色（非深色模式預設） */
 .user-level-card {
   max-width: 780px;
   margin: 0 auto;
@@ -2164,7 +2172,7 @@ body.dark-mode .edit-modal-body .mood-tag {
   margin: 0 auto 20px;
   padding: 16px 20px;
   min-height: 50px;
-  /* 預設（非深色模式）顯示淺綠漸層背景，深色模式由 body.dark-mode 覆蓋 */
+  /* 用戶等級卡片（此處為完整樣式）：預設淺綠背景與深色文字，並包含圓角與陰影 */
   background: linear-gradient(135deg, #E8F5E9, #DFF0D8);
   color: #163014;
   border-radius: 16px;
@@ -3255,8 +3263,8 @@ body.dark-mode .edit-modal-body .mood-tag {
 }
 
 /* ========== 用戶等級卡片依等級變色 ========== */
+/* 等級顏色覆寫區塊：針對不同 data-level 值變換卡片背景，例如 新手村民/活躍居民/社群達人/榮譽會員 */
 .user-level-card {
-  /* 先移除原本的深灰色背景。非 dark-mode 時仍使用淺綠系預設，等級變色規則會覆蓋此背景 */
   background: linear-gradient(135deg, #E8F5E9, #DFF0D8);
   color: #163014;
   border-radius: 16px;
