@@ -1351,6 +1351,166 @@ def search_api():
 
 # ==================== 追蹤功能 ====================
 
+@social_bp.route('/follow', methods=['POST'])
+@login_required
+def follow():
+    """
+    追蹤用戶 (JSON API)
+    
+    JSON Body:
+        user_email (str): 要追蹤的用戶Email
+    
+    Returns:
+        JSON: 追蹤結果
+    """
+    try:
+        data = request.get_json()
+        if not data or 'user_email' not in data:
+            return jsonify({
+                'success': False,
+                'message': '缺少必要的參數'
+            }), 400
+            
+        user_email = data['user_email']
+        
+        # 檢查是否嘗試追蹤自己
+        if user_email == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': '不能追蹤自己'
+            }), 400
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 檢查目標用戶是否存在
+        database_cursor.execute("SELECT User_Email FROM User WHERE User_Email = %s", (user_email,))
+        if not database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '目標用戶不存在'
+            }), 404
+        
+        # 檢查是否已經追蹤
+        database_cursor.execute("""
+            SELECT id FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        if database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '您已經追蹤了這個用戶'
+            }), 400
+        
+        # 創建追蹤關係
+        current_time = datetime.now()
+        database_cursor.execute("""
+            INSERT INTO follows (follower_email, following_email, created_at) 
+            VALUES (%s, %s, %s)
+        """, (current_user.id, user_email, current_time))
+        
+        # 獲取更新後的追蹤數據
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (user_email,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        database_connection.commit()
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'message': '追蹤成功',
+            'is_following': True,
+            'followers_count': followers_count,
+            'following_count': following_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 追蹤用戶失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'追蹤失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/unfollow', methods=['POST'])
+@login_required
+def unfollow():
+    """
+    取消追蹤用戶 (JSON API)
+    
+    JSON Body:
+        user_email (str): 要取消追蹤的用戶Email
+    
+    Returns:
+        JSON: 取消追蹤結果
+    """
+    try:
+        data = request.get_json()
+        if not data or 'user_email' not in data:
+            return jsonify({
+                'success': False,
+                'message': '缺少必要的參數'
+            }), 400
+            
+        user_email = data['user_email']
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 檢查是否正在追蹤
+        database_cursor.execute("""
+            SELECT id FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        if not database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '您尚未追蹤這個用戶'
+            }), 400
+        
+        # 刪除追蹤關係
+        database_cursor.execute("""
+            DELETE FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        # 獲取更新後的追蹤數據
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (user_email,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        database_connection.commit()
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'message': '取消追蹤成功',
+            'is_following': False,
+            'followers_count': followers_count,
+            'following_count': following_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 取消追蹤失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'取消追蹤失敗：{str(e)}'
+        }), 500
+
 @social_bp.route('/follow/<user_email>', methods=['POST'])
 @login_required
 def follow_user(user_email):

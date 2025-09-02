@@ -31,7 +31,7 @@
       <button type="button" class="action-btn more-toggle" title="更多">⋯</button>
       <div class="more-menu">
         <button type="button" id="toggle-dark" class="more-item">🌗 深色模式</button>
-        <a href="#" class="more-item">⚙️ 個人設定</a>
+        <a href="/settings/profile" class="more-item">⚙️ 個人設定</a>
       </div>
     </div>
   </nav>
@@ -143,12 +143,12 @@
       
       <!-- 社交統計 -->
       <div class="social-stats">
-        <div class="social-stat-item" data-stat="followers">
+        <div class="social-stat-item" data-stat="followers" style="cursor: pointer;" title="點擊查看粉絲列表">
           <span class="social-stat-icon">👥</span>
           <span class="social-stat-number" id="followers-count">{{ social_stats.followers_count if social_stats else 0 }}</span>
           <span class="social-stat-label">粉絲</span>
         </div>
-        <div class="social-stat-item" data-stat="following">
+        <div class="social-stat-item" data-stat="following" style="cursor: pointer;" title="點擊查看追蹤列表">
           <span class="social-stat-icon">🔔</span>
           <span class="social-stat-number" id="following-count">{{ social_stats.following_count if social_stats else 0 }}</span>
           <span class="social-stat-label">追蹤</span>
