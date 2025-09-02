@@ -415,14 +415,18 @@ body.dark-mode .post-card a, body.dark-mode .user-card a {
   color: #fff;
 }
 
-/* 強制貼文區與使用者卡片內的使用者名稱顯示為白色（保持可點擊） */
-.post-card header strong a, .post-card header strong a:visited {
-  color: #fff !important;
+/* 淺色模式：使用者名稱使用淺綠色；深色模式保留白色（保持可點擊） */
+body:not(.dark-mode) .post-card header strong a,
+body:not(.dark-mode) .post-card header strong a:visited {
+  color: #8BC34A !important; /* 淺綠色 */
   text-decoration: none !important;
 }
 
-.user-card .user-name, .user-card .user-name a, .user-card .user-name a:visited {
-  color: #fff !important;
+/* 使用者卡片 - 僅在非 dark-mode 時套用淺綠色，避免覆寫深色模式 */
+body:not(.dark-mode) .user-card .user-name,
+body:not(.dark-mode) .user-card .user-name a,
+body:not(.dark-mode) .user-card .user-name a:visited {
+  color: #8BC34A !important; /* 淺綠色 */
   text-decoration: none !important;
 }
 
