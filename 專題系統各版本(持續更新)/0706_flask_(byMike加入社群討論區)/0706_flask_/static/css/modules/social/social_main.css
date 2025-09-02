@@ -83,8 +83,9 @@
   margin: 0 auto;
   padding: 16px 20px;
   min-height: 50px;
-  background: #23272f !important;
-  color: #fff;
+  /* 預設（非深色模式）顯示淺綠漸層背景，深色模式由 body.dark-mode 覆蓋 */
+  background: linear-gradient(135deg, #4a7d4e, #73886a);
+  color: #163014;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -133,7 +134,8 @@ body.page-wrapper.dark-mode .user-level-card {
 
 .level-info h3 {
   margin: 0 0 5px 0;
-  color: #2c3e50;
+  /* 在淺綠背景上使用深綠/深色文字以確保可讀性 */
+  color: #163014;
   font-size: 1.3rem;
   font-weight: 600;
 }
@@ -144,7 +146,7 @@ body.dark-mode .level-info h3 {
 
 .level-description {
   margin: 0;
-  color: #7f8c8d;
+  color: #355034;
   font-size: 0.9rem;
   line-height: 1.4;
 }
@@ -161,7 +163,7 @@ body.dark-mode .level-description {
   display: block;
   font-size: 1.8rem;
   font-weight: 700;
-  color: #5B7F47;
+  color: #2E4F33;
   line-height: 1;
 }
 
@@ -1225,179 +1227,7 @@ body.dark-mode .edit-modal-body .mood-tag {
   color: #ccc;
 }
 
-/* ========== 用戶等級卡片完整樣式 ========== */
-.user-level-card {
-  max-width: 780px;
-  margin: 0 auto 20px;
-  padding: 16px 20px;
-  min-height: 50px;
-  background: #23272f !important;
-  color: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  border-left: 4px solid #95a5a6;
-  position: relative;
-  overflow: hidden;
-}
-
-body.dark-mode .user-level-card {
-  background: #23272f !important;
-  color: #fff;
-}
-
-.user-level-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-  transition: left 0.5s ease;
-}
-
-.user-level-card.updating::before {
-  left: 100%;
-}
-
-.level-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 15px;
-}
-
-.level-icon {
-  display: flex;
-  align-items: center;
-}
-
-.level-emoji {
-  font-size: 2.5rem;
-  margin-right: 15px;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
-}
-
-.level-info h3 {
-  margin: 0 0 5px 0;
-  color: #2c3e50;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
-
-body.dark-mode .level-info h3 {
-  color: #ecf0f1;
-}
-
-.level-description {
-  margin: 0;
-  color: #7f8c8d;
-  font-size: 0.9rem;
-  line-height: 1.4;
-}
-
-body.dark-mode .level-description {
-  color: #bdc3c7;
-}
-
-.level-points {
-  text-align: right;
-}
-
-.points-value {
-  display: block;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: #5B7F47;
-  line-height: 1;
-}
-
-body.dark-mode .points-value {
-  color: #7BA05B;
-}
-
-.points-label {
-  font-size: 0.8rem;
-  color: #95a5a6;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-body.dark-mode .points-label {
-  color: #7f8c8d;
-}
-
-.level-progress {
-  margin-bottom: 20px;
-}
-
-.progress-bar {
-  background: rgba(0,0,0,0.1);
-  border-radius: 10px;
-  height: 8px;
-  overflow: hidden;
-  position: relative;
-}
-
-body.dark-mode .progress-bar {
-  background: rgba(255,255,255,0.1);
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #5B7F47, #7BA05B);
-  border-radius: 10px;
-  transition: width 0.8s ease-in-out;
-  position: relative;
-}
-
-.progress-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-  animation: progressShine 2s ease-in-out infinite;
-}
-
-@keyframes progressShine {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.progress-text {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
-  font-size: 0.85rem;
-}
-
-.current-progress {
-  color: #5B7F47;
-  font-weight: 600;
-}
-
-body.dark-mode .current-progress {
-  color: #7BA05B;
-}
-
-.next-level {
-  color: #7f8c8d;
-  font-style: italic;
-}
-
-body.dark-mode .next-level {
-  color: #fff;
-}
-
-.level-stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
-}
+/* removed duplicate card block */
 
 .stat-item {
   text-align: center;
@@ -2334,8 +2164,9 @@ body.dark-mode .edit-modal-body .mood-tag {
   margin: 0 auto 20px;
   padding: 16px 20px;
   min-height: 50px;
-  background: #23272f !important;
-  color: #fff;
+  /* 預設（非深色模式）顯示淺綠漸層背景，深色模式由 body.dark-mode 覆蓋 */
+  background: linear-gradient(135deg, #E8F5E9, #DFF0D8);
+  color: #163014;
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   border-left: 4px solid #95a5a6;
@@ -3425,9 +3256,9 @@ body.dark-mode .edit-modal-body .mood-tag {
 
 /* ========== 用戶等級卡片依等級變色 ========== */
 .user-level-card {
-  /* 先移除原本的深灰色背景 */
-  background: none !important;
-  color: #fff;
+  /* 先移除原本的深灰色背景。非 dark-mode 時仍使用淺綠系預設，等級變色規則會覆蓋此背景 */
+  background: linear-gradient(135deg, #E8F5E9, #DFF0D8);
+  color: #163014;
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   border-left: 4px solid #95a5a6;
