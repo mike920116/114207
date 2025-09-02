@@ -7,7 +7,7 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/social_main.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/search_results_new.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/search_results.css') }}">
 </head>
 
 <body class="page-wrapper">
@@ -185,7 +185,7 @@
             <!-- 圖片預覽 -->
             {% if post.image_url %}
             <div class="post-image-preview">
-              <img src="{{ url_for('static', filename='uploads/' + post.image_url.split('/')[-1]) }}" 
+              <img src="{{ post.image_url }}" 
                    alt="貼文圖片" 
                    style="max-width: 100px; height: 60px; object-fit: cover; border-radius: 4px;"
                    onerror="this.style.display='none';">

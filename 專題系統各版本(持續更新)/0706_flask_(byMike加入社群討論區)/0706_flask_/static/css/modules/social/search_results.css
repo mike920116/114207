@@ -660,3 +660,62 @@ body.dark-mode .no-results-suggestions a {
   font-size: 0.7rem;
   padding: 2px 6px;
 }
+
+/* ========== 追蹤按鈕樣式 ========== */
+.follow-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.follow-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #5a6fd8, #6a42a3);
+}
+
+.follow-btn.following {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.follow-btn.following:hover {
+  background: linear-gradient(135deg, #218838, #1db584);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.follow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.follow-btn .btn-emoji {
+  font-size: 0.9em;
+}
+
+/* 深色模式下的追蹤按鈕 */
+body.dark-mode .follow-btn {
+  background: linear-gradient(135deg, #5a6fd8, #6a42a3);
+}
+
+body.dark-mode .follow-btn:hover {
+  background: linear-gradient(135deg, #4e5ec7, #5d3892);
+}
+
+body.dark-mode .follow-btn.following {
+  background: linear-gradient(135deg, #20c997, #17a085);
+}
+
+body.dark-mode .follow-btn.following:hover {
+  background: linear-gradient(135deg, #1db584, #138f72);
+}

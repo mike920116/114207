@@ -424,7 +424,7 @@ function bindFollowButton(followBtn) {
         // 更新按鈕狀態
         if (data.is_following) {
           this.classList.add('following');
-          this.innerHTML = '<span class="btn-emoji"></span> 已追蹤';
+          this.innerHTML = '<span class="btn-emoji">✓</span> 已追蹤';
           this.title = '點擊取消追蹤';
         } else {
           this.classList.remove('following');
@@ -435,7 +435,7 @@ function bindFollowButton(followBtn) {
         // 更新該用戶的所有追蹤按鈕狀態
         updateAllFollowButtonsForUser(userEmail, data.is_following);
         
-        // 顯示操作結果
+        // 顯示操作結果 - 不再更新社交統計，因為搜尋頁面不顯示統計數據
         showFollowNotification(data.message, data.is_following ? 'success' : 'info');
         
       } else {
@@ -486,7 +486,7 @@ function updateAllFollowButtonsForUser(userEmail, isFollowing) {
   followBtns.forEach(btn => {
     if (isFollowing) {
       btn.classList.add('following');
-      btn.innerHTML = '<span class="btn-emoji"></span> 已追蹤';
+      btn.innerHTML = '<span class="btn-emoji">✓</span> 已追蹤';
       btn.title = '點擊取消追蹤';
     } else {
       btn.classList.remove('following');
