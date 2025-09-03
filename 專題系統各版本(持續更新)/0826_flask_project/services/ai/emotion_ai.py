@@ -13,7 +13,7 @@
 - /ai/emotion/api: 情緒分析API（簡化版本）
 """
 
-import os, requests, logging, json, re, time
+import os, requests, logging, json, re, time, uuid
 from datetime import datetime
 from flask import render_template, request, jsonify
 from flask_login import login_required, current_user
@@ -41,6 +41,51 @@ def safe_log(message):
 def to_str(v):
     """將任何值轉成str（None → None）"""
     return str(v) if v is not None else None
+
+def save_emotion_data(user_email, user_emotions, ai_emotions, confidence, session_id, message_content=None):
+    """儲存情緒分析數據到資料庫"""
+    try:
+        from utils.db import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        
+        # 生成唯一的message_id
+        message_id = str(uuid.uuid4())[:8]
+        
+        # 準備數據
+        user_emotions_json = json.dumps(user_emotions, ensure_ascii=False) if user_emotions else None
+        ai_emotions_json = json.dumps(ai_emotions, ensure_ascii=False) if ai_emotions else None
+        
+        # 從用戶情緒分析中提取overall_tone
+        overall_tone = None
+        if user_emotions and 'overall_tone' in user_emotions:
+            overall_tone = user_emotions['overall_tone']
+        
+        sql = """INSERT INTO emotion_history 
+                (user_email, message_id, user_emotions, ai_emotions, confidence_score, 
+                 overall_tone, session_id, interaction_type, message_content, created_at) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())"""
+        
+        cursor.execute(sql, (
+            user_email,
+            message_id,
+            user_emotions_json,
+            ai_emotions_json,
+            confidence if confidence else 5,
+            overall_tone,
+            session_id,
+            'emotion_chat',
+            message_content[:500] if message_content else None  # 限制長度
+        ))
+        
+        cursor.close()
+        conn.close()
+        safe_log(f"[資料儲存] 成功儲存情緒數據: {user_email}, session: {session_id}")
+        return True
+        
+    except Exception as e:
+        safe_log(f"[資料儲存] 儲存情緒數據失敗: {str(e)}")
+        return False
 
 # ==================== 情緒分析處理函數 ====================
 
@@ -445,6 +490,29 @@ def emotion_chat_api():
             safe_log("[API回應] 使用回滾sidebar_reco")
 
         safe_log(f"[情緒AI API] 處理成功，直接返回HTTP響應")
+        
+        # 儲存情緒分析數據到資料庫
+        session_id = str(uuid.uuid4())[:12]  # 生成會話ID
+        user_analysis = main_payload.get('analysis_for_user')
+        ai_analysis = main_payload.get('analysis_for_ai')
+        
+        # 提取信心度
+        confidence = None
+        if user_analysis and 'confidence' in user_analysis:
+            try:
+                confidence = int(user_analysis['confidence'])
+            except (ValueError, TypeError):
+                confidence = 5
+        
+        # 儲存數據
+        save_emotion_data(
+            user_email=current_user.id,
+            user_emotions=user_analysis,
+            ai_emotions=ai_analysis,
+            confidence=confidence,
+            session_id=session_id,
+            message_content=user_message
+        )
         
         # 直接返回HTTP響應，不使用WebSocket
         return jsonify({
