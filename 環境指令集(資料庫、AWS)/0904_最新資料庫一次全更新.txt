@@ -1,9 +1,8 @@
 /* ============================================================
-   Non-destructive schema setup for flaskdb
-   - 不刪任何資料
-   - 不 DROP 任何表
-   - 補表、補欄位、補索引、補外鍵（若缺）
-   MySQL 8.0.39 測（ADD COLUMN IF NOT EXISTS 可用）
+   Non-destructive minimal schema for flaskdb
+   - 僅建庫與建表（IF NOT EXISTS）
+   - 不 DROP、不 ALTER；已存在的表與資料完全保留
+   - MySQL 8.0+
    ============================================================ */
 
 -- 1) 建庫與切換
@@ -14,62 +13,7 @@ USE `flaskdb`;
 
 SET NAMES utf8mb4;
 
--- 2) 輔助程序：補索引 / 補外鍵（存在就跳過）
-DELIMITER //
-
-CREATE PROCEDURE ensure_index(IN tbl VARCHAR(64), IN idx VARCHAR(64), IN cols TEXT)
-BEGIN
-  DECLARE cnt INT DEFAULT 0;
-  SELECT COUNT(*) INTO cnt
-    FROM information_schema.statistics
-   WHERE table_schema = DATABASE()
-     AND table_name = tbl
-     AND index_name = idx;
-  IF cnt = 0 THEN
-    SET @sql = CONCAT('ALTER TABLE `', tbl, '` ADD INDEX `', idx, '` (', cols, ')');
-    PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
-  END IF;
-END//
-
-CREATE PROCEDURE ensure_unique(IN tbl VARCHAR(64), IN idx VARCHAR(64), IN cols TEXT)
-BEGIN
-  DECLARE cnt INT DEFAULT 0;
-  SELECT COUNT(*) INTO cnt
-    FROM information_schema.statistics
-   WHERE table_schema = DATABASE()
-     AND table_name = tbl
-     AND index_name = idx;
-  IF cnt = 0 THEN
-    SET @sql = CONCAT('ALTER TABLE `', tbl, '` ADD UNIQUE `', idx, '` (', cols, ')');
-    PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
-  END IF;
-END//
-
-CREATE PROCEDURE ensure_fk(
-  IN tbl VARCHAR(64),
-  IN fk_name VARCHAR(64),
-  IN cols TEXT,
-  IN reftable VARCHAR(64),
-  IN refcols TEXT,
-  IN ondelete TEXT,   -- 例: ' ON DELETE CASCADE' 或 ''
-  IN onupdate TEXT    -- 例: ' ON UPDATE CASCADE' 或 ''
-)
-BEGIN
-  DECLARE cnt INT DEFAULT 0;
-  SELECT COUNT(*) INTO cnt
-    FROM information_schema.referential_constraints
-   WHERE constraint_schema = DATABASE()
-     AND table_name = tbl
-     AND constraint_name = fk_name;
-  IF cnt = 0 THEN
-    SET @sql = CONCAT('ALTER TABLE `', tbl, '` ADD CONSTRAINT `', fk_name, '` FOREIGN KEY (', cols, ') REFERENCES `', reftable, '` (', refcols, ')', ondelete, onupdate);
-    PREPARE s FROM @sql; EXECUTE s; DEALLOCATE PREPARE s;
-  END IF;
-END//
-
-DELIMITER ;
-
-/* 3) 建表（若不存在） */
+-- 2) 基礎參照表先建：user
 CREATE TABLE IF NOT EXISTS `user` (
   `User_Email` varchar(255) NOT NULL,
   `User_name` varchar(255) NOT NULL,
@@ -93,9 +37,12 @@ CREATE TABLE IF NOT EXISTS `user` (
   `last_login_time` datetime DEFAULT NULL,
   `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`User_Email`)
+  PRIMARY KEY (`User_Email`),
+  KEY `idx_user_level` (`user_level`),
+  KEY `idx_user_points` (`user_points`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 3) 內容表：posts
 CREATE TABLE IF NOT EXISTS `posts` (
   `Post_id` int NOT NULL AUTO_INCREMENT,
   `User_Email` varchar(255) DEFAULT NULL,
@@ -111,9 +58,15 @@ CREATE TABLE IF NOT EXISTS `posts` (
   `reposts_count` int DEFAULT '0',
   `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Post_id`)
+  PRIMARY KEY (`Post_id`),
+  KEY `idx_posts_mood` (`Mood`),
+  KEY `idx_posts_user_email` (`User_Email`),
+  KEY `idx_posts_created_at` (`Created_at`),
+  KEY `idx_posts_is_anonymous` (`Is_Anonymous`),
+  CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`User_Email`) REFERENCES `user` (`User_Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 4) AI 對話會話與日誌
 CREATE TABLE IF NOT EXISTS `aichatsessions` (
   `session_id` int NOT NULL AUTO_INCREMENT,
   `user_email` varchar(255) DEFAULT NULL,
@@ -122,7 +75,9 @@ CREATE TABLE IF NOT EXISTS `aichatsessions` (
   `need_human` tinyint DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`session_id`)
+  PRIMARY KEY (`session_id`),
+  KEY `user_email` (`user_email`),
+  CONSTRAINT `aichatsessions_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`User_Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `aichatlogs` (
@@ -131,9 +86,12 @@ CREATE TABLE IF NOT EXISTS `aichatlogs` (
   `role` enum('user','ai','admin') NOT NULL,
   `message` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `session_id` (`session_id`),
+  CONSTRAINT `aichatlogs_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `aichatsessions` (`session_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 5) 公告
 CREATE TABLE IF NOT EXISTS `announcements` (
   `id` int NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
@@ -145,6 +103,7 @@ CREATE TABLE IF NOT EXISTS `announcements` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 6) 情緒目標與歷史
 CREATE TABLE IF NOT EXISTS `emotion_goals` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_email` varchar(255) NOT NULL,
@@ -157,7 +116,10 @@ CREATE TABLE IF NOT EXISTS `emotion_goals` (
   `description` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_user_email` (`user_email`),
+  KEY `idx_status` (`status`),
+  CONSTRAINT `emotion_goals_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`User_Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='情緒目標管理表';
 
 CREATE TABLE IF NOT EXISTS `emotion_history` (
@@ -172,9 +134,15 @@ CREATE TABLE IF NOT EXISTS `emotion_history` (
   `interaction_type` varchar(50) DEFAULT 'chat',
   `message_content` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_user_email` (`user_email`),
+  KEY `idx_created_at` (`created_at`),
+  KEY `idx_session_id` (`session_id`),
+  KEY `idx_user_date` (`user_email`, `created_at`),
+  CONSTRAINT `emotion_history_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`User_Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='情緒分析歷史紀錄表';
 
+-- 7) 日記與互動與摘要
 CREATE TABLE IF NOT EXISTS `diaryrecords` (
   `Diary_id` int NOT NULL AUTO_INCREMENT,
   `User_Email` varchar(255) DEFAULT NULL,
@@ -184,7 +152,8 @@ CREATE TABLE IF NOT EXISTS `diaryrecords` (
   `AI_suggestions` text,
   `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Diary_id`)
+  PRIMARY KEY (`Diary_id`),
+  CONSTRAINT `diaryrecords_ibfk_1` FOREIGN KEY (`User_Email`) REFERENCES `user` (`User_Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `diaryinteractions` (
@@ -193,7 +162,8 @@ CREATE TABLE IF NOT EXISTS `diaryinteractions` (
   `User_message` text,
   `AI_response` text,
   `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Interaction_id`)
+  PRIMARY KEY (`Interaction_id`),
+  CONSTRAINT `diaryinteractions_ibfk_1` FOREIGN KEY (`Diary_id`) REFERENCES `diaryrecords` (`Diary_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `diarysummaries` (
@@ -203,24 +173,36 @@ CREATE TABLE IF NOT EXISTS `diarysummaries` (
   `Summary_end_period` varchar(255) DEFAULT NULL,
   `Summary_content` text,
   `Generate_date` date DEFAULT NULL,
-  PRIMARY KEY (`Summary_id`)
+  PRIMARY KEY (`Summary_id`),
+  CONSTRAINT `diarysummaries_ibfk_1` FOREIGN KEY (`User_Email`) REFERENCES `user` (`User_Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 8) 社交關係
 CREATE TABLE IF NOT EXISTS `follows` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `follower_email` varchar(255) NOT NULL,
-  `following_email` varchar(255) NOT NULL,
+  `follower_email` varchar(255) NOT NULL COMMENT '追蹤者的Email',
+  `following_email` varchar(255) NOT NULL COMMENT '被追蹤者的Email',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_follow` (`follower_email`, `following_email`),
+  KEY `idx_follower` (`follower_email`),
+  KEY `idx_following` (`following_email`),
+  CONSTRAINT `follows_ibfk_1` FOREIGN KEY (`follower_email`) REFERENCES `user` (`User_Email`) ON DELETE CASCADE,
+  CONSTRAINT `follows_ibfk_2` FOREIGN KEY (`following_email`) REFERENCES `user` (`User_Email`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用戶追蹤關係表';
 
+-- 9) 互動：likes / comments / collections
 CREATE TABLE IF NOT EXISTS `likes` (
   `Like_id` int NOT NULL AUTO_INCREMENT,
   `User_Email` varchar(255) DEFAULT NULL,
   `Post_id` int DEFAULT NULL,
   `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Like_id`)
+  PRIMARY KEY (`Like_id`),
+  UNIQUE KEY `unique_like` (`User_Email`, `Post_id`),
+  KEY `Post_id` (`Post_id`),
+  CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`User_Email`) REFERENCES `user` (`User_Email`),
+  CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`Post_id`) REFERENCES `posts` (`Post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `comments` (
@@ -233,7 +215,11 @@ CREATE TABLE IF NOT EXISTS `comments` (
   `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `reply_to_id` int DEFAULT NULL,
   `reply_to_username` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`Comment_id`)
+  PRIMARY KEY (`Comment_id`),
+  KEY `Post_id` (`Post_id`),
+  KEY `User_Email` (`User_Email`),
+  CONSTRAINT `comments_ibfk_1` FOREIGN KEY (`Post_id`) REFERENCES `posts` (`Post_id`),
+  CONSTRAINT `comments_ibfk_2` FOREIGN KEY (`User_Email`) REFERENCES `user` (`User_Email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `postcollections` (
@@ -241,9 +227,14 @@ CREATE TABLE IF NOT EXISTS `postcollections` (
   `User_Email` varchar(255) DEFAULT NULL,
   `Post_id` int DEFAULT NULL,
   `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Collection_id`)
+  PRIMARY KEY (`Collection_id`),
+  KEY `User_Email` (`User_Email`),
+  KEY `Post_id` (`Post_id`),
+  CONSTRAINT `postcollections_ibfk_1` FOREIGN KEY (`User_Email`) REFERENCES `user` (`User_Email`),
+  CONSTRAINT `postcollections_ibfk_2` FOREIGN KEY (`Post_id`) REFERENCES `posts` (`Post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 10) 檢舉與稽核
 CREATE TABLE IF NOT EXISTS `reports` (
   `Report_id` int NOT NULL AUTO_INCREMENT,
   `User_Email` varchar(255) DEFAULT NULL,
@@ -260,7 +251,11 @@ CREATE TABLE IF NOT EXISTS `reports` (
   `Notified` tinyint(1) DEFAULT '0',
   `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Report_id`)
+  PRIMARY KEY (`Report_id`),
+  KEY `User_Email` (`User_Email`),
+  KEY `Post_id` (`Post_id`),
+  CONSTRAINT `reports_ibfk_1` FOREIGN KEY (`User_Email`) REFERENCES `user` (`User_Email`),
+  CONSTRAINT `reports_ibfk_2` FOREIGN KEY (`Post_id`) REFERENCES `posts` (`Post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `report_audit_log` (
@@ -270,9 +265,12 @@ CREATE TABLE IF NOT EXISTS `report_audit_log` (
   `Performed_by` varchar(255) NOT NULL,
   `Description` text,
   `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`Log_id`)
+  PRIMARY KEY (`Log_id`),
+  KEY `Report_id` (`Report_id`),
+  CONSTRAINT `report_audit_log_ibfk_1` FOREIGN KEY (`Report_id`) REFERENCES `reports` (`Report_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- 11) 活動與等級歷史
 CREATE TABLE IF NOT EXISTS `userdailyactivity` (
   `id` int NOT NULL AUTO_INCREMENT,
   `user_email` varchar(255) NOT NULL,
@@ -283,7 +281,9 @@ CREATE TABLE IF NOT EXISTS `userdailyactivity` (
   `login_count` int DEFAULT '0',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unique_user_date` (`user_email`,`activity_date`)
+  UNIQUE KEY `unique_user_date` (`user_email`,`activity_date`),
+  KEY `idx_activity_date` (`activity_date`),
+  CONSTRAINT `userdailyactivity_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`User_Email`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 CREATE TABLE IF NOT EXISTS `userlevelhistory` (
@@ -296,271 +296,8 @@ CREATE TABLE IF NOT EXISTS `userlevelhistory` (
   `points_earned` int DEFAULT '0',
   `reason` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_user_email` (`user_email`),
+  KEY `idx_created_at` (`created_at`),
+  CONSTRAINT `userlevelhistory_ibfk_1` FOREIGN KEY (`user_email`) REFERENCES `user` (`User_Email`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-/* 4) 補欄位（若缺）——對已存在的表也安全 */
--- user（索引補在後面）
-ALTER TABLE `user`
-  ADD COLUMN IF NOT EXISTS `User_Avatar` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Is_Anonymous` char(1) DEFAULT 'N',
-  ADD COLUMN IF NOT EXISTS `is_verified` tinyint DEFAULT '0',
-  ADD COLUMN IF NOT EXISTS `email_verification_token` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `token_expiry` datetime NULL,
-  ADD COLUMN IF NOT EXISTS `reset_token` text NULL,
-  ADD COLUMN IF NOT EXISTS `reset_token_expiry` datetime NULL,
-  ADD COLUMN IF NOT EXISTS `bio` text NULL,
-  ADD COLUMN IF NOT EXISTS `user_level` int DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS `user_points` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `posts_count` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `likes_received` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `comments_made` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `login_days` int DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS `last_level_update` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `last_login_ip` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `last_login_time` datetime NULL,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `posts`
-  ADD COLUMN IF NOT EXISTS `title` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Content` text NULL,
-  ADD COLUMN IF NOT EXISTS `Mood` enum('happy','sad','angry','surprised','relaxed','neutral') DEFAULT 'neutral',
-  ADD COLUMN IF NOT EXISTS `Is_Anonymous` tinyint(1) DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `Image_URL` varchar(500) NULL,
-  ADD COLUMN IF NOT EXISTS `Is_public` tinyint(1) DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS `likes_count` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `comments_count` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `shares_count` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `reposts_count` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `aichatsessions`
-  ADD COLUMN IF NOT EXISTS `user_email` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `conversation_id` varchar(64) NULL,
-  ADD COLUMN IF NOT EXISTS `is_open` tinyint DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS `need_human` tinyint DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `aichatlogs`
-  ADD COLUMN IF NOT EXISTS `session_id` int NULL,
-  ADD COLUMN IF NOT EXISTS `role` enum('user','ai','admin') NOT NULL,
-  ADD COLUMN IF NOT EXISTS `message` text NULL,
-  ADD COLUMN IF NOT EXISTS `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `announcements`
-  ADD COLUMN IF NOT EXISTS `title` varchar(255) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `body` text NOT NULL,
-  ADD COLUMN IF NOT EXISTS `start_time` datetime DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `end_time` datetime NULL,
-  ADD COLUMN IF NOT EXISTS `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `emotion_goals`
-  ADD COLUMN IF NOT EXISTS `user_email` varchar(255) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `goal_type` varchar(50) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `target_value` decimal(5,2) NULL,
-  ADD COLUMN IF NOT EXISTS `current_value` decimal(5,2) DEFAULT 0.00,
-  ADD COLUMN IF NOT EXISTS `start_date` date NOT NULL,
-  ADD COLUMN IF NOT EXISTS `end_date` date NULL,
-  ADD COLUMN IF NOT EXISTS `status` enum('active','completed','paused') DEFAULT 'active',
-  ADD COLUMN IF NOT EXISTS `description` text NULL,
-  ADD COLUMN IF NOT EXISTS `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `emotion_history`
-  ADD COLUMN IF NOT EXISTS `user_email` varchar(255) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `message_id` varchar(100) NULL,
-  ADD COLUMN IF NOT EXISTS `user_emotions` json NOT NULL,
-  ADD COLUMN IF NOT EXISTS `ai_emotions` json NULL,
-  ADD COLUMN IF NOT EXISTS `confidence_score` int DEFAULT 5,
-  ADD COLUMN IF NOT EXISTS `overall_tone` varchar(100) NULL,
-  ADD COLUMN IF NOT EXISTS `session_id` varchar(100) NULL,
-  ADD COLUMN IF NOT EXISTS `interaction_type` varchar(50) DEFAULT 'chat',
-  ADD COLUMN IF NOT EXISTS `message_content` text NULL,
-  ADD COLUMN IF NOT EXISTS `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `diaryrecords`
-  ADD COLUMN IF NOT EXISTS `User_Email` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Diary_Content` text NULL,
-  ADD COLUMN IF NOT EXISTS `Emotion_status` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `AI_analysis_content` text NULL,
-  ADD COLUMN IF NOT EXISTS `AI_suggestions` text NULL,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `diaryinteractions`
-  ADD COLUMN IF NOT EXISTS `Diary_id` int NULL,
-  ADD COLUMN IF NOT EXISTS `User_message` text NULL,
-  ADD COLUMN IF NOT EXISTS `AI_response` text NULL,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `diarysummaries`
-  ADD COLUMN IF NOT EXISTS `User_Email` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Summary_start_period` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Summary_end_period` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Summary_content` text NULL,
-  ADD COLUMN IF NOT EXISTS `Generate_date` date NULL;
-
-ALTER TABLE `follows`
-  ADD COLUMN IF NOT EXISTS `follower_email` varchar(255) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `following_email` varchar(255) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `likes`
-  ADD COLUMN IF NOT EXISTS `User_Email` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Post_id` int NULL,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `comments`
-  ADD COLUMN IF NOT EXISTS `Post_id` int NULL,
-  ADD COLUMN IF NOT EXISTS `User_Email` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Content` text NULL,
-  ADD COLUMN IF NOT EXISTS `Is_public` tinyint(1) DEFAULT 1,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `reply_to_id` int NULL,
-  ADD COLUMN IF NOT EXISTS `reply_to_username` varchar(255) NULL;
-
-ALTER TABLE `postcollections`
-  ADD COLUMN IF NOT EXISTS `User_Email` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Post_id` int NULL,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `reports`
-  ADD COLUMN IF NOT EXISTS `User_Email` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Post_id` int NULL,
-  ADD COLUMN IF NOT EXISTS `Theme` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `Options` text NULL,
-  ADD COLUMN IF NOT EXISTS `Context` text NULL,
-  ADD COLUMN IF NOT EXISTS `AI_Valid` tinyint NULL,
-  ADD COLUMN IF NOT EXISTS `AI_Confidence` float NULL,
-  ADD COLUMN IF NOT EXISTS `AI_Reason` text NULL,
-  ADD COLUMN IF NOT EXISTS `AI_Suggest_Action` text NULL,
-  ADD COLUMN IF NOT EXISTS `Status` enum('pending','accepted','rejected','closed') DEFAULT 'pending',
-  ADD COLUMN IF NOT EXISTS `Staff_Reply` text NULL,
-  ADD COLUMN IF NOT EXISTS `Notified` tinyint(1) DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  ADD COLUMN IF NOT EXISTS `Updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-
-ALTER TABLE `report_audit_log`
-  ADD COLUMN IF NOT EXISTS `Report_id` int NULL,
-  ADD COLUMN IF NOT EXISTS `Action` enum('ai_check','manual_review','notify_user','close') NOT NULL,
-  ADD COLUMN IF NOT EXISTS `Performed_by` varchar(255) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `Description` text NULL,
-  ADD COLUMN IF NOT EXISTS `Created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `userdailyactivity`
-  ADD COLUMN IF NOT EXISTS `user_email` varchar(255) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `activity_date` date NOT NULL,
-  ADD COLUMN IF NOT EXISTS `posts_created` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `likes_given` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `comments_made` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `login_count` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-ALTER TABLE `userlevelhistory`
-  ADD COLUMN IF NOT EXISTS `user_email` varchar(255) NOT NULL,
-  ADD COLUMN IF NOT EXISTS `old_level` int NOT NULL,
-  ADD COLUMN IF NOT EXISTS `new_level` int NOT NULL,
-  ADD COLUMN IF NOT EXISTS `old_title` varchar(100) NULL,
-  ADD COLUMN IF NOT EXISTS `new_title` varchar(100) NULL,
-  ADD COLUMN IF NOT EXISTS `points_earned` int DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS `reason` varchar(255) NULL,
-  ADD COLUMN IF NOT EXISTS `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP;
-
-/* 5) 補索引（若缺） */
-CALL ensure_index('user', 'idx_user_level', 'user_level');
-CALL ensure_index('user', 'idx_user_points', 'user_points');
-
-CALL ensure_index('posts', 'idx_posts_mood', 'Mood');
-CALL ensure_index('posts', 'idx_posts_user_email', 'User_Email');
-CALL ensure_index('posts', 'idx_posts_created_at', 'Created_at');
-CALL ensure_index('posts', 'idx_posts_is_anonymous', 'Is_Anonymous');
-
-CALL ensure_index('aichatsessions', 'user_email', 'user_email');
-CALL ensure_index('aichatlogs', 'session_id', 'session_id');
-
-CALL ensure_index('emotion_goals', 'idx_user_email', 'user_email');
-CALL ensure_index('emotion_goals', 'idx_status', 'status');
-
-CALL ensure_index('emotion_history', 'idx_user_email', 'user_email');
-CALL ensure_index('emotion_history', 'idx_created_at', 'created_at');
-CALL ensure_index('emotion_history', 'idx_session_id', 'session_id');
-CALL ensure_index('emotion_history', 'idx_user_date', 'user_email, created_at');
-
-CALL ensure_index('comments', 'Post_id', 'Post_id');
-CALL ensure_index('comments', 'User_Email', 'User_Email');
-
-CALL ensure_unique('likes', 'unique_like', 'User_Email, Post_id');
-CALL ensure_index('likes', 'Post_id', 'Post_id');
-
-CALL ensure_index('postcollections', 'User_Email', 'User_Email');
-CALL ensure_index('postcollections', 'Post_id', 'Post_id');
-
-CALL ensure_index('reports', 'User_Email', 'User_Email');
-CALL ensure_index('reports', 'Post_id', 'Post_id');
-
-CALL ensure_index('report_audit_log', 'Report_id', 'Report_id');
-
-CALL ensure_unique('userdailyactivity', 'unique_user_date', 'user_email, activity_date');
-CALL ensure_index('userdailyactivity', 'idx_activity_date', 'activity_date');
-
-CALL ensure_index('userlevelhistory', 'idx_user_email', 'user_email');
-CALL ensure_index('userlevelhistory', 'idx_created_at', 'created_at');
-
-CALL ensure_unique('follows', 'unique_follow', 'follower_email, following_email');
-CALL ensure_index('follows', 'idx_follower', 'follower_email');
-CALL ensure_index('follows', 'idx_following', 'following_email');
-
-/* 6) 補外鍵（若缺） */
--- posts -> user
-CALL ensure_fk('posts','posts_ibfk_1','`User_Email`','user','`User_Email`','','');
-
--- aichatsessions -> user
-CALL ensure_fk('aichatsessions','aichatsessions_ibfk_1','`user_email`','user','`User_Email`','','');
-
--- aichatlogs -> aichatsessions
-CALL ensure_fk('aichatlogs','aichatlogs_ibfk_1','`session_id`','aichatsessions','`session_id`','','');
-
--- comments -> posts, user
-CALL ensure_fk('comments','comments_ibfk_1','`Post_id`','posts','`Post_id`','','');
-CALL ensure_fk('comments','comments_ibfk_2','`User_Email`','user','`User_Email`','','');
-
--- likes -> user, posts
-CALL ensure_fk('likes','likes_ibfk_1','`User_Email`','user','`User_Email`','','');
-CALL ensure_fk('likes','likes_ibfk_2','`Post_id`','posts','`Post_id`','','');
-
--- postcollections -> user, posts
-CALL ensure_fk('postcollections','postcollections_ibfk_1','`User_Email`','user','`User_Email`','','');
-CALL ensure_fk('postcollections','postcollections_ibfk_2','`Post_id`','posts','`Post_id`','','');
-
--- diary*
-CALL ensure_fk('diaryrecords','diaryrecords_ibfk_1','`User_Email`','user','`User_Email`','','');
-CALL ensure_fk('diaryinteractions','diaryinteractions_ibfk_1','`Diary_id`','diaryrecords','`Diary_id`','','');
-CALL ensure_fk('diarysummaries','diarysummaries_ibfk_1','`User_Email`','user','`User_Email`','','');
-
--- follows -> user (雙向，含 ON DELETE CASCADE)
-CALL ensure_fk('follows','follows_ibfk_1','`follower_email`','user','`User_Email`',' ON DELETE CASCADE','');
-CALL ensure_fk('follows','follows_ibfk_2','`following_email`','user','`User_Email`',' ON DELETE CASCADE','');
-
--- reports -> user, posts
-CALL ensure_fk('reports','reports_ibfk_1','`User_Email`','user','`User_Email`','','');
-CALL ensure_fk('reports','reports_ibfk_2','`Post_id`','posts','`Post_id`','','');
-
--- report_audit_log -> reports
-CALL ensure_fk('report_audit_log','report_audit_log_ibfk_1','`Report_id`','reports','`Report_id`','','');
-
--- userdailyactivity -> user
-CALL ensure_fk('userdailyactivity','userdailyactivity_ibfk_1','`user_email`','user','`User_Email`',' ON DELETE CASCADE','');
-
--- userlevelhistory -> user
-CALL ensure_fk('userlevelhistory','userlevelhistory_ibfk_1','`user_email`','user','`User_Email`',' ON DELETE CASCADE','');
-
--- 7) 清理輔助程序（可留可刪）
-DROP PROCEDURE IF EXISTS ensure_index;
-DROP PROCEDURE IF EXISTS ensure_unique;
-DROP PROCEDURE IF EXISTS ensure_fk;
