@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>搜尋結果 - {{ query }}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/social_main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/search_results.css') }}">
+</head>
+
+<body class="page-wrapper">
+
+<!-- ===== 頁首 ===== -->
+<header class="custom-header">
+  <a href="/social/main" class="back-btn" title="返回社群">❮</a>
+
+  <form class="search-bar" action="{{ url_for('social.search') }}" method="GET">
+    <input type="text" name="q" class="search-input" placeholder="搜尋貼文、使用者…" value="{{ query }}">
+    <button type="submit" class="search-btn">🔍</button>
+  </form>
+
+  <nav class="social-nav">
+    <a href="/social/create_post" class="action-btn" title="新增貼文">➕</a>
+    <div class="more-wrapper">
+      <button type="button" class="action-btn more-toggle" title="更多">⋯</button>
+      <div class="more-menu">
+        <button type="button" id="toggle-dark" class="more-item">🌗 深色模式</button>
+        <a href="#" class="more-item">⚙️ 個人設定</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- ===== 主要區域 ===== -->
+<div class="content-flex">
+
+  <!-- — 左側搜尋篩選 — -->
+  <aside class="search-filter-panel">
+    <h3>搜尋篩選</h3>
+    <ul class="filter-list">
+      <li>
+        <a href="{{ url_for('social.search', q=query, type='all') }}" 
+           class="filter-item {{ 'active' if search_type == 'all' else '' }}">
+          📋 全部結果 
+          <span class="filter-count">{{ total_results }}</span>
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('social.search', q=query, type='posts') }}" 
+           class="filter-item {{ 'active' if search_type == 'posts' else '' }}">
+          📝 貼文 
+          <span class="filter-count">{{ posts|length }}</span>
+        </a>
+      </li>
+      <li>
+        <a href="{{ url_for('social.search', q=query, type='users') }}" 
+           class="filter-item {{ 'active' if search_type == 'users' else '' }}">
+          👤 用戶 
+          <span class="filter-count">{{ users|length }}</span>
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- — 右側搜尋結果 — -->
+  <section class="search-results-area">
+
+    <!-- 搜尋結果標題 -->
+    <div class="search-header">
+      {% if query %}
+        <h2>搜尋「{{ query }}」的結果</h2>
+        <p class="search-info">
+          找到 {{ total_results }} 個結果
+          {% if search_type == 'posts' %}
+            (貼文)
+          {% elif search_type == 'users' %}
+            (用戶)
+          {% endif %}
+        </p>
+      {% else %}
+        <h2>搜尋結果</h2>
+        <p class="search-info">請輸入搜尋關鍵字</p>
+      {% endif %}
+    </div>
+
+    <!-- 錯誤訊息 -->
+    {% if error_message %}
+    <div class="error-message">
+      <div class="error-icon">⚠️</div>
+      <p>{{ error_message }}</p>
+    </div>
+    {% endif %}
+
+    <!-- 搜尋結果內容 -->
+    <div class="search-results-content">
+
+      <!-- 用戶搜尋結果 -->
+      {% if search_type in ['all', 'users'] and users %}
+      <div class="users-section">
+        <h3 class="section-title">👤 用戶 ({{ users|length }})</h3>
+        <div class="users-grid">
+          {% for user in users %}
+          <div class="user-card post-card">
+            <div class="user-avatar">
+              <span class="avatar-icon">👤</span>
+            </div>
+            <div class="user-info">
+              <h4 class="user-name">{{ user.username }}</h4>
+              <p class="user-stats">
+                {{ user.post_count }} 篇貼文 · {{ user.likes_received }} 個讚
+              </p>
+              <p class="user-joined">加入於 {{ user.created_at if user.created_at else '未知' }}</p>
+            </div>
+            <div class="user-actions">
+              {% if current_user.is_authenticated and user.user_email != current_user.id %}
+              <button class="follow-btn btn btn-sm btn-primary" data-user-email="{{ user.user_email }}" data-username="{{ user.username }}" title="追蹤用戶">
+                <span class="btn-emoji">➕</span> 追蹤
+              </button>
+              {% endif %}
+              <button class="btn btn-sm btn-secondary view-user-posts" data-username="{{ user.username }}">
+                <span class="btn-emoji">👁️</span> 查看貼文
+              </button>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 貼文搜尋結果 -->
+      {% if search_type in ['all', 'posts'] and posts %}
+      <div class="posts-section">
+        <h3 class="section-title">📝 貼文 ({{ posts|length }})</h3>
+        <div class="posts-list">
+          {% for post in posts %}
+          <article class="search-post-card post-card" data-post-id="{{ post.post_id }}" data-mood="{{ post.mood or 'neutral' }}">
+            <header class="post-header">
+              <div class="post-author">
+                <strong><a href="{{ url_for('social.user_posts', user_email=post.user_email) }}">{{ post.username }}</a></strong>
+                {% if post.is_anonymous %}
+                  <span class="anonymous-badge">
+                    <span class="anonymous-icon">👤</span> 匿名
+                  </span>
+                {% endif %}
+              </div>
+              <span class="post-time" data-original-time="{{ post.created_at }}" title="發布於: {{ post.created_at }}">{{ post.created_at }}</span>
+            </header>
+            
+            <!-- 心情標籤 -->
+            <div class="mood-indicator">
+              {% if post.mood == 'happy' %}
+                <span class="mood-emoji">😄</span> 開心
+              {% elif post.mood == 'sad' %}
+                <span class="mood-emoji">😢</span> 難過
+              {% elif post.mood == 'angry' %}
+                <span class="mood-emoji">😡</span> 生氣
+              {% elif post.mood == 'surprised' %}
+                <span class="mood-emoji">😱</span> 驚訝
+              {% elif post.mood == 'relaxed' %}
+                <span class="mood-emoji">😌</span> 放鬆
+              {% else %}
+                <span class="mood-emoji">😐</span> 平常
+              {% endif %}
+            </div>
+            
+            <!-- 貼文標題 -->
+            {% if post.title and post.title.strip() %}
+            <div class="post-title">
+              <h4>{{ post.title }}</h4>
+            </div>
+            {% endif %}
+            
+            <!-- 貼文內容預覽 -->
+            <div class="post-content-preview">
+              {% set content_length = post.content|length %}
+              {% if content_length > 150 %}
+                {{ post.content[:150] }}...
+              {% else %}
+                {{ post.content }}
+              {% endif %}
+            </div>
+
+            <!-- 圖片預覽 -->
+            {% if post.image_url %}
+            <div class="post-image-preview">
+              <img src="{{ post.image_url }}" 
+                   alt="貼文圖片" 
+                   style="max-width: 100px; height: 60px; object-fit: cover; border-radius: 4px;"
+                   onerror="this.style.display='none';">
+            </div>
+            {% endif %}
+            
+            <footer class="post-footer">
+              <div class="post-stats">
+                <span class="likes-count">
+                  <span class="stat-emoji">{{ '👍' if post.user_liked else '🤍' }}</span>
+                  {{ post.likes_count }}
+                </span>
+                <span class="comments-count">
+                  <span class="stat-emoji">💬</span>
+                  {{ post.comments|length if post.comments else 0 }}
+                </span>
+              </div>
+              <div class="post-actions">
+                {% if current_user.is_authenticated and post.user_email != current_user.id and not post.is_anonymous %}
+                <button class="follow-btn btn btn-sm btn-primary" data-user-email="{{ post.user_email }}" data-username="{{ post.username }}" title="追蹤用戶">
+                  <span class="btn-emoji">➕</span> 追蹤
+                </button>
+                {% endif %}
+                <a href="/social/main#post-{{ post.post_id }}" class="view-post-btn btn btn-sm btn-secondary">
+                  <span class="btn-emoji">👁️</span> 查看完整貼文
+                </a>
+              </div>
+            </footer>
+          </article>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 沒有搜尋結果 -->
+      {% if query and total_results == 0 %}
+      <div class="no-results">
+        <div class="no-results-icon">🔍</div>
+        <h3>沒有找到相關結果</h3>
+        <p>找不到與「{{ query }}」相關的
+          {% if search_type == 'posts' %}貼文
+          {% elif search_type == 'users' %}用戶
+          {% else %}內容
+          {% endif %}
+        </p>
+        <div class="no-results-suggestions">
+          <h4>搜尋建議：</h4>
+          <ul>
+            <li>檢查拼字是否正確</li>
+            <li>嘗試使用不同的關鍵字</li>
+            <li>使用更簡短的搜尋詞</li>
+            {% if search_type != 'all' %}
+            <li><a href="{{ url_for('social.search', q=query, type='all') }}">搜尋所有類型的內容</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- 沒有輸入搜尋關鍵字 -->
+      {% if not query %}
+      <div class="no-query">
+        <div class="no-query-icon">💭</div>
+        <h3>開始搜尋</h3>
+        <p>在上方搜尋欄輸入關鍵字，尋找感興趣的貼文和用戶</p>
+        <div class="search-tips">
+          <h4>搜尋技巧：</h4>
+          <ul>
+            <li>輸入貼文標題或內容中的關鍵字</li>
+            <li>搜尋用戶名稱</li>
+            <li>使用具體的詞彙會有更好的搜尋結果</li>
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+
+    </div><!-- /search-results-content -->
+
+  </section><!-- /search-results-area -->
+
+</div><!-- /content-flex -->
+
+<!-- 功能尚未開通彈窗 -->
+<div id="feature-modal" class="feature-modal-overlay">
+  <div class="feature-modal-box">
+    <h3>功能尚未開通</h3>
+    <p>很抱歉，這個功能尚未開通，敬請期待！</p>
+    <button onclick="closeFeatureModal()">知道了</button>
+  </div>
+</div>
+
+{% include 'components/footer.html' %}
+
+<script>
+  // 定義當前用戶信息，供JavaScript使用
+  const currentUserEmail = '{{ current_user.id if current_user.is_authenticated else "" }}';
+  const searchQuery = '{{ query }}';
+  const searchType = '{{ search_type }}';
+</script>
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/social/search_results.js') }}"></script>
+</body>
+</html>

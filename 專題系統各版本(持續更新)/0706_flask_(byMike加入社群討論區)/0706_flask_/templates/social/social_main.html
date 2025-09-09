@@ -1,0 +1,405 @@
+﻿<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社群互動 | 貼文瀏覽</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/social_main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/social_tabs.css') }}">
+</head>
+
+<body class="page-wrapper"><!-- flex 縱向 -->
+
+<!-- ===== 頁首 ===== -->
+<header class="custom-header">
+  <a href="/" class="back-btn" title="返回首頁">❮</a>
+
+  <form class="search-bar" action="{{ url_for('social.search') }}" method="GET">
+    <input type="text" name="q" class="search-input" placeholder="搜尋貼文、使用者…">
+    <button type="submit" class="search-btn">🔍</button>
+  </form>
+
+  <nav class="social-nav">
+    <a href="/social/create_post"   class="action-btn" title="新增貼文">➕</a>
+    <!-- <a href="#"              class="action-btn" title="通知">🔔</a> -->
+    <!-- <a href="#"              class="action-btn" title="收藏">⭐</a>
+    <a href="#"              class="action-btn" title="聊天">💬</a> -->
+
+    <div class="more-wrapper">
+      <button type="button" class="action-btn more-toggle" title="更多">⋯</button>
+      <div class="more-menu">
+        <button type="button" id="toggle-dark" class="more-item">🌗 深色模式</button>
+        <a href="/settings/profile" class="more-item">⚙️ 個人設定</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- ===== 主要區域：左右雙欄 ===== -->
+<div class="content-flex">
+
+  <!-- — 左側固定標籤（獨立滾動） — -->
+  <aside class="tag-panel">
+    <!-- 主要版面切換 -->
+    <div class="main-tabs">
+      <a href="/social/main" class="main-tab {{ 'active' if current_tab != 'following' else '' }}" data-tab="all-posts">
+        <span class="tab-icon">📋</span>
+        <span class="tab-text">所有貼文</span>
+        <span class="tab-count" id="all-posts-count">{{ posts|length if posts else 0 }}</span>
+      </a>
+      <a href="/social/main?tab=following" class="main-tab {{ 'active' if current_tab == 'following' else '' }}" data-tab="following">
+        <span class="tab-icon">👥</span>
+        <span class="tab-text">正在追蹤</span>
+        <span class="tab-count" id="following-posts-count">0</span>
+      </a>
+    </div>
+    
+    <!-- 子標籤（心情篩選） -->
+    <div class="sub-tabs" id="all-posts-filters" style="display: {{ 'block' if current_tab != 'following' else 'none' }};">
+      <div class="sub-tab-header">📊 心情篩選</div>
+      <ul>
+        <li data-filter="all" class="tag active">📋 全部 <span class="tag-count" id="count-all">0</span></li>
+        <li data-filter="my-posts" class="tag">👤 我的貢獻 <span class="tag-count" id="count-my-posts">0</span></li>
+        <li data-filter="happy" class="tag">😄 開心 <span class="tag-count" id="count-happy">0</span></li>
+        <li data-filter="sad" class="tag">😢 難過 <span class="tag-count" id="count-sad">0</span></li>
+        <li data-filter="angry" class="tag">😡 生氣 <span class="tag-count" id="count-angry">0</span></li>
+        <li data-filter="surprised" class="tag">😱 驚訝 <span class="tag-count" id="count-surprised">0</span></li>
+        <li data-filter="relaxed" class="tag">😌 放鬆 <span class="tag-count" id="count-relaxed">0</span></li>
+      </ul>
+    </div>
+    
+    <!-- 追蹤用戶管理 -->
+    <div class="sub-tabs" id="following-filters" style="display: {{ 'block' if current_tab == 'following' else 'none' }};">
+      <div class="sub-tab-header">👥 追蹤管理</div>
+      <ul>
+        <li data-filter="following-all" class="tag active">📋 全部追蹤 <span class="tag-count" id="count-following-all">{{ posts|length if current_tab == 'following' else 0 }}</span></li>
+        <li data-filter="following-recent" class="tag">⏰ 最近更新 <span class="tag-count" id="count-following-recent">0</span></li>
+      </ul>
+      <div class="following-actions">
+        <button class="btn btn-sm btn-secondary" onclick="showFollowModal('following')">
+          <span class="btn-emoji">👁️</span> 查看追蹤列表
+        </button>
+        <button class="btn btn-sm btn-secondary" onclick="showFollowModal('followers')">
+          <span class="btn-emoji">👥</span> 查看粉絲列表
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- — 右側內容滾動區 — -->
+  <section class="scroll-area">
+
+    <!-- 用戶等級信息卡片 -->
+    <div class="user-level-card" id="user-level-card" data-level="{{ user_level_info.current_level.title if user_level_info and user_level_info.current_level else '新手村民' }}">
+      <div class="level-header">
+        <div class="level-icon">
+          <span class="level-emoji">{{ user_level_info.current_level.emoji if user_level_info and user_level_info.current_level else '🌱' }}</span>
+        </div>
+        <div class="level-info">
+          <h3 class="level-title">{{ current_user.username if current_user.is_authenticated else '新手村民' }}</h3>
+          <p class="level-description">{{ user_level_info.current_level.description if user_level_info and user_level_info.current_level else '剛加入社群的新朋友' }}</p>
+        </div>
+        <div class="level-points">
+          <span class="points-value">{{ user_level_info.points if user_level_info else 0 }}</span>
+          <span class="points-label">積分</span>
+        </div>
+      </div>
+      
+      <div class="level-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ user_level_info.progress_to_next if user_level_info else 0 }}%"></div>
+        </div>
+        <div class="progress-text">
+          <span class="current-progress">{{ user_level_info.progress_to_next if user_level_info else 0 }}%</span>
+          <span class="next-level">下一級：{{ user_level_info.next_level.title if user_level_info and user_level_info.next_level else '活躍居民' }}</span>
+        </div>
+      </div>
+      
+      <div class="level-stats">
+        <div class="stat-item">
+          <span class="stat-icon">📝</span>
+          <span class="stat-value">{{ user_level_info.stats.posts_count if user_level_info and user_level_info.stats else 0 }}</span>
+          <span class="stat-label">發文</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">👍</span>
+          <span class="stat-value">{{ user_level_info.stats.likes_received if user_level_info and user_level_info.stats else 0 }}</span>
+          <span class="stat-label">獲讚</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">💬</span>
+          <span class="stat-value">{{ user_level_info.stats.comments_received if user_level_info and user_level_info.stats else 0 }}</span>
+          <span class="stat-label">留言</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">📅</span>
+          <span class="stat-value">{{ user_level_info.stats.login_days if user_level_info and user_level_info.stats else 1 }}</span>
+          <span class="stat-label">天數</span>
+        </div>
+      </div>
+      
+      
+      <!-- 社交統計 -->
+      <div class="social-stats">
+        <div class="social-stat-item" data-stat="followers" style="cursor: pointer;" title="點擊查看粉絲列表">
+          <span class="social-stat-icon">👥</span>
+          <span class="social-stat-number" id="followers-count">{{ social_stats.followers_count if social_stats else 0 }}</span>
+          <span class="social-stat-label">粉絲</span>
+        </div>
+        <div class="social-stat-item" data-stat="following" style="cursor: pointer;" title="點擊查看追蹤列表">
+          <span class="social-stat-icon">🔔</span>
+          <span class="social-stat-number" id="following-count">{{ social_stats.following_count if social_stats else 0 }}</span>
+          <span class="social-stat-label">追蹤</span>
+        </div>
+      <!-- 查看等級規範 -->
+      </div>
+            <div class="level-actions">
+        <a href="/social/level_guide" class="btn btn-info btn-sm">
+          <span class="btn-emoji">📖</span> 查看等級規範
+        </a>
+      </div>
+    </div>
+
+      <!-- --- 公告板 --- -->
+    <div class="announcement-board">
+      <h2>📌 公告區</h2>
+
+      <!-- 內容跑馬燈放在 body 內，不影響 h2 -->
+      <div class="announcement-body">
+        <ul class="announcement-scroller">
+          <li>🚧 5 / 30 凌晨 00:00 ~ 02:00 系統維護，請使用者提前完成操作。</li>
+          <li>🎉 社群聊天室現已推出，歡迎體驗並提供寶貴意見！</li>
+          <li>⚠️ 請勿於貼文中透露個人資料，保障帳號安全。</li>
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- --- 貼文清單（從資料庫讀取）--- -->
+    <div class="post-list">
+      {% if posts %}
+        {% for post in posts %}
+        <article class="post-card" data-post-id="{{ post.post_id }}" data-mood="{{ post.mood or 'neutral' }}">
+          <header>
+            <div class="post-header-left">
+              <strong><a href="{{ url_for('social.user_posts', user_email=post.user_email) }}">{{ post.username }}</a></strong>
+              <!-- 追蹤按鈕（僅非作者且非匿名貼文可見） -->
+              {% if current_user.is_authenticated and post.user_email != current_user.id and not post.is_anonymous %}
+              <button class="follow-btn follow-btn-inline {{ 'following' if post.is_following else '' }}" 
+                      data-user-email="{{ post.user_email }}" 
+                      data-action="{{ 'unfollow' if post.is_following else 'follow' }}"
+                      title="{{ '取消追蹤' if post.is_following else '追蹤' }} {{ post.username }}">
+                {% if post.is_following %}
+                  <span class="btn-emoji">✓</span> 已追蹤
+                {% else %}
+                  <span class="btn-emoji">➕</span> 追蹤
+                {% endif %}
+              </button>
+              {% endif %}
+            </div>
+            <span data-original-time="{{ post.created_at }}" title="發布於: {{ post.created_at }}">{{ post.created_at }}</span>
+          </header>
+          
+          <!-- 心情標籤 (用邏輯運算方式處理) -->
+          <div class="mood-indicator">
+            {% if post.mood == 'happy' %}
+              <span class="mood-emoji">😄</span> 開心
+            {% elif post.mood == 'sad' %}
+              <span class="mood-emoji">😢</span> 難過
+            {% elif post.mood == 'angry' %}
+              <span class="mood-emoji">😡</span> 生氣
+            {% elif post.mood == 'surprised' %}
+              <span class="mood-emoji">😱</span> 驚訝
+            {% elif post.mood == 'relaxed' %}
+              <span class="mood-emoji">😌</span> 放鬆
+            {% else %}
+              <span class="mood-emoji">😐</span> 平常
+            {% endif %}
+          </div>
+          
+          <!-- 貼文標題（如果有的話） -->
+          {% if post.title and post.title.strip() %}
+          <div class="post-title">
+            <h3>{{ post.title }}</h3>
+          </div>
+          {% endif %}
+          
+          <!-- 貼文內容 -->
+          <p>{{ post.content }}</p>
+
+          <!-- 07/29修復完成照片未顯示出來的問題 -->
+          <!-- 圖片（如果有的話，使用新的路徑處理方式） -->
+          <!-- 若使用 post.image_url.lstrip('/static/')，表示試圖移除圖片路徑中的 /static/ -->
+          <!-- 使用 post.image_url.split('/')[-1] 提取圖片的檔名（如 image.jpg）。 -->
+          {% set image_path = post.image_url.split('/')[-1] if post.image_url else None %}
+          {% if post.image_url %}
+          <div class="post-image">
+            <img src="{{ url_for('static', filename='uploads/' + post.image_url.split('/')[-1]) }}" 
+                alt="貼文圖片" 
+                style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #ddd;"
+                onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <div style="display: none; padding: 20px; background: #f8f9fa; border-radius: 8px; text-align: center; color: #666;">
+              <span>📷</span><br>
+              圖片載入失敗<br>
+              <small>{{ post.image_url }}</small>
+            </div>
+          </div>
+          {% endif %}
+          
+          <!-- 匿名標示 -->
+          {% if post.is_anonymous %}
+          <div class="anonymous-badge">
+            <span class="anonymous-icon">👤</span> 匿名發文
+          </div>
+          {% endif %}
+
+          <!-- 作者操作按鈕（僅作者可見） -->
+          {% if current_user.is_authenticated and post.user_email == current_user.id %}
+          <div class="author-actions">
+            <button class="edit-post-btn" data-post-id="{{ post.post_id }}" title="編輯貼文">
+              <span class="btn-emoji">✏️</span> 編輯
+            </button>
+            <button class="delete-post-btn" data-post-id="{{ post.post_id }}" title="刪除貼文">
+              <span class="btn-emoji">🗑️</span> 刪除
+            </button>
+          </div>
+          {% endif %}
+          
+          <footer>
+            <button class="like-btn" data-post-id="{{ post.post_id }}" data-liked="{{ 'true' if post.user_liked else 'false' }}">
+              <span class="btn-emoji">{{ '👍' if post.user_liked else '🤍' }}</span> {{ post.likes_count }}
+            </button>
+            <button class="comment-btn" data-post-id="{{ post.post_id }}">
+              <span class="btn-emoji">💬</span> {{ post.comments|length }}
+            </button>
+            <!-- <button class="share-btn">
+              <span class="btn-emoji">🔗</span> 分享
+            </button>
+            <button class="repost-btn">
+              <span class="btn-emoji">🔁</span> 轉發
+            </button>
+            <button class="report-btn">
+              <span class="btn-emoji">🚩</span> 檢舉
+            </button> -->
+          </footer>
+
+          <!-- 留言區域 -->
+          <div class="comments-section" id="comments-{{ post.post_id }}" style="display: none;">
+            <div class="comments-header">
+              <h4>💬 留言區</h4>
+              <button class="close-comments" data-post-id="{{ post.post_id }}">×</button>
+            </div>
+            
+            <!-- 新增留言表單 -->
+            <form class="comment-form" data-post-id="{{ post.post_id }}">
+              <div class="reply-indicator" style="display: none;">
+                <span class="reply-text">回覆 <strong class="reply-target"></strong>：</span>
+                <button type="button" class="cancel-reply">×</button>
+              </div>
+              <div class="comment-input-group">
+                <textarea name="content" placeholder="寫下您的留言..." maxlength="500" required></textarea>
+                <button type="submit" class="submit-comment-btn">發送</button>
+              </div>
+              <div class="comment-char-count">
+                <span class="char-count">0</span>/500 字
+              </div>
+              <input type="hidden" name="reply_to_id" value="">
+              <input type="hidden" name="reply_to_username" value="">
+            </form>
+
+            <!-- 留言列表 -->
+            <div class="comments-list" id="comments-list-{{ post.post_id }}">
+              {% if post.comments %}
+                {% for comment in post.comments %}
+                <div class="comment-item" data-comment-id="{{ comment.comment_id }}">
+                  <div class="comment-header">
+                    <div class="comment-author-section">
+                      <strong class="comment-author">
+                        {{ comment.username }}
+                        {% if post.username == comment.username %}
+                          <span class="author-badge">作者</span>
+                        {% endif %}
+                      </strong>
+                      <!-- 留言區追蹤按鈕（僅非作者且非匿名用戶可見） -->
+                      {% if current_user.is_authenticated and comment.user_email != current_user.id and comment.user_email != post.user_email %}
+                      <button class="follow-btn follow-btn-comment {{ 'following' if comment.is_following else '' }}" 
+                              data-user-email="{{ comment.user_email }}" 
+                              data-action="{{ 'unfollow' if comment.is_following else 'follow' }}"
+                              title="{{ '取消追蹤' if comment.is_following else '追蹤' }} {{ comment.username }}">
+                        {% if comment.is_following %}
+                          <span class="btn-emoji">✓</span> 已追蹤
+                        {% else %}
+                          <span class="btn-emoji">➕</span> 追蹤
+                        {% endif %}
+                      </button>
+                      {% endif %}
+                    </div>
+                    <span class="comment-time" data-original-time="{{ comment.created_at }}" title="發布於: {{ comment.created_at }}">{{ comment.created_at }}</span>
+                    <div class="comment-actions">
+                      <button class="reply-comment-btn" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}">回覆</button>
+                      <!-- 留言作者操作按鈕（僅作者可見） -->
+                      {% if current_user.is_authenticated and comment.user_email == current_user.id %}
+                      <button class="edit-comment-btn" data-comment-id="{{ comment.comment_id }}" title="編輯留言">
+                        <span class="btn-emoji">✏️</span>
+                      </button>
+                      <button class="delete-comment-btn" data-comment-id="{{ comment.comment_id }}" title="刪除留言">
+                        <span class="btn-emoji">🗑️</span>
+                      </button>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% if comment.reply_to_username %}
+                  <div class="reply-info">
+                    <span class="reply-prefix">回覆</span>
+                    <span class="reply-target">{{ comment.reply_to_username }}</span>：
+                  </div>
+                  {% endif %}
+                  <div class="comment-content">{{ comment.content }}</div>
+                </div>
+                {% endfor %}
+              {% else %}
+                <div class="no-comments">
+                  <p>目前還沒有留言，成為第一個留言的人吧！</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+        {% endfor %}
+      {% else %}
+        <!-- 沒有貼文時顯示 -->
+        <div class="no-posts">
+          <div class="no-posts-icon">�</div>
+          <p>目前還沒有任何貼文，成為第一個分享心情的人吧！</p>
+          <a href="/social/create_post" class="btn btn-primary">
+            <span class="btn-emoji">➕</span> 立即發文
+          </a>
+        </div>
+      {% endif %}
+    </div><!-- /post-list -->
+
+  </section><!-- /scroll-area -->
+
+</div><!-- /content-flex -->
+
+<!-- 功能尚未開通彈窗 -->
+<div id="feature-modal" class="feature-modal-overlay">
+  <div class="feature-modal-box">
+    <h3>功能尚未開通</h3>
+    <p>很抱歉，這個功能尚未開通，敬請期待！</p>
+    <button onclick="closeFeatureModal()">知道了</button>
+  </div>
+</div>
+{% include 'components/footer.html' %}
+
+<script>
+  // 定義當前用戶信息，供JavaScript使用
+  const currentUserEmail = '{{ current_user.id if current_user.is_authenticated else "" }}';
+</script>
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/social/social_main.js') }}"></script>
+</body>
+</html>
+
