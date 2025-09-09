@@ -1,0 +1,1113 @@
+/* === 預約紀錄頁面樣式 === */
+.appointment-history-container {
+    max-width: 1200px;
+    margin: 100px auto 40px;
+    padding: 0 20px;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* 頁面標題區域 */
+.history-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, #F0F7F2, #E4F5E9);
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0, 30, 10, 0.1);
+}
+
+body.dark-mode .history-header {
+    background: linear-gradient(135deg, #1A3C5A, #2A4B7C);
+    color: #E6F0FA;
+}
+
+.logo-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.system-logo {
+    font-size: 48px;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.page-title {
+    font-size: 36px;
+    font-weight: bold;
+    color: #3A8B55;
+    margin: 0;
+}
+
+body.dark-mode .page-title {
+    color: #E6F0FA;
+}
+
+.subtitle {
+    font-size: 18px;
+    color: #5B7F47;
+    margin: 0;
+}
+
+body.dark-mode .subtitle {
+    color: #C8D8E8;
+}
+
+/* 統計卡片 */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: linear-gradient(135deg, #F8FCF9, #F0F7F2);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 30, 10, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 30, 10, 0.15);
+}
+
+body.dark-mode .stat-card {
+    background: linear-gradient(135deg, #1A3C5A, #2A4B7C);
+    color: #E6F0FA;
+}
+
+.stat-icon {
+    font-size: 32px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: rgba(58, 139, 85, 0.1);
+}
+
+body.dark-mode .stat-icon {
+    background: rgba(138, 182, 214, 0.1);
+}
+
+.stat-info h3 {
+    font-size: 16px;
+    color: #5B7F47;
+    margin: 0 0 5px 0;
+    font-weight: 600;
+}
+
+body.dark-mode .stat-info h3 {
+    color: #C8D8E8;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #3A8B55;
+}
+
+body.dark-mode .stat-number {
+    color: #8AB6D6;
+}
+
+/* 不同狀態的卡片顏色 */
+.stat-confirmed .stat-icon {
+    background: rgba(40, 167, 69, 0.1);
+}
+
+.stat-pending .stat-icon {
+    background: rgba(255, 193, 7, 0.1);
+}
+
+.stat-completed .stat-icon {
+    background: rgba(23, 162, 184, 0.1);
+}
+
+/* 篩選器區域 */
+.filter-section {
+    background: linear-gradient(135deg, #F8FCF9, #F0F7F2);
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 30, 10, 0.1);
+    margin-bottom: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: end;
+}
+
+body.dark-mode .filter-section {
+    background: linear-gradient(135deg, #1A3C5A, #2A4B7C);
+    color: #E6F0FA;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 160px;
+}
+
+.filter-group label {
+    font-weight: 600;
+    font-size: 14px;
+    color: #3A8B55;
+}
+
+body.dark-mode .filter-group label {
+    color: #C8D8E8;
+}
+
+.filter-select {
+    padding: 10px 12px;
+    border: 2px solid #C3E9C9;
+    border-radius: 8px;
+    font-size: 14px;
+    background-color: #FFFFFF;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3A8B55;
+    box-shadow: 0 0 0 3px rgba(58, 139, 85, 0.1);
+}
+
+body.dark-mode .filter-select {
+    background-color: #2C3F36;
+    border-color: #4A7B9D;
+    color: #E6F0FA;
+}
+
+body.dark-mode .filter-select:focus {
+    border-color: #8AB6D6;
+    box-shadow: 0 0 0 3px rgba(138, 182, 214, 0.1);
+}
+
+.filter-reset-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #E0E0E0, #F0F0F0);
+    color: #666;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: fit-content;
+}
+
+.filter-reset-btn:hover {
+    background: linear-gradient(135deg, #D0D0D0, #E0E0E0);
+    transform: translateY(-1px);
+}
+
+body.dark-mode .filter-reset-btn {
+    background: linear-gradient(135deg, #3A4A5A, #4A5A6A);
+    color: #C8D8E8;
+}
+
+/* 預約紀錄區域 */
+.appointments-section {
+    background: linear-gradient(135deg, #F8FCF9, #F0F7F2);
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 6px 20px rgba(0, 30, 10, 0.1);
+    margin-bottom: 30px;
+}
+
+body.dark-mode .appointments-section {
+    background: linear-gradient(135deg, #1A3C5A, #2A4B7C);
+    color: #E6F0FA;
+}
+
+.section-title {
+    font-size: 24px;
+    color: #3A8B55;
+    margin-bottom: 25px;
+    font-weight: bold;
+}
+
+body.dark-mode .section-title {
+    color: #E6F0FA;
+}
+
+/* 預約卡片列表 */
+.appointments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.appointment-card {
+    background: #FFFFFF;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    border-left: 4px solid #3A8B55;
+}
+
+.appointment-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+body.dark-mode .appointment-card {
+    background: #2A4B7C;
+    border-left-color: #8AB6D6;
+    color: #E6F0FA;
+}
+
+/* 卡片標題 */
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px 15px;
+    border-bottom: 1px solid #E8F4EA;
+}
+
+body.dark-mode .card-header {
+    border-bottom-color: #4A7B9D;
+}
+
+.appointment-id {
+    font-size: 18px;
+    font-weight: bold;
+    color: #3A8B55;
+}
+
+body.dark-mode .appointment-id {
+    color: #8AB6D6;
+}
+
+.appointment-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.status-confirmed {
+    background: #D6F4DE;
+    color: #2E6B40;
+}
+
+.status-pending {
+    background: #FFF3CD;
+    color: #856404;
+}
+
+.status-completed {
+    background: #D1ECF1;
+    color: #0C5460;
+}
+
+.status-cancelled {
+    background: #F8D7DA;
+    color: #842029;
+}
+
+body.dark-mode .status-confirmed {
+    background: #2A4B3C;
+    color: #8AB6D6;
+}
+
+body.dark-mode .status-pending {
+    background: #4B4A2A;
+    color: #D6C48A;
+}
+
+body.dark-mode .status-completed {
+    background: #2A3B4B;
+    color: #8AC4D6;
+}
+
+body.dark-mode .status-cancelled {
+    background: #4B2A2A;
+    color: #D68A8A;
+}
+
+/* 卡片內容 */
+.card-body {
+    padding: 0 25px 15px;
+}
+
+.appointment-info {
+    margin-bottom: 15px;
+}
+
+.info-row {
+    display: flex;
+    margin-bottom: 8px;
+}
+
+.info-label {
+    min-width: 100px;
+    font-weight: 600;
+    color: #5B7F47;
+}
+
+body.dark-mode .info-label {
+    color: #C8D8E8;
+}
+
+.info-value {
+    color: #333;
+    flex: 1;
+}
+
+body.dark-mode .info-value {
+    color: #E6F0FA;
+}
+
+.appointment-details {
+    background: #F8FCF9;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid #3A8B55;
+}
+
+body.dark-mode .appointment-details {
+    background: #1A3C4A;
+    border-left-color: #8AB6D6;
+}
+
+.details-label {
+    font-weight: 600;
+    color: #3A8B55;
+    margin-bottom: 8px;
+}
+
+body.dark-mode .details-label {
+    color: #8AB6D6;
+}
+
+.details-content {
+    color: #333;
+    line-height: 1.5;
+}
+
+body.dark-mode .details-content {
+    color: #E6F0FA;
+}
+
+/* 卡片底部 */
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px 20px;
+    border-top: 1px solid #E8F4EA;
+}
+
+body.dark-mode .card-footer {
+    border-top-color: #4A7B9D;
+}
+
+.appointment-date {
+    font-size: 14px;
+    color: #666;
+}
+
+body.dark-mode .appointment-date {
+    color: #A8B8C8;
+}
+
+.card-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* 動作按鈕 */
+.action-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.view-btn {
+    background: #17A2B8;
+    color: white;
+}
+
+.cancel-btn {
+    background: #DC3545;
+    color: white;
+}
+
+.modify-btn {
+    background: #FFC107;
+    color: #333;
+}
+
+.review-btn {
+    background: #28A745;
+    color: white;
+}
+
+.report-btn {
+    background: #6F42C1;
+    color: white;
+}
+
+.rebook-btn {
+    background: #3A8B55;
+    color: white;
+}
+
+.action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* 分頁控制 */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.page-btn {
+    padding: 10px 20px;
+    border: 2px solid #3A8B55;
+    background: transparent;
+    color: #3A8B55;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+    background: #3A8B55;
+    color: white;
+}
+
+.page-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+body.dark-mode .page-btn {
+    border-color: #8AB6D6;
+    color: #8AB6D6;
+}
+
+body.dark-mode .page-btn:hover:not(:disabled) {
+    background: #8AB6D6;
+    color: #1A3C5A;
+}
+
+.page-info {
+    font-size: 16px;
+    color: #5B7F47;
+}
+
+body.dark-mode .page-info {
+    color: #C8D8E8;
+}
+
+/* 快速操作按鈕 */
+.quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.quick-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 25px;
+    background: linear-gradient(135deg, #3A8B55, #5BA872);
+    color: white;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+}
+
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(58, 139, 85, 0.3);
+}
+
+body.dark-mode .quick-action-btn {
+    background: linear-gradient(135deg, #2A4B7C, #4A7B9D);
+}
+
+.action-icon {
+    font-size: 18px;
+}
+
+/* 彈窗樣式 */
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    z-index: 1001;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+body.dark-mode .modal {
+    background: #1A3C5A;
+    color: #E6F0FA;
+}
+
+.modal.show {
+    display: block;
+    animation: fadeInScale 0.4s ease-out;
+}
+
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #E8F4EA;
+}
+
+body.dark-mode .modal-header {
+    border-bottom-color: #4A7B9D;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: #3A8B55;
+    font-size: 20px;
+}
+
+body.dark-mode .modal-header h3 {
+    color: #8AB6D6;
+}
+
+.close-btn {
+    font-size: 28px;
+    cursor: pointer;
+    color: #666;
+    transition: color 0.3s;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+body.dark-mode .close-btn {
+    color: #A8B8C8;
+}
+
+body.dark-mode .close-btn:hover {
+    color: #E6F0FA;
+}
+
+.modal-body {
+    padding: 25px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.modal-footer {
+    padding: 20px 25px;
+    border-top: 1px solid #E8F4EA;
+    text-align: right;
+}
+
+body.dark-mode .modal-footer {
+    border-top-color: #4A7B9D;
+}
+
+.modal-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.close-modal-btn {
+    background: #6C757D;
+    color: white;
+}
+
+.close-modal-btn:hover {
+    background: #545B62;
+}
+
+/* 遮罩層 */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+}
+
+.modal-overlay.show {
+    display: block;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .appointment-history-container {
+        margin: 80px auto 20px;
+        padding: 0 15px;
+    }
+    
+    .history-header {
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    
+    .logo-title {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .system-logo {
+        font-size: 36px;
+    }
+    
+    .page-title {
+        font-size: 28px;
+    }
+    
+    .subtitle {
+        font-size: 16px;
+    }
+    
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .stat-card {
+        padding: 20px 15px;
+    }
+    
+    .stat-icon {
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+    }
+    
+    .filter-section {
+        padding: 20px 15px;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-group {
+        min-width: auto;
+    }
+    
+    .appointments-section {
+        padding: 20px 15px;
+    }
+    
+    .appointment-card {
+        border-left-width: 3px;
+    }
+    
+    .card-header {
+        padding: 15px 20px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .card-body {
+        padding: 0 20px 12px;
+    }
+    
+    .info-row {
+        flex-direction: column;
+        margin-bottom: 12px;
+    }
+    
+    .info-label {
+        min-width: auto;
+        margin-bottom: 4px;
+    }
+    
+    .card-footer {
+        padding: 12px 20px 15px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .card-actions {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        flex: 1;
+        min-width: 80px;
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    
+    .quick-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .quick-action-btn {
+        width: 100%;
+        max-width: 300px;
+        justify-content: center;
+    }
+    
+    .modal {
+        width: 95%;
+        max-height: 90vh;
+    }
+    
+    .modal-header {
+        padding: 15px 20px;
+    }
+    
+    .modal-body {
+        padding: 20px;
+    }
+    
+    .modal-footer {
+        padding: 15px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .appointment-history-container {
+        margin: 60px auto 15px;
+        padding: 0 10px;
+    }
+    
+    .history-header {
+        padding: 16px 12px;
+        margin-bottom: 20px;
+        border-radius: 12px;
+    }
+    
+    .system-logo {
+        font-size: 32px;
+    }
+    
+    .page-title {
+        font-size: 24px;
+    }
+    
+    .subtitle {
+        font-size: 14px;
+    }
+    
+    .stats-cards {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+    
+    .stat-card {
+        padding: 16px 12px;
+        border-radius: 12px;
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+    
+    .stat-icon {
+        font-size: 20px;
+        width: 36px;
+        height: 36px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    .stat-label {
+        font-size: 12px;
+    }
+    
+    .filter-section {
+        padding: 16px 12px;
+        border-radius: 12px;
+    }
+    
+    .filter-group {
+        margin-bottom: 12px;
+    }
+    
+    .filter-group label {
+        font-size: 13px;
+        margin-bottom: 4px;
+    }
+    
+    .filter-group select,
+    .filter-group input {
+        padding: 8px 10px;
+        font-size: 14px;
+        border-radius: 6px;
+        min-height: 40px;
+    }
+    
+    .appointments-section {
+        padding: 16px 12px;
+        border-radius: 12px;
+    }
+    
+    .appointment-id {
+        font-size: 16px;
+    }
+    
+    .card-header {
+        padding: 12px 16px 10px;
+        gap: 8px;
+    }
+    
+    .card-body {
+        padding: 0 16px 10px;
+    }
+    
+    .info-row {
+        margin-bottom: 8px;
+    }
+    
+    .info-label {
+        font-size: 12px;
+        margin-bottom: 2px;
+    }
+    
+    .info-value {
+        font-size: 13px;
+    }
+    
+    .card-footer {
+        padding: 10px 16px 12px;
+        gap: 10px;
+    }
+    
+    .card-actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .action-btn {
+        flex: none;
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 12px;
+        min-height: 36px;
+    }
+    
+    .quick-actions {
+        margin-top: 20px;
+    }
+    
+    .quick-action-btn {
+        padding: 10px 16px;
+        font-size: 14px;
+        min-height: 40px;
+    }
+    
+    .modal {
+        width: 98%;
+        max-height: 95vh;
+        margin: 1%;
+    }
+    
+    .modal-header {
+        padding: 12px 16px;
+    }
+    
+    .modal-title {
+        font-size: 16px;
+    }
+    
+    .modal-body {
+        padding: 16px;
+        font-size: 14px;
+    }
+    
+    .modal-footer {
+        padding: 12px 16px;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .modal-footer .btn {
+        width: 100%;
+        min-height: 40px;
+    }
+}
+
+/* === 觸控設備優化 === */
+@media(hover:none) and (pointer:coarse){
+    .filter-group select,
+    .filter-group input {
+        min-height: 48px;
+        font-size: 16px;
+    }
+    
+    .action-btn {
+        min-height: 44px;
+        font-size: 14px;
+    }
+    
+    .quick-action-btn {
+        min-height: 48px;
+        font-size: 16px;
+    }
+    
+    .modal-footer .btn {
+        min-height: 48px;
+        font-size: 16px;
+    }
+}
+
+/* === 橫屏手機優化 === */
+@media(max-width:768px) and (orientation:landscape){
+    .appointment-history-container {
+        margin: 40px auto 15px;
+    }
+    
+    .history-header {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .logo-title {
+        flex-direction: row;
+        gap: 12px;
+    }
+    
+    .stats-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .filter-section {
+        padding: 16px;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .filter-group {
+        flex: 1;
+        min-width: 150px;
+        margin-right: 12px;
+        margin-bottom: 8px;
+    }
+}
+
+/* === 平板響應式設計 === */
+@media(min-width:769px) and (max-width:1024px){
+    .appointment-history-container {
+        margin: 90px auto 30px;
+        padding: 0 30px;
+    }
+    
+    .history-header {
+        padding: 25px 30px;
+    }
+    
+    .page-title {
+        font-size: 32px;
+    }
+    
+    .stats-cards {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .filter-section,
+    .appointments-section {
+        padding: 30px;
+    }
+}
+
+/* === 日記授權樣式 === */
+.diary-permission {
+    background: #F8FCF9 !important;
+    padding: 12px !important;
+    border-radius: 8px;
+    border: 1px solid #E8F4EA;
+    margin-top: 8px;
+}
+
+body.dark-mode .diary-permission {
+    background: #1A3C4A !important;
+    border-color: #4A7B9D;
+}
+
+.permission-yes {
+    color: #28A745 !important;
+    font-weight: 600;
+}
+
+.permission-no {
+    color: #DC3545 !important;
+    font-weight: 600;
+}
+
+body.dark-mode .permission-yes {
+    color: #48C964 !important;
+}
+
+body.dark-mode .permission-no {
+    color: #FF6B7A !important;
+}
+
+/* 預約卡片中的日記授權樣式 */
+.appointment-card .diary-permission {
+    margin-top: 8px;
+    background: rgba(56, 139, 85, 0.1);
+}
+
+body.dark-mode .appointment-card .diary-permission {
+    background: rgba(138, 182, 214, 0.1);
+}

@@ -1,0 +1,251 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Admin - 回饋詳情 #{{ report.Report_id }}{% endblock %}
+
+{% block extra_css %}
+<!-- CSS 已整合到 admin.css 中 -->
+{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+  <!-- 頁面標題 -->
+  <div class="page-header">
+    <h1 class="page-title">回饋詳情 #{{ report.Report_id }}</h1>
+    <div class="page-actions">
+      <a href="{{ url_for('admin.admin_reports') }}" class="btn btn-secondary">
+        <i class="icon-back"></i> 返回列表
+      </a>
+    </div>
+  </div>
+
+  <!-- 舉報狀態卡片 -->
+  <div class="status-card status-{{ report.Status }}">
+    <div class="status-header">
+      <span class="status-badge status-{{ report.Status }}">
+        {% if report.Status == 'pending' %}待處理
+        {% elif report.Status == 'accepted' %}已接受
+        {% elif report.Status == 'rejected' %}已拒絕
+        {% elif report.Status == 'closed' %}已關閉
+        {% endif %}
+      </span>
+      <div class="status-meta">
+        <span class="created-time">提交於 {{ report.Created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+        {% if report.Updated_at != report.Created_at %}
+        <span class="updated-time">更新於 {{ report.Updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    <!-- 舉報內容 -->
+    <div class="detail-section">
+      <h2 class="section-title">意見內容</h2>
+      <div class="detail-card">
+        <!-- 舉報者資訊 -->
+        <div class="user-info-section">
+          <h3>意見回饋者資訊</h3>
+          <div class="user-details">
+            <div class="user-avatar">
+              {% if report.User_Avatar %}
+                {% if report.User_Avatar.startswith(('http://', 'https://')) %}
+                  <img src="{{ report.User_Avatar }}" alt="User Avatar">
+                {% else %}
+                  <img src="{{ url_for('static', filename=report.User_Avatar) }}" alt="User Avatar">
+                {% endif %}
+              {% else %}
+              <div class="avatar-placeholder">{{ report.User_Email[0].upper() }}</div>
+              {% endif %}
+            </div>
+            <div class="user-meta">
+              <div class="user-email">{{ report.User_Email }}</div>
+              {% if report.User_name %}
+              <div class="user-name">{{ report.User_name }}</div>
+              {% endif %}
+              <div class="user-details-extra">
+                <span class="user-badge">
+                  📅 {{ report.Created_at.strftime('%Y-%m-%d') }}
+                </span>
+                {% if report.Status == 'pending' %}
+                <span class="user-badge new-user">
+                  ⏳ 待處理
+                </span>
+                {% elif report.Status == 'accepted' %}
+                <span class="user-badge verified">
+                  ✅ 已處理
+                </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 舉報詳情 -->
+        <div class="report-details">
+          <div class="detail-row">
+            <div class="detail-label">意見主題</div>
+            <div class="detail-value">{{ report.Theme }}</div>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-label">問題類型</div>
+            <div class="detail-value">
+              {% for option in report.Options %}
+              <span class="option-tag">{{ option }}</span>
+              {% endfor %}
+            </div>
+          </div>
+
+          {% if report.Post_id %}
+          <div class="detail-row">
+            <div class="detail-label">相關貼文</div>
+            <div class="detail-value">
+              <a href="#" class="link">貼文 #{{ report.Post_id }}</a>
+              {% if post_info %}
+              <div class="post-preview">
+                <div class="post-author">{{ post_info.User_Email }} ({{ post_info.User_name }})</div>
+                <div class="post-content">{{ post_info.Content[:200] }}{% if post_info.Content|length > 200 %}...{% endif %}</div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="detail-row">
+            <div class="detail-label">詳細說明</div>
+            <div class="detail-value">
+              <div class="content-text">{{ report.Context }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI 分析結果 -->
+    {% if report.AI_Valid is not none %}
+    <div class="detail-section">
+      <h2 class="section-title">AI 智能分析</h2>
+      <div class="detail-card ai-analysis-card">
+        <div class="ai-header">
+          <div class="ai-result {{ 'valid' if report.AI_Valid else 'invalid' }}">
+            <i class="icon-ai"></i>
+            <span>{{ '有效意見' if report.AI_Valid else '需要進一步確認' }}</span>
+          </div>
+          {% if report.AI_Confidence %}
+          <div class="ai-confidence">
+            <span class="confidence-label">可信度</span>
+            <div class="confidence-bar">
+              <div class="confidence-fill" data-confidence="{{ (report.AI_Confidence * 100)|int }}"></div>
+            </div>
+            <span class="confidence-value">{{ "%.0f"|format(report.AI_Confidence * 100) }}%</span>
+          </div>
+          {% endif %}
+        </div>
+
+        {% if report.AI_Reason %}
+        <div class="ai-detail">
+          <div class="detail-label">分析原因</div>
+          <div class="detail-value">{{ report.AI_Reason }}</div>
+        </div>
+        {% endif %}
+
+        {% if report.AI_Suggest_Action %}
+        <div class="ai-detail">
+          <div class="detail-label">建議行動</div>
+          <div class="detail-value">{{ report.AI_Suggest_Action }}</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 管理員處理區 -->
+    <div class="detail-section">
+      <h2 class="section-title">管理員處理</h2>
+      <div class="detail-card">
+        {% if report.Staff_Reply %}
+        <div class="current-reply">
+          <h3>目前回覆</h3>
+          <div class="reply-content">{{ report.Staff_Reply }}</div>
+          <div class="reply-time">回覆時間：{{ report.Updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+        </div>
+        {% endif %}
+
+        <!-- 處理表單 -->
+        <form method="POST" action="{{ url_for('admin.admin_report_update', report_id=report.Report_id) }}" class="admin-form">
+          <div class="form-group">
+            <label for="status" class="form-label">處理狀態</label>
+            <select id="status" name="status" class="form-control" required>
+              <option value="pending" {{ 'selected' if report.Status == 'pending' }}>待處理</option>
+              <option value="accepted" {{ 'selected' if report.Status == 'accepted' }}>已接受</option>
+              <option value="rejected" {{ 'selected' if report.Status == 'rejected' }}>已拒絕</option>
+              <option value="closed" {{ 'selected' if report.Status == 'closed' }}>已關閉</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="staff_reply" class="form-label">管理員回覆</label>
+            <textarea id="staff_reply" 
+                      name="staff_reply" 
+                      class="form-control" 
+                      rows="5" 
+                      placeholder="請填寫對使用者的回覆內容...">{{ report.Staff_Reply or '' }}</textarea>
+            <small class="form-text">此回覆將顯示給使用者</small>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" name="notify_user" checked>
+              <span class="checkmark"></span>
+              通知使用者處理結果
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary">更新處理結果</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 處理歷程 -->
+  {% if audit_logs %}
+  <div class="detail-section full-width">
+    <h2 class="section-title">處理歷程</h2>
+    <div class="timeline-container">
+      <div class="timeline">
+        {% for log in audit_logs %}
+        <div class="timeline-item">
+          <div class="timeline-marker {{ log.Action }}">
+            {% if log.Action == 'ai_check' %}
+            <i class="icon-ai"></i>
+            {% elif log.Action == 'manual_review' %}
+            <i class="icon-user"></i>
+            {% elif log.Action == 'notify_user' %}
+            <i class="icon-bell"></i>
+            {% endif %}
+          </div>
+          <div class="timeline-content">
+            <div class="timeline-header">
+              <span class="action-name">
+                {% if log.Action == 'ai_check' %}AI 自動檢查
+                {% elif log.Action == 'manual_review' %}人工審核
+                {% elif log.Action == 'notify_user' %}使用者通知
+                {% endif %}
+              </span>
+              <span class="action-time">{{ log.Created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+            </div>
+            <div class="timeline-description">{{ log.Description }}</div>
+            {% if log.Performed_by != 'system' %}
+            <div class="timeline-performer">執行者：{{ log.Performed_by }}</div>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}日記之森 | 門診預約{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/clinic/appointment.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- 門診預約容器 -->
+<div class="appointment-container">
+    <!-- 頁面標題 -->
+    <div class="appointment-header">
+        <div class="logo-title">
+            <div class="system-logo">🌲</div>
+            <h1 class="page-title">門診預約</h1>
+        </div>
+        <p class="subtitle">為您的孩子預約專業的心理健康諮詢</p>
+    </div>
+
+    <!-- 預約表單 -->
+    <div class="appointment-form-section">
+        <form id="appointment-form" class="appointment-form">
+            <!-- 醫院/醫師選擇 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="hospital-select">選擇醫院</label>
+                    <select id="hospital-select" class="form-control" required>
+                        <option value="">請選擇醫院</option>
+                        <option value="hospital1">衛生福利部桃園醫院</option>
+                        <option value="hospital2">敏盛醫院三民院區</option>
+                        <option value="hospital3">立倫診所</option>
+                        <option value="hospital4">林口長庚紀念醫院</option>
+                        <option value="hospital5">兒童發展復健站（大溪區）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="doctor-select">選擇醫師</label>
+                    <select id="doctor-select" class="form-control" required disabled>
+                        <option value="">請先選擇醫院</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 日期和時段選擇 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="appointment-date">預約日期</label>
+                    <input type="date" id="appointment-date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="time-slot">預約時段</label>
+                    <select id="time-slot" class="form-control" required>
+                        <option value="">請選擇時段</option>
+                        <option value="09:00">09:00-09:30</option>
+                        <option value="09:30">09:30-10:00</option>
+                        <option value="10:00">10:00-10:30</option>
+                        <option value="10:30">10:30-11:00</option>
+                        <option value="11:00">11:00-11:30</option>
+                        <option value="14:00">14:00-14:30</option>
+                        <option value="14:30">14:30-15:00</option>
+                        <option value="15:00">15:00-15:30</option>
+                        <option value="15:30">15:30-16:00</option>
+                        <option value="16:00">16:00-16:30</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 個人資訊 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="parent-name">家長姓名</label>
+                    <input type="text" id="parent-name" class="form-control" placeholder="請輸入家長姓名" required>
+                </div>
+                <div class="form-group">
+                    <label for="contact-phone">聯絡電話</label>
+                    <input type="tel" id="contact-phone" class="form-control" placeholder="請輸入聯絡電話" required>
+                </div>
+            </div>
+
+            <!-- 孩子資訊 -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="child-name">孩子姓名</label>
+                    <input type="text" id="child-name" class="form-control" placeholder="請輸入孩子姓名" required>
+                </div>
+                <div class="form-group">
+                    <label for="child-age">孩子年齡</label>
+                    <select id="child-age" class="form-control" required>
+                        <option value="">請選擇年齡</option>
+                        <option value="3">3歲</option>
+                        <option value="4">4歲</option>
+                        <option value="5">5歲</option>
+                        <option value="6">6歲</option>
+                        <option value="7">7歲</option>
+                        <option value="8">8歲</option>
+                        <option value="9">9歲</option>
+                        <option value="10">10歲</option>
+                        <option value="11">11歲</option>
+                        <option value="12">12歲</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 症狀描述 -->
+            <div class="form-group full-width">
+                <label for="symptoms">主要症狀或關注的問題</label>
+                <textarea id="symptoms" class="form-control textarea-control" 
+                          placeholder="請簡述孩子目前的情況、症狀或您關注的問題..." rows="4"></textarea>
+            </div>
+
+            <!-- 授權勾選 -->
+            <div class="form-group checkbox-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="diary-permission" class="checkbox-input">
+                    <span class="checkbox-custom"></span>
+                    我授權醫師查看孩子的觀察日記，以便更好地了解孩子的狀況
+                </label>
+            </div>
+
+            <!-- 提交按鈕 -->
+            <div class="form-actions">
+                <button type="submit" class="submit-btn">確認預約</button>
+                <button type="reset" class="reset-btn">重新填寫</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 預約成功訊息 -->
+    <div id="success-message" class="success-message">
+        <div class="success-icon">✅</div>
+        <h3>預約成功！</h3>
+        <p>您的預約已成功提交，我們將在24小時內與您電話確認詳細資訊。</p>
+        <div class="appointment-info">
+            <p><strong>預約編號：</strong><span id="appointment-id"></span></p>
+            <p><strong>預約醫院：</strong><span id="confirm-hospital"></span></p>
+            <p><strong>預約醫師：</strong><span id="confirm-doctor"></span></p>
+            <p><strong>預約時間：</strong><span id="confirm-datetime"></span></p>
+        </div>
+        <button onclick="closeSuccessMessage()" class="close-success-btn">確定</button>
+    </div>
+</div>
+
+<!-- 遮罩層 -->
+<div id="overlay" class="overlay"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/modules/clinic/appointment.js') }}"></script>
+{% endblock %}

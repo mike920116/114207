@@ -1,0 +1,520 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Admin ─ 預約管理{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+  <!-- 頁面標題 -->
+  <div class="page-header">
+    <h1 class="page-title">預約管理</h1>
+  </div>
+
+  <!-- 醫院選擇卡片 -->
+  <div class="hospital-grid">
+    
+    <!-- 衛生福利部桃園醫院 -->
+    <div class="hospital-card" data-hospital="hospital1">
+      <div class="hospital-icon">🏥</div>
+      <div class="hospital-info">
+        <h3 class="hospital-name">衛生福利部桃園醫院</h3>
+        <p class="hospital-desc">兒童發展評估中心、物理治療科、職能治療科</p>
+        <div class="hospital-stats">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-details">
+              <span class="stat-number">156</span>
+              <span class="stat-text">總預約數</span>
+            </div>
+          </div>
+          <div class="stat-card pending">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-details">
+              <span class="stat-number">8</span>
+              <span class="stat-text">待處理</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hospital-arrow">➤</div>
+    </div>
+
+    <!-- 敏盛醫院三民院區 -->
+    <div class="hospital-card" data-hospital="hospital2">
+      <div class="hospital-icon">🏥</div>
+      <div class="hospital-info">
+        <h3 class="hospital-name">敏盛醫院三民院區</h3>
+        <p class="hospital-desc">聯合評估科、心理輔導科、聽覺評估科</p>
+        <div class="hospital-stats">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-details">
+              <span class="stat-number">89</span>
+              <span class="stat-text">總預約數</span>
+            </div>
+          </div>
+          <div class="stat-card pending">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-details">
+              <span class="stat-number">3</span>
+              <span class="stat-text">待處理</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hospital-arrow">➤</div>
+    </div>
+
+    <!-- 立倫診所 -->
+    <div class="hospital-card" data-hospital="hospital3">
+      <div class="hospital-icon">🏥</div>
+      <div class="hospital-info">
+        <h3 class="hospital-name">立倫診所</h3>
+        <p class="hospital-desc">職能治療科、語言治療科、物理治療科</p>
+        <div class="hospital-stats">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-details">
+              <span class="stat-number">67</span>
+              <span class="stat-text">總預約數</span>
+            </div>
+          </div>
+          <div class="stat-card pending">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-details">
+              <span class="stat-number">2</span>
+              <span class="stat-text">待處理</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hospital-arrow">➤</div>
+    </div>
+
+    <!-- 林口長庚紀念醫院 -->
+    <div class="hospital-card" data-hospital="hospital4">
+      <div class="hospital-icon">🏥</div>
+      <div class="hospital-info">
+        <h3 class="hospital-name">林口長庚紀念醫院</h3>
+        <p class="hospital-desc">兒童發展評估中心、藝術治療科、音樂治療科</p>
+        <div class="hospital-stats">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-details">
+              <span class="stat-number">234</span>
+              <span class="stat-text">總預約數</span>
+            </div>
+          </div>
+          <div class="stat-card pending">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-details">
+              <span class="stat-number">12</span>
+              <span class="stat-text">待處理</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hospital-arrow">➤</div>
+    </div>
+
+    <!-- 兒童發展復健站（大溪區） -->
+    <div class="hospital-card" data-hospital="hospital5">
+      <div class="hospital-icon">🏥</div>
+      <div class="hospital-info">
+        <h3 class="hospital-name">兒童發展復健站（大溪區）</h3>
+        <p class="hospital-desc">語言治療科、職能治療科、物理治療科</p>
+        <div class="hospital-stats">
+          <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-details">
+              <span class="stat-number">43</span>
+              <span class="stat-text">總預約數</span>
+            </div>
+          </div>
+          <div class="stat-card pending">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-details">
+              <span class="stat-number">1</span>
+              <span class="stat-text">待處理</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hospital-arrow">➤</div>
+    </div>
+
+  </div>
+
+  <!-- 總覽統計 -->
+  <div class="overview-stats">
+    <div class="overview-card">
+      <div class="overview-header">
+        <div class="overview-icon">📊</div>
+        <h4>全系統統計</h4>
+      </div>
+      <div class="overview-grid">
+        <div class="overview-stat-card total">
+          <div class="overview-stat-icon">📈</div>
+          <div class="overview-stat-info">
+            <span class="overview-stat-number">589</span>
+            <span class="overview-stat-label">總預約數</span>
+          </div>
+        </div>
+        <div class="overview-stat-card pending">
+          <div class="overview-stat-icon">⏰</div>
+          <div class="overview-stat-info">
+            <span class="overview-stat-number">26</span>
+            <span class="overview-stat-label">待處理</span>
+          </div>
+        </div>
+        <div class="overview-stat-card today">
+          <div class="overview-stat-icon">📅</div>
+          <div class="overview-stat-info">
+            <span class="overview-stat-number">7</span>
+            <span class="overview-stat-label">今日預約</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<style>
+/* 醫院選擇頁面樣式 */
+.hospital-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.hospital-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 25px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hospital-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  border-color: var(--primary);
+}
+
+.hospital-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+}
+
+.hospital-icon {
+  font-size: 48px;
+  opacity: 0.8;
+}
+
+.hospital-info {
+  flex: 1;
+}
+
+.hospital-name {
+  font-size: 1.4em;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.hospital-desc {
+  color: var(--text-muted);
+  font-size: 0.95em;
+  margin-bottom: 15px;
+  line-height: 1.4;
+}
+
+.hospital-stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.stat-card {
+  background: transparent;
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 120px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.stat-card.pending {
+  border-color: #ff6b6b;
+}
+
+.stat-card:hover {
+  transform: translateY(-2px);
+  border-width: 3px;
+  background: rgba(255,255,255,0.05);
+}
+
+.stat-icon {
+  font-size: 20px;
+  color: var(--primary);
+  z-index: 1;
+}
+
+.stat-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 1;
+}
+
+.stat-number {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.stat-text {
+  font-size: 0.85em;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stat-label {
+  color: var(--text-muted);
+  font-size: 0.9em;
+}
+
+.stat-value {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.stat-value.pending {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.85em;
+}
+
+.hospital-arrow {
+  font-size: 24px;
+  color: var(--primary);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.hospital-card:hover .hospital-arrow {
+  opacity: 1;
+  transform: translateX(5px);
+}
+
+/* 總覽統計 */
+.overview-stats {
+  margin-top: 40px;
+}
+
+.overview-card {
+  background: transparent;
+  border-radius: var(--radius);
+  padding: 30px;
+  border: 2px solid var(--surface-alt);
+}
+
+.overview-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid var(--surface-alt);
+}
+
+.overview-icon {
+  font-size: 32px;
+  opacity: 0.8;
+}
+
+.overview-header h4 {
+  font-size: 1.3em;
+  margin: 0;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 20px;
+}
+
+.overview-stat-card {
+  background: transparent;
+  border: 2px solid var(--primary);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.overview-stat-card.pending {
+  border-color: #ff6b6b;
+}
+
+.overview-stat-card.today {
+  border-color: #4ecdc4;
+}
+
+.overview-stat-card:hover {
+  transform: translateY(-3px);
+  border-width: 3px;
+  background: rgba(255,255,255,0.05);
+}
+
+.overview-stat-icon {
+  font-size: 28px;
+  color: var(--primary);
+  z-index: 1;
+}
+
+.overview-stat-info {
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+}
+
+.overview-stat-number {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.overview-stat-label {
+  font-size: 0.9em;
+  color: var(--text-muted);
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.overview-info h4 {
+  font-size: 1.3em;
+  margin-bottom: 10px;
+  color: var(--text);
+}
+
+.overview-numbers {
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
+}
+
+.overview-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.overview-label {
+  color: var(--text-muted);
+  font-size: 0.95em;
+}
+
+.overview-value {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--text);
+}
+
+.overview-value.pending {
+  color: #e74c3c;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .hospital-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .hospital-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+  
+  .hospital-stats {
+    justify-content: center;
+  }
+  
+  .stat-card {
+    min-width: 100px;
+    padding: 10px 14px;
+  }
+  
+  .stat-number {
+    font-size: 1.2em;
+  }
+  
+  .stat-text {
+    font-size: 0.7em;
+  }
+  
+  .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .overview-stat-card {
+    padding: 16px;
+  }
+  
+  .overview-stat-number {
+    font-size: 1.5em;
+  }
+}
+</style>
+
+<script>
+// 處理醫院卡片點擊事件
+document.addEventListener('DOMContentLoaded', function() {
+  const hospitalCards = document.querySelectorAll('.hospital-card');
+  
+  hospitalCards.forEach(card => {
+    card.addEventListener('click', function() {
+      const hospitalId = this.getAttribute('data-hospital');
+      if (hospitalId) {
+        window.location.href = `{{ url_for('admin.appointment_management', hospital_id='') }}` + hospitalId;
+      }
+    });
+  });
+});
+</script>
+{% endblock %}

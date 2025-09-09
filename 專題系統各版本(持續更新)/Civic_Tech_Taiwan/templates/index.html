@@ -1,0 +1,111 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}日記之森 | 首頁{% endblock %}
+
+{% block extra_css %}
+{% endblock %}
+
+{% block content %}
+<!-- Hero 區塊-->
+<section class="hero" id="home">
+  <h1>在森林的守護中陪伴孩子成長！</h1>
+  <p>日記之森是一個整合兒童早療預約、紀錄及AI分析的平台，協助家長與專業人員一同追蹤孩子的發展歷程。</p>
+</section>
+
+<!-- ========== 功能展示 Feature ========== -->
+<!-- 跑馬燈公告 -->
+<section class="feature-section announcement-section" id="announcement">
+  <div class="feature-content">
+    <div class="announcement-board-home">
+      <h2 class="announcement-title">公告</h2>
+      <div class="announcement-marquee">
+        <ul id="announce-scroll" class="scroll-list"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- 觀察日記 -->
+<section class="feature-section" id="diary">
+  <div class="feature-content">
+    <div class="feature-text">
+      <h2>觀察日記</h2>
+      <p>記錄與孩子的日常，追蹤發展進度。</p>
+      <a href="/diary/form" class="auth-required">試試看</a>
+    </div>
+    <div class="feature-icon">📝</div>
+  </div>
+</section>
+
+<!-- AI 聊天 -->
+<section class="feature-section" id="ai">
+  <div class="feature-content reverse">
+    <div class="feature-icon">🤖</div>
+    <div class="feature-text">
+      <h2>AI 聊天</h2>
+      <p>你的智慧小助手，隨時陪伴關懷。</p>
+      <a href="/ai/chat" class="auth-required">找助手聊聊</a>
+    </div>
+  </div>
+</section>
+
+<!-- 社群互動 -->
+<section class="feature-section" id="community">
+  <div class="feature-content">
+    <div class="feature-text">
+      <h2>社群互動</h2>
+      <p>在森林的樹蔭下與他人分享心聲。</p>
+      <a href="/social/main" class="auth-required">加入社群</a>
+    </div>
+    <div class="feature-icon">💬</div>
+  </div>
+</section>
+
+<!-- 門診預約 -->
+<section class="feature-section" id="clinic">
+  <div class="feature-content reverse">
+    <div class="feature-icon">🏥</div>
+    <div class="feature-text">
+      <h2>門診預約</h2>
+      <p>快速預約專業醫師，為孩子的健康護航。</p>
+      <a href="/clinic/appointment" class="auth-required">立即預約</a>
+    </div>
+  </div>
+</section>
+
+<!-- ---------------------------------------- -->
+
+<!-- 意見反饋 -->
+<section class="feature-section" id="feedback">
+  <div class="feature-content">
+    <div class="feature-icon">💌</div>
+    <div class="feature-text">
+      <h2>意見反饋</h2>
+      <p>有任何想法或建議，請告訴我們您的想法。</p>
+      <a href="/support/report" class="auth-required">提交意見</a>
+    </div>
+  </div>
+</section>
+
+<!-- 註冊 / 登入 CTA -->
+<section class="auth-section" id="login">
+  {% if current_user.is_authenticated %}
+  <h2>歡迎回到日記之森，期待您的探索！</h2>
+  <div class="auth-buttons">
+    <a href="/settings/profile">個人資料</a>
+    <a href="/user/logout">登出</a>
+  </div>
+  {% else %}
+  <h2>加入日記之森，開始與孩子的記錄之旅</h2>
+  <div class="auth-buttons">
+    <a href="/user/signup/form">註冊</a>
+    <a href="/user/login/form">登入</a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+
+
+

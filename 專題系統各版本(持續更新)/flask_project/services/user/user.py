@@ -13,6 +13,7 @@ from flask import render_template, request, redirect, url_for,session
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
 from itsdangerous import URLSafeTimedSerializer
 
+from utils.ip import get_client_ip
 from utils.db import get_connection
 from utils.keygen import derive_key
 from . import user_bp
@@ -177,7 +178,7 @@ def login():
         user_data = cursor.fetchone()
 
         if not user_data:
-            return render_template('user/login.html', success=False, error_message="帳號或密碼錯誤")
+            return render_template('user/login.html', success=False, error_message="此帳號尚未註冊，請先註冊")
 
         if not user_data[3]:  # is_verified
             return render_template('user/login.html', success=False, error_message="此帳號尚未驗證，請至信箱收取驗證信")
@@ -187,14 +188,25 @@ def login():
             login_user(user_object)
             
             # 產生金鑰並 base64 編碼後放入 session
-            aes_key = derive_key(password, email)
-            encoded_key = base64.b64encode(aes_key).decode('utf-8')
-            session['encryption_key'] = encoded_key
+            try:
+                aes_key = derive_key(password, email)
+                encoded_key = base64.b64encode(aes_key).decode('utf-8')
+                session['encryption_key'] = encoded_key
+                logger.info(f"用戶 {email} 成功登入，金鑰已設置")
+            except Exception as e:
+                logger.error(f"金鑰生成失敗 - 用戶: {email}, 錯誤: {str(e)}")
+                return render_template('user/login.html', success=False, 
+                                       error_message="系統錯誤，請稍後再試")
 
+            client_ip = get_client_ip()
             
             # 記錄登入時間
-            cursor.execute("UPDATE User SET last_login_time = %s, last_login_ip = %s WHERE User_Email = %s", 
-                         (datetime.now(), request.remote_addr, email))
+            cursor.execute("""
+                UPDATE User
+                SET last_login_time = %s,
+                    last_login_ip   = %s
+                WHERE User_Email = %s
+            """, (datetime.now(), client_ip, email))
             conn.commit()
             
             return redirect(url_for('index'))
@@ -354,8 +366,10 @@ def send_verification_email(recipient_email, verification_token):
             logger.error("Zoho 環境變數未設置")
             return
 
+        base_url = os.getenv("APP_BASE_URL")
         subject = "【Soulcraft】請驗證您的帳號"
-        verification_link = url_for("user.verify_email", token=verification_token, _external=True)
+        verification_path = url_for("user.verify_email", token=verification_token)
+        verification_link = base_url + verification_path
 
         # 嘗試使用 HTML 模板，失敗則用純文字
         try:

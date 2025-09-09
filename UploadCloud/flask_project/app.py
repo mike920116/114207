@@ -23,23 +23,28 @@ from dotenv import load_dotenv
 from flask import Flask, render_template
 from flask_login import LoginManager, current_user
 
+# ─── 優先載入環境變數 ─────────────────────────────
+load_dotenv()  # 必須在導入自訂模組之前執行！
+
 # ─── 自訂模組 ─────────────────────────────
 from services.socketio_manager import socketio, init_socketio
 from services.user import user_bp, load_user as user_load_user, settings_bp
 from services.diary import diary_bp
 from services.admin import admin_bp, admin_chat_bp, admin_announcement_bp
-from services.ai import ai_chat_bp
+from services.ai import ai_chat_bp, emotion_ai_bp
 from services.line import line_webhook_bp
 from services.support import support_bp
 from services.social import social_bp
 from services.announcement import announcement_bp
 # ─────────────────────────────────────────
 
-load_dotenv()
-
 # ── 建立 Flask App ────────────────────────
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+
+# 中文編碼設定
+app.config['JSON_AS_ASCII'] = False
+app.config['JSONIFY_MIMETYPE'] = 'application/json; charset=utf-8'
 
 # Socket 相關資料結構（供事件處理共用）
 # 用於管理 AI 聊天暫停狀態和連線狀態
@@ -54,6 +59,7 @@ init_socketio(app)
 app.register_blueprint(admin_bp,        url_prefix="/admin")
 app.register_blueprint(admin_chat_bp,   url_prefix="/admin/chat")
 app.register_blueprint(ai_chat_bp,      url_prefix="/ai")
+app.register_blueprint(emotion_ai_bp,   url_prefix="/ai")
 app.register_blueprint(user_bp,         url_prefix="/user")
 app.register_blueprint(diary_bp,        url_prefix="/diary")
 app.register_blueprint(settings_bp,     url_prefix="/settings")
@@ -111,17 +117,15 @@ def inject_today_date():
     """
     return {'today_date': datetime.now().strftime('%Y-%m-%d')}
 
-os.makedirs("logs", exist_ok=True)
-logging.basicConfig(
-    filename="logs/app.log",
-    level=logging.INFO,
-    format="%(asctime)s %(levelname)s: %(message)s"
-)
+# os.makedirs("logs", exist_ok=True)
+# logging.basicConfig(
+#    filename="logs/app.log",
+#    level=logging.INFO,
+#    format="%(asctime)s %(levelname)s: %(message)s"
+#)
 
 # ── 啟動 ───────────────────────────────────
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
-else:
-    # 生產環境：包裝 Socket.IO 以支援 WSGI 部署
-    application = WSGIApp(socketio, app)
+    socketio.run(app, host='0.0.0.0', port=5000,
+                 debug=True, use_reloader=False)

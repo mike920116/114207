@@ -1,0 +1,3 @@
+ALTER TABLE flaskdb.comments
+ADD COLUMN reply_to_id INTEGER NULL,
+ADD COLUMN reply_to_username VARCHAR(255) NULL;)
