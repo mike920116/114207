@@ -34,6 +34,31 @@ UPLOAD_FOLDER = '0706_flask_/static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
+
+def format_datetime(val, fmt='%Y-%m-%d %H:%M:%S'):
+    """Safely format a datetime-like value.
+    If val has strftime, use it; if it's truthy string, return it (optionally truncated);
+    otherwise return empty string.
+    """
+    if not val:
+        return ''
+    # datetime-like objects
+    if hasattr(val, 'strftime'):
+        try:
+            return val.strftime(fmt)
+        except Exception:
+            return str(val)
+    # numeric timestamp
+    if isinstance(val, (int, float)):
+        try:
+            return datetime.fromtimestamp(val).strftime(fmt)
+        except Exception:
+            return str(val)
+    # assume string
+    s = str(val)
+    # if string already in ISO-like format, try to return date/time portion
+    return s if len(s) <= len(fmt) or fmt == '%Y-%m-%d %H:%M:%S' else s[:19]
+
 def allowed_file(filename):
     """檢查檔案是否為允許的圖片格式"""
     return '.' in filename and \
@@ -189,6 +214,9 @@ def main():
     """
     社交動態主頁
     
+    Query Parameters:
+        tab (str): 顯示的版面 ('all-posts' 或 'following')
+    
     顯示所有用戶的公開貼文，包括：
     - 貼文內容和發布時間
     - 作者資訊（匿名/實名）
@@ -199,36 +227,64 @@ def main():
     Returns:
         str: 渲染後的社交主頁 HTML 頁面
     """
+    tab = request.args.get('tab', 'all-posts')
+    
     database_connection = db.get_connection()
     database_cursor = database_connection.cursor()
 
-    # 取得所有貼文的基本資訊（包含新增的欄位和當前用戶按讚狀態）
-    database_cursor.execute("""
-        SELECT 
-            p.Post_id,
-            p.User_Email,
-            u.User_name,
-            p.title,
-            p.Content,
-            p.Mood,
-            p.Is_Anonymous,
-            p.Image_URL,
-            p.Is_public,
-            p.Created_at,
-            COUNT(l.Like_id) AS likes_count,
-            MAX(CASE WHEN l.User_Email = %s THEN 1 ELSE 0 END) AS user_liked
-        FROM Posts p
-        LEFT JOIN User u ON p.User_Email = u.User_Email
-        LEFT JOIN Likes l ON p.Post_id = l.Post_id
-        WHERE p.Is_public = TRUE
-        GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Is_public, p.Created_at
-        ORDER BY p.Created_at DESC
-        """, (current_user.id,))
+    formatted_post_data = []
+    
+    if tab == 'following':
+        # 顯示追蹤用戶的貼文
+        database_cursor.execute("""
+            SELECT 
+                p.Post_id,
+                p.User_Email,
+                u.User_name,
+                p.title,
+                p.Content,
+                p.Mood,
+                p.Is_Anonymous,
+                p.Image_URL,
+                p.Is_public,
+                p.Created_at,
+                COUNT(l.Like_id) AS likes_count,
+                MAX(CASE WHEN l.User_Email = %s THEN 1 ELSE 0 END) AS user_liked
+            FROM Posts p
+            INNER JOIN follows f ON p.User_Email = f.following_email
+            LEFT JOIN User u ON p.User_Email = u.User_Email
+            LEFT JOIN Likes l ON p.Post_id = l.Post_id
+            WHERE f.follower_email = %s AND p.Is_public = TRUE
+            GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Is_public, p.Created_at
+            ORDER BY p.Created_at DESC
+            """, (current_user.id, current_user.id))
+    else:
+        # 顯示所有貼文（預設）
+        database_cursor.execute("""
+            SELECT 
+                p.Post_id,
+                p.User_Email,
+                u.User_name,
+                p.title,
+                p.Content,
+                p.Mood,
+                p.Is_Anonymous,
+                p.Image_URL,
+                p.Is_public,
+                p.Created_at,
+                COUNT(l.Like_id) AS likes_count,
+                MAX(CASE WHEN l.User_Email = %s THEN 1 ELSE 0 END) AS user_liked
+            FROM Posts p
+            LEFT JOIN User u ON p.User_Email = u.User_Email
+            LEFT JOIN Likes l ON p.Post_id = l.Post_id
+            WHERE p.Is_public = TRUE
+            GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Is_public, p.Created_at
+            ORDER BY p.Created_at DESC
+            """, (current_user.id,))
     
     raw_posts_data = database_cursor.fetchall()
 
     # 為每個貼文處理評論資料
-    formatted_post_data = []
     for post_item in raw_posts_data:
         post_id = post_item[0]
         
@@ -251,6 +307,38 @@ def main():
         
         comments_data = database_cursor.fetchall()
         
+        # 檢查當前用戶是否已追蹤該貼文作者（僅非匿名貼文）
+        is_following = False
+        if not post_item[6] and post_item[1] != current_user.id:  # 非匿名且非自己的貼文
+            database_cursor.execute("""
+                SELECT id FROM follows 
+                WHERE follower_email = %s AND following_email = %s
+            """, (current_user.id, post_item[1]))
+            is_following = database_cursor.fetchone() is not None
+
+        # 為評論添加追蹤狀態
+        comments_with_follow_status = []
+        for comment_item in comments_data:
+            comment_following = False
+            if comment_item[1] != current_user.id and comment_item[1] != post_item[1]:  # 非自己且非貼文作者
+                database_cursor.execute("""
+                    SELECT id FROM follows 
+                    WHERE follower_email = %s AND following_email = %s
+                """, (current_user.id, comment_item[1]))
+                comment_following = database_cursor.fetchone() is not None
+            
+            comments_with_follow_status.append({
+                'comment_id': comment_item[0],
+                'user_email': comment_item[1],
+                'username': comment_item[2],
+                'content': comment_item[3],
+                'reply_to_id': comment_item[4],
+                'reply_to_username': comment_item[5],
+                'is_public': comment_item[6],
+                'created_at': format_datetime(comment_item[7]),
+                'is_following': comment_following
+            })
+        
         # 組裝完整的貼文資料
         complete_post_data = {
             'post_id': post_item[0],
@@ -262,29 +350,99 @@ def main():
             'is_anonymous': post_item[6],
             'image_url': post_item[7],
             'is_public': post_item[8],
-            'created_at': post_item[9],
+            'created_at': format_datetime(post_item[9]),
             'likes_count': post_item[10],
             'user_liked': bool(post_item[11]),  # 當前用戶是否已按讚
-            'comments': [
-                {
-                    'comment_id': comment_item[0],
-                    'user_email': comment_item[1],
-                    'username': comment_item[2],
-                    'content': comment_item[3],
-                    'reply_to_id': comment_item[4],
-                    'reply_to_username': comment_item[5],
-                    'is_public': comment_item[6],
-                    'created_at': comment_item[7]
-                }
-                for comment_item in comments_data
-            ]
+            'is_following': is_following,  # 當前用戶是否已追蹤該作者
+            'comments': comments_with_follow_status
         }
         
         formatted_post_data.append(complete_post_data)
     
+    # 獲取社交統計數據
+    try:
+        # 獲取粉絲數（追蹤我的人）
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (current_user.id,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        # 獲取追蹤數（我追蹤的人）
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        # 獲取喜歡的貼文數量（我按讚過的貼文）
+        database_cursor.execute("""
+            SELECT COUNT(*)
+            FROM Likes l
+            INNER JOIN Posts p ON l.Post_id = p.Post_id
+            WHERE l.User_Email = %s AND p.Is_public = TRUE
+        """, (current_user.id,))
+        liked_posts_count = database_cursor.fetchone()[0]
+        
+        social_stats = {
+            'followers_count': followers_count,
+            'following_count': following_count,
+            'liked_posts_count': liked_posts_count
+        }
+    except Exception as e:
+        print(f"[ERROR] 獲取社交統計失敗: {str(e)}")
+        social_stats = {
+            'followers_count': 0,
+            'following_count': 0,
+            'liked_posts_count': 0
+        }
+    
     database_connection.close()
 
-    return render_template('social/social_main.html', posts=formatted_post_data)
+    # 獲取用戶等級信息
+    try:
+        user_level_info = get_user_level_info(current_user.id)
+        if not user_level_info.get('success', False):
+            user_level_info = {
+                'success': True,
+                'current_level': {
+                    'level': 1,
+                    'title': '新手村民',
+                    'emoji': '🌱',
+                    'description': '剛加入社群的新朋友'
+                },
+                'points': 0,
+                'progress_to_next': 0,
+                'stats': {
+                    'posts_count': 0,
+                    'likes_received': 0,
+                    'comments_received': 0,
+                    'login_days': 1
+                }
+            }
+    except Exception as e:
+        print(f"[ERROR] 獲取用戶等級信息失敗: {str(e)}")
+        user_level_info = {
+            'success': True,
+            'current_level': {
+                'level': 1,
+                'title': '新手村民',
+                'emoji': '🌱',
+                'description': '剛加入社群的新朋友'
+            },
+            'points': 0,
+            'progress_to_next': 0,
+            'stats': {
+                'posts_count': 0,
+                'likes_received': 0,
+                'comments_received': 0,
+                'login_days': 1
+            }
+        }
+
+    return render_template('social/social_main.html', 
+                         posts=formatted_post_data, 
+                         current_tab=tab,
+                         social_stats=social_stats,
+                         user_level_info=user_level_info)
 
 @social_bp.route('/delete_post/<int:post_id>', methods=['POST'])
 @login_required
@@ -617,6 +775,282 @@ def toggle_like(post_id):
             'message': f'操作失敗：{str(e)}'
         }), 500
 
+@social_bp.route('/liked_posts')
+@login_required
+def liked_posts():
+    """
+    顯示用戶按讚的貼文頁面
+    
+    Returns:
+        str: 渲染後的喜歡的貼文 HTML 頁面
+    """
+    try:
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 獲取用戶按讚的貼文，JOIN Posts 表獲取完整貼文信息
+        database_cursor.execute("""
+            SELECT 
+                p.Post_id,
+                p.User_Email,
+                u.User_name,
+                p.title,
+                p.Content,
+                p.Mood,
+                p.Is_Anonymous,
+                p.Image_URL,
+                p.Is_public,
+                p.Created_at,
+                l.Created_at as liked_at,
+                COUNT(all_likes.Like_id) AS likes_count,
+                1 AS user_liked
+            FROM Likes l
+            INNER JOIN Posts p ON l.Post_id = p.Post_id
+            LEFT JOIN User u ON p.User_Email = u.User_Email
+            LEFT JOIN Likes all_likes ON p.Post_id = all_likes.Post_id
+            WHERE l.User_Email = %s AND p.Is_public = TRUE
+            GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Is_public, p.Created_at, l.Created_at
+            ORDER BY l.Created_at DESC
+        """, (current_user.id,))
+        
+        raw_posts_data = database_cursor.fetchall()
+        
+        formatted_post_data = []
+        
+        # 為每個貼文處理評論資料
+        for post_item in raw_posts_data:
+            post_id = post_item[0]
+            
+            # 獲取該貼文的評論
+            database_cursor.execute("""
+                SELECT 
+                    c.Comment_id,
+                    c.User_Email,
+                    u.User_name,
+                    c.Content,
+                    c.Reply_to_id,
+                    c.Reply_to_username,
+                    c.Is_public,
+                    c.Created_at
+                FROM Comments c
+                LEFT JOIN User u ON c.User_Email = u.User_Email
+                WHERE c.Post_id = %s AND c.Is_public = TRUE
+                ORDER BY c.Created_at ASC
+            """, (post_id,))
+            
+            comments_data = database_cursor.fetchall()
+            
+            # 檢查當前用戶是否已追蹤該貼文作者（僅非匿名貼文）
+            is_following = False
+            if not post_item[6] and post_item[1] != current_user.id:  # 非匿名且非自己的貼文
+                database_cursor.execute("""
+                    SELECT id FROM follows 
+                    WHERE follower_email = %s AND following_email = %s
+                """, (current_user.id, post_item[1]))
+                is_following = database_cursor.fetchone() is not None
+
+            # 為評論添加追蹤狀態
+            comments_with_follow_status = []
+            for comment_item in comments_data:
+                comment_following = False
+                if comment_item[1] != current_user.id and comment_item[1] != post_item[1]:  # 非自己且非貼文作者
+                    database_cursor.execute("""
+                        SELECT id FROM follows 
+                        WHERE follower_email = %s AND following_email = %s
+                    """, (current_user.id, comment_item[1]))
+                    comment_following = database_cursor.fetchone() is not None
+                
+                comments_with_follow_status.append({
+                    'comment_id': comment_item[0],
+                    'user_email': comment_item[1],
+                    'username': comment_item[2],
+                    'content': comment_item[3],
+                    'reply_to_id': comment_item[4],
+                    'reply_to_username': comment_item[5],
+                    'is_public': comment_item[6],
+                    'created_at': format_datetime(comment_item[7]),
+                    'is_following': comment_following
+                })
+            
+            # 組裝完整的貼文資料
+            complete_post_data = {
+                'post_id': post_item[0],
+                'user_email': post_item[1],
+                'username': post_item[2] if not post_item[6] else '匿名用戶',  # 如果匿名則顯示匿名用戶
+                'title': post_item[3],
+                'content': post_item[4],
+                'mood': post_item[5],
+                'is_anonymous': post_item[6],
+                'image_url': post_item[7],
+                'is_public': post_item[8],
+                'created_at': format_datetime(post_item[9]),
+                'liked_at': format_datetime(post_item[10]),  # 新增按讚時間
+                'likes_count': post_item[11],
+                'user_liked': bool(post_item[12]),  # 當前用戶已按讚
+                'is_following': is_following,  # 當前用戶是否已追蹤該作者
+                'comments': comments_with_follow_status
+            }
+            
+            formatted_post_data.append(complete_post_data)
+        
+        database_connection.close()
+        
+        # 獲取用戶等級信息
+        try:
+            user_level_info = get_user_level_info(current_user.id)
+            if not user_level_info.get('success', False):
+                user_level_info = {
+                    'success': True,
+                    'current_level': {
+                        'level': 1,
+                        'title': '新手村民',
+                        'emoji': '🌱',
+                        'description': '剛加入社群的新朋友'
+                    },
+                    'points': 0,
+                    'progress_to_next': 0,
+                    'stats': {
+                        'posts_count': 0,
+                        'likes_received': 0,
+                        'comments_received': 0,
+                        'login_days': 1
+                    }
+                }
+        except Exception as e:
+            print(f"[ERROR] 獲取用戶等級信息失敗: {str(e)}")
+            user_level_info = {
+                'success': True,
+                'current_level': {
+                    'level': 1,
+                    'title': '新手村民',
+                    'emoji': '🌱',
+                    'description': '剛加入社群的新朋友'
+                },
+                'points': 0,
+                'progress_to_next': 0,
+                'stats': {
+                    'posts_count': 0,
+                    'likes_received': 0,
+                    'comments_received': 0,
+                    'login_days': 1
+                }
+            }
+        
+        return render_template('social/liked_posts.html', 
+                             posts=formatted_post_data,
+                             user_level_info=user_level_info,
+                             total_liked_posts=len(formatted_post_data))
+        
+    except Exception as e:
+        print(f"[ERROR] 獲取喜歡的貼文失敗: {str(e)}")
+        return render_template('social/liked_posts.html', 
+                             posts=[],
+                             user_level_info=None,
+                             total_liked_posts=0,
+                             error_message=f'載入失敗：{str(e)}')
+
+@social_bp.route('/api/get_liked_posts')
+@login_required
+def get_liked_posts_api():
+    """
+    獲取用戶按讚的貼文 (API 端點)
+    
+    Query Parameters:
+        limit (int): 限制返回數量，預設 50
+        offset (int): 偏移量，用於分頁，預設 0
+    
+    Returns:
+        JSON: 用戶按讚的貼文列表
+    """
+    try:
+        # 獲取分頁參數
+        limit = request.args.get('limit', 50, type=int)
+        offset = request.args.get('offset', 0, type=int)
+        
+        # 限制最大查詢數量
+        if limit > 100:
+            limit = 100
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 獲取用戶按讚的貼文總數
+        database_cursor.execute("""
+            SELECT COUNT(*)
+            FROM Likes l
+            INNER JOIN Posts p ON l.Post_id = p.Post_id
+            WHERE l.User_Email = %s AND p.Is_public = TRUE
+        """, (current_user.id,))
+        
+        total_count = database_cursor.fetchone()[0]
+        
+        # 獲取分頁的貼文數據
+        database_cursor.execute("""
+            SELECT 
+                p.Post_id,
+                p.User_Email,
+                u.User_name,
+                p.title,
+                p.Content,
+                p.Mood,
+                p.Is_Anonymous,
+                p.Image_URL,
+                p.Created_at,
+                l.Created_at as liked_at,
+                COUNT(all_likes.Like_id) AS likes_count,
+                COUNT(c.Comment_id) AS comments_count
+            FROM Likes l
+            INNER JOIN Posts p ON l.Post_id = p.Post_id
+            LEFT JOIN User u ON p.User_Email = u.User_Email
+            LEFT JOIN Likes all_likes ON p.Post_id = all_likes.Post_id
+            LEFT JOIN Comments c ON p.Post_id = c.Post_id AND c.Is_public = TRUE
+            WHERE l.User_Email = %s AND p.Is_public = TRUE
+            GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Created_at, l.Created_at
+            ORDER BY l.Created_at DESC
+            LIMIT %s OFFSET %s
+        """, (current_user.id, limit, offset))
+        
+        posts_data = database_cursor.fetchall()
+        
+        posts = [
+            {
+                'post_id': post_item[0],
+                'user_email': post_item[1],
+                'username': post_item[2] if not post_item[6] else '匿名用戶',
+                'title': post_item[3],
+                'content': post_item[4],
+                'mood': post_item[5],
+                'is_anonymous': post_item[6],
+                'image_url': post_item[7],
+                'created_at': format_datetime(post_item[8]),
+                'liked_at': format_datetime(post_item[9]),
+                'likes_count': post_item[10],
+                'comments_count': post_item[11],
+                'user_liked': True  # 因為是從 Likes 表查詢，所以一定是已按讚
+            }
+            for post_item in posts_data
+        ]
+        
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'posts': posts,
+            'total_count': total_count,
+            'limit': limit,
+            'offset': offset,
+            'has_more': (offset + limit) < total_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] API 獲取喜歡的貼文失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'獲取失敗：{str(e)}',
+            'posts': [],
+            'total_count': 0
+        }), 500
+
 @social_bp.route('/add_comment/<int:post_id>', methods=['POST'])
 @login_required
 def add_comment(post_id):
@@ -768,7 +1202,7 @@ def get_comments(post_id):
                 'content': comment[3],
                 'reply_to_id': comment[4],
                 'reply_to_username': comment[5],
-                'created_at': comment[6].strftime('%Y-%m-%d %H:%M')
+                'created_at': format_datetime(comment[6], '%Y-%m-%d %H:%M')
             }
             for comment in comments_data
         ]
@@ -982,3 +1416,1195 @@ def check_like_status(post_id):
             'message': f'檢查失敗：{str(e)}'
         }), 500
 
+@social_bp.route('/search')
+@login_required
+def search():
+    """
+    社群搜尋功能
+    
+    Query Parameters:
+        q (str): 搜尋關鍵字
+        type (str): 搜尋類型 (all, posts, users)
+        
+    Returns:
+        str: 渲染後的搜尋結果 HTML 頁面
+    """
+    query = request.args.get('q', '').strip()
+    search_type = request.args.get('type', 'all')
+    
+    if not query:
+        # 如果沒有搜尋關鍵字，返回空結果
+        return render_template('social/search_results.html', 
+                             query='', 
+                             search_type=search_type,
+                             posts=[], 
+                             users=[],
+                             total_results=0)
+    
+    database_connection = db.get_connection()
+    database_cursor = database_connection.cursor()
+    
+    posts = []
+    users = []
+    
+    try:
+        # 搜尋貼文 (如果搜尋類型是 all 或 posts)
+        if search_type in ['all', 'posts']:
+            # 搜尋貼文標題和內容
+            database_cursor.execute("""
+                SELECT 
+                    p.Post_id,
+                    p.User_Email,
+                    u.User_name,
+                    p.title,
+                    p.Content,
+                    p.Mood,
+                    p.Is_Anonymous,
+                    p.Image_URL,
+                    p.Is_public,
+                    p.Created_at,
+                    COUNT(l.Like_id) AS likes_count,
+                    MAX(CASE WHEN l.User_Email = %s THEN 1 ELSE 0 END) AS user_liked
+                FROM Posts p
+                LEFT JOIN User u ON p.User_Email = u.User_Email
+                LEFT JOIN Likes l ON p.Post_id = l.Post_id
+                WHERE p.Is_public = TRUE 
+                AND (
+                    p.title LIKE %s 
+                    OR p.Content LIKE %s 
+                    OR (p.Is_Anonymous = FALSE AND u.User_name LIKE %s)
+                )
+                GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Is_public, p.Created_at
+                ORDER BY p.Created_at DESC
+                LIMIT 50
+            """, (current_user.id, f'%{query}%', f'%{query}%', f'%{query}%'))
+            
+            posts_data = database_cursor.fetchall()
+            
+            # 為每個貼文獲取評論
+            for post_item in posts_data:
+                post_id = post_item[0]
+                
+                # 獲取該貼文的評論
+                database_cursor.execute("""
+                    SELECT 
+                        c.Comment_id,
+                        c.User_Email,
+                        u.User_name,
+                        c.Content,
+                        c.Reply_to_id,
+                        c.Reply_to_username,
+                        c.Is_public,
+                        c.Created_at
+                    FROM Comments c
+                    LEFT JOIN User u ON c.User_Email = u.User_Email
+                    WHERE c.Post_id = %s AND c.Is_public = TRUE
+                    ORDER BY c.Created_at ASC
+                """, (post_id,))
+                
+                comments_data = database_cursor.fetchall()
+                
+                # 組裝完整的貼文資料
+                complete_post_data = {
+                    'post_id': post_item[0],
+                    'user_email': post_item[1],
+                    'username': post_item[2] if not post_item[6] else '匿名用戶',
+                    'title': post_item[3],
+                    'content': post_item[4],
+                    'mood': post_item[5],
+                    'is_anonymous': post_item[6],
+                    'image_url': post_item[7],
+                    'is_public': post_item[8],
+                    'created_at': post_item[9],
+                    'likes_count': post_item[10],
+                    'user_liked': bool(post_item[11]),
+                    'comments': [
+                        {
+                            'comment_id': comment_item[0],
+                            'user_email': comment_item[1],
+                            'username': comment_item[2],
+                            'content': comment_item[3],
+                            'reply_to_id': comment_item[4],
+                            'reply_to_username': comment_item[5],
+                            'is_public': comment_item[6],
+                            'created_at': comment_item[7]
+                        }
+                        for comment_item in comments_data
+                    ]
+                }
+                
+                posts.append(complete_post_data)
+        
+        # 搜尋用戶 (如果搜尋類型是 all 或 users)
+        if search_type in ['all', 'users']:
+            # 搜尋用戶名稱
+            database_cursor.execute("""
+                SELECT 
+                    u.User_Email,
+                    u.User_name,
+                    u.Created_At,
+                    COUNT(DISTINCT p.Post_id) as post_count,
+                    COUNT(DISTINCT l.Like_id) as likes_received
+                FROM User u
+                LEFT JOIN Posts p ON u.User_Email = p.User_Email AND p.Is_public = TRUE
+                LEFT JOIN Likes l ON p.Post_id = l.Post_id
+                WHERE u.User_name LIKE %s
+                GROUP BY u.User_Email, u.User_name, u.Created_At
+                ORDER BY post_count DESC, u.User_name ASC
+                LIMIT 20
+            """, (f'%{query}%',))
+            
+            users_data = database_cursor.fetchall()
+            users = [
+                {
+                    'user_email': user_item[0],
+                    'username': user_item[1],
+                    'created_at': user_item[2],
+                    'post_count': user_item[3],
+                    'likes_received': user_item[4]
+                }
+                for user_item in users_data
+            ]
+        
+        database_connection.close()
+        
+        # 計算總結果數
+        total_results = len(posts) + len(users)
+        
+        return render_template('social/search_results.html', 
+                             query=query, 
+                             search_type=search_type,
+                             posts=posts, 
+                             users=users,
+                             total_results=total_results)
+        
+    except Exception as e:
+        print(f"[ERROR] 搜尋時發生錯誤: {str(e)}")
+        database_connection.close()
+        return render_template('social/search_results.html', 
+                             query=query, 
+                             search_type=search_type,
+                             posts=[], 
+                             users=[],
+                             total_results=0,
+                             error_message=f'搜尋失敗：{str(e)}')
+
+@social_bp.route('/search_api')
+@login_required
+def search_api():
+    """
+    社群搜尋 API (AJAX用)
+    
+    Query Parameters:
+        q (str): 搜尋關鍵字
+        type (str): 搜尋類型 (all, posts, users)
+        
+    Returns:
+        JSON: 搜尋結果
+    """
+    query = request.args.get('q', '').strip()
+    search_type = request.args.get('type', 'all')
+    
+    if not query:
+        return jsonify({
+            'success': True,
+            'query': '',
+            'search_type': search_type,
+            'posts': [],
+            'users': [],
+            'total_results': 0
+        })
+    
+    database_connection = db.get_connection()
+    database_cursor = database_connection.cursor()
+    
+    posts = []
+    users = []
+    
+    try:
+        # 搜尋貼文
+        if search_type in ['all', 'posts']:
+            database_cursor.execute("""
+                SELECT 
+                    p.Post_id,
+                    p.User_Email,
+                    u.User_name,
+                    p.title,
+                    p.Content,
+                    p.Mood,
+                    p.Is_Anonymous,
+                    p.Image_URL,
+                    p.Created_at,
+                    COUNT(l.Like_id) AS likes_count,
+                    MAX(CASE WHEN l.User_Email = %s THEN 1 ELSE 0 END) AS user_liked,
+                    COUNT(c.Comment_id) AS comments_count
+                FROM Posts p
+                LEFT JOIN User u ON p.User_Email = u.User_Email
+                LEFT JOIN Likes l ON p.Post_id = l.Post_id
+                LEFT JOIN Comments c ON p.Post_id = c.Post_id AND c.Is_public = TRUE
+                WHERE p.Is_public = TRUE 
+                AND (
+                    p.title LIKE %s 
+                    OR p.Content LIKE %s 
+                    OR (p.Is_Anonymous = FALSE AND u.User_name LIKE %s)
+                )
+                GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Created_at
+                ORDER BY p.Created_at DESC
+                LIMIT 50
+            """, (current_user.id, f'%{query}%', f'%{query}%', f'%{query}%'))
+            
+            posts_data = database_cursor.fetchall()
+        posts = [
+                {
+                    'post_id': post_item[0],
+                    'user_email': post_item[1],
+                    'username': post_item[2] if not post_item[6] else '匿名用戶',
+                    'title': post_item[3],
+                    'content': post_item[4][:200] + '...' if len(post_item[4]) > 200 else post_item[4],  # 截取內容
+                    'mood': post_item[5],
+                    'is_anonymous': post_item[6],
+                    'image_url': post_item[7],
+            'created_at': format_datetime(post_item[8]),
+                    'likes_count': post_item[9],
+                    'user_liked': bool(post_item[10]),
+                    'comments_count': post_item[11]
+                }
+                for post_item in posts_data
+            ]
+        
+        # 搜尋用戶
+        if search_type in ['all', 'users']:
+            database_cursor.execute("""
+                SELECT 
+                    u.User_Email,
+                    u.User_name,
+                    u.Created_At,
+                    COUNT(DISTINCT p.Post_id) as post_count,
+                    COUNT(DISTINCT l.Like_id) as likes_received
+                FROM User u
+                LEFT JOIN Posts p ON u.User_Email = p.User_Email AND p.Is_public = TRUE
+                LEFT JOIN Likes l ON p.Post_id = l.Post_id
+                WHERE u.User_name LIKE %s
+                GROUP BY u.User_Email, u.User_name, u.Created_At
+                ORDER BY post_count DESC, u.User_name ASC
+                LIMIT 20
+            """, (f'%{query}%',))
+            
+            users_data = database_cursor.fetchall()
+        users = [
+                {
+                    'user_email': user_item[0],
+                    'username': user_item[1],
+            'created_at': format_datetime(user_item[2], '%Y-%m-%d'),
+                    'post_count': user_item[3],
+                    'likes_received': user_item[4]
+                }
+                for user_item in users_data
+            ]
+        
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'query': query,
+            'search_type': search_type,
+            'posts': posts,
+            'users': users,
+            'total_results': len(posts) + len(users)
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 搜尋API錯誤: {str(e)}")
+        database_connection.close()
+        return jsonify({
+            'success': False,
+            'message': f'搜尋失敗：{str(e)}',
+            'query': query,
+            'search_type': search_type,
+            'posts': [],
+            'users': [],
+            'total_results': 0
+        }), 500
+
+
+# ==================== 追蹤功能 ====================
+
+@social_bp.route('/follow', methods=['POST'])
+@login_required
+def follow():
+    """
+    追蹤用戶 (JSON API)
+    
+    JSON Body:
+        user_email (str): 要追蹤的用戶Email
+    
+    Returns:
+        JSON: 追蹤結果
+    """
+    try:
+        data = request.get_json()
+        if not data or 'user_email' not in data:
+            return jsonify({
+                'success': False,
+                'message': '缺少必要的參數'
+            }), 400
+            
+        user_email = data['user_email']
+        
+        # 檢查是否嘗試追蹤自己
+        if user_email == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': '不能追蹤自己'
+            }), 400
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 檢查目標用戶是否存在
+        database_cursor.execute("SELECT User_Email FROM User WHERE User_Email = %s", (user_email,))
+        if not database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '目標用戶不存在'
+            }), 404
+        
+        # 檢查是否已經追蹤
+        database_cursor.execute("""
+            SELECT id FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        if database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '您已經追蹤了這個用戶'
+            }), 400
+        
+        # 創建追蹤關係
+        current_time = datetime.now()
+        database_cursor.execute("""
+            INSERT INTO follows (follower_email, following_email, created_at) 
+            VALUES (%s, %s, %s)
+        """, (current_user.id, user_email, current_time))
+        
+        # 獲取更新後的當前用戶統計數據（只返回當前用戶的數據）
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (current_user.id,))
+        current_user_followers_count = database_cursor.fetchone()[0]
+        
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        database_connection.commit()
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'message': '追蹤成功',
+            'is_following': True,
+            'followers_count': current_user_followers_count,
+            'following_count': following_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 追蹤用戶失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'追蹤失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/unfollow', methods=['POST'])
+@login_required
+def unfollow():
+    """
+    取消追蹤用戶 (JSON API)
+    
+    JSON Body:
+        user_email (str): 要取消追蹤的用戶Email
+    
+    Returns:
+        JSON: 取消追蹤結果
+    """
+    try:
+        data = request.get_json()
+        if not data or 'user_email' not in data:
+            return jsonify({
+                'success': False,
+                'message': '缺少必要的參數'
+            }), 400
+            
+        user_email = data['user_email']
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 檢查是否正在追蹤
+        database_cursor.execute("""
+            SELECT id FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        if not database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '您尚未追蹤這個用戶'
+            }), 400
+        
+        # 刪除追蹤關係
+        database_cursor.execute("""
+            DELETE FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        # 獲取更新後的當前用戶統計數據（只返回當前用戶的數據）
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (current_user.id,))
+        current_user_followers_count = database_cursor.fetchone()[0]
+        
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        database_connection.commit()
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'message': '取消追蹤成功',
+            'is_following': False,
+            'followers_count': current_user_followers_count,
+            'following_count': following_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 取消追蹤失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'取消追蹤失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/follow/<user_email>', methods=['POST'])
+@login_required
+def follow_user(user_email):
+    """
+    追蹤用戶
+    
+    Args:
+        user_email (str): 要追蹤的用戶Email
+    
+    Returns:
+        JSON: 追蹤結果
+    """
+    try:
+        # 檢查是否有Email參數
+        if not user_email:
+            return jsonify({
+                'success': False,
+                'message': '缺少必要的參數'
+            }), 400
+        
+        # 檢查是否嘗試追蹤自己
+        if user_email == current_user.id:
+            return jsonify({
+                'success': False,
+                'message': '不能追蹤自己'
+            }), 400
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 檢查目標用戶是否存在
+        database_cursor.execute("SELECT User_Email FROM User WHERE User_Email = %s", (user_email,))
+        if not database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '目標用戶不存在'
+            }), 404
+        
+        # 檢查是否已經追蹤
+        database_cursor.execute("""
+            SELECT id FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        if database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '您已經追蹤了這個用戶'
+            }), 400
+        
+        # 創建追蹤關係
+        current_time = datetime.now()
+        database_cursor.execute("""
+            INSERT INTO follows (follower_email, following_email, created_at) 
+            VALUES (%s, %s, %s)
+        """, (current_user.id, user_email, current_time))
+        
+        # 獲取更新後的追蹤數據
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (user_email,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        database_connection.commit()
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'message': '追蹤成功',
+            'is_following': True,
+            'followers_count': followers_count,
+            'following_count': following_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 追蹤用戶失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'追蹤失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/unfollow/<user_email>', methods=['POST'])
+@login_required
+def unfollow_user(user_email):
+    """
+    取消追蹤用戶
+    
+    Args:
+        user_email (str): 要取消追蹤的用戶Email
+    
+    Returns:
+        JSON: 取消追蹤結果
+    """
+    try:
+        # 檢查是否有Email參數
+        if not user_email:
+            return jsonify({
+                'success': False,
+                'message': '缺少必要的參數'
+            }), 400
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 檢查是否正在追蹤
+        database_cursor.execute("""
+            SELECT id FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        if not database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '您尚未追蹤這個用戶'
+            }), 400
+        
+        # 刪除追蹤關係
+        database_cursor.execute("""
+            DELETE FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        # 獲取更新後的追蹤數據
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (user_email,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        database_connection.commit()
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'message': '取消追蹤成功',
+            'is_following': False,
+            'followers_count': followers_count,
+            'following_count': following_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 取消追蹤失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'取消追蹤失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/check_follow_status/<user_email>')
+@login_required
+def check_follow_status(user_email):
+    """
+    檢查是否追蹤某個用戶
+    
+    Args:
+        user_email (str): 要檢查的用戶 Email
+        
+    Returns:
+        JSON: 追蹤狀態
+    """
+    try:
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 檢查是否正在追蹤
+        database_cursor.execute("""
+            SELECT id FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (current_user.id, user_email))
+        
+        is_following = database_cursor.fetchone() is not None
+        
+        # 獲取目標用戶的粉絲數
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (user_email,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'is_following': is_following,
+            'followers_count': followers_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 檢查追蹤狀態失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'檢查失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/social_stats')
+@login_required
+def social_stats_current_user():
+    """
+    獲取當前用戶的社交統計數據 (舊版路由兼容)
+    
+    Returns:
+        JSON: 社交統計數據
+    """
+    return get_social_stats()
+
+@social_bp.route('/get_social_stats')
+@login_required
+def get_social_stats():
+    """
+    獲取當前用戶的社交統計數據
+    
+    Returns:
+        JSON: 社交統計數據
+    """
+    try:
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 獲取粉絲數（追蹤我的人）
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (current_user.id,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        # 獲取追蹤數（我追蹤的人）
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (current_user.id,))
+        following_count = database_cursor.fetchone()[0]
+        
+        # 獲取喜歡的貼文數量（我按讚過的貼文）
+        database_cursor.execute("""
+            SELECT COUNT(*)
+            FROM Likes l
+            INNER JOIN Posts p ON l.Post_id = p.Post_id
+            WHERE l.User_Email = %s AND p.Is_public = TRUE
+        """, (current_user.id,))
+        liked_posts_count = database_cursor.fetchone()[0]
+        
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'followers_count': followers_count,
+            'following_count': following_count,
+            'liked_posts_count': liked_posts_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 獲取社交統計失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'獲取統計失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/get_followers')
+@login_required
+def get_followers():
+    """
+    獲取粉絲列表
+    
+    Returns:
+        JSON: 粉絲列表
+    """
+    try:
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 獲取粉絲列表（追蹤我的用戶）
+        database_cursor.execute("""
+            SELECT 
+                f.follower_email,
+                u.User_name,
+                f.created_at,
+                COUNT(DISTINCT p.Post_id) as post_count
+            FROM follows f
+            LEFT JOIN user u ON f.follower_email = u.User_Email
+            LEFT JOIN Posts p ON f.follower_email = p.User_Email AND p.Is_public = TRUE
+            WHERE f.following_email = %s
+            GROUP BY f.follower_email, u.User_name, f.created_at
+            ORDER BY f.created_at DESC
+        """, (current_user.id,))
+        
+        followers_data = database_cursor.fetchall()
+        database_connection.close()
+        
+        followers = [
+            {
+                'user_email': follower[0],
+                'username': follower[1],
+                'followed_at': format_datetime(follower[2], '%Y-%m-%d'),
+                'post_count': follower[3]
+            }
+            for follower in followers_data
+        ]
+        
+        return jsonify({
+            'success': True,
+            'followers': followers,
+            'total_count': len(followers)
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 獲取粉絲列表失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'獲取粉絲列表失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/get_following')
+@login_required
+def get_following():
+    """
+    獲取追蹤列表
+    
+    Returns:
+        JSON: 追蹤列表
+    """
+    try:
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 獲取追蹤列表（我追蹤的用戶）
+        database_cursor.execute("""
+            SELECT 
+                f.following_email,
+                u.User_name,
+                f.created_at,
+                COUNT(DISTINCT p.Post_id) as post_count
+            FROM follows f
+            LEFT JOIN user u ON f.following_email = u.User_Email
+            LEFT JOIN Posts p ON f.following_email = p.User_Email AND p.Is_public = TRUE
+            WHERE f.follower_email = %s
+            GROUP BY f.following_email, u.User_name, f.created_at
+            ORDER BY f.created_at DESC
+        """, (current_user.id,))
+        
+        following_data = database_cursor.fetchall()
+        database_connection.close()
+        
+        following = [
+            {
+                'user_email': follow[0],
+                'username': follow[1],
+                'followed_at': format_datetime(follow[2], '%Y-%m-%d'),
+                'post_count': follow[3]
+            }
+            for follow in following_data
+        ]
+        
+        return jsonify({
+            'success': True,
+            'following': following,
+            'total_count': len(following)
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 獲取追蹤列表失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'獲取追蹤列表失敗：{str(e)}'
+        }), 500
+
+@social_bp.route('/get_following_posts')
+@login_required
+def get_following_posts():
+    """
+    獲取追蹤用戶的貼文
+    
+    Returns:
+        JSON: 追蹤用戶的貼文列表
+    """
+    try:
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 獲取我追蹤的用戶的貼文
+        database_cursor.execute("""
+            SELECT 
+                p.Post_id,
+                p.User_Email,
+                u.User_name,
+                p.title,
+                p.Content,
+                p.Mood,
+                p.Is_Anonymous,
+                p.Image_URL,
+                p.Is_public,
+                p.Created_at,
+                COUNT(l.Like_id) AS likes_count,
+                MAX(CASE WHEN l.User_Email = %s THEN 1 ELSE 0 END) AS user_liked
+            FROM Posts p
+            INNER JOIN follows f ON p.User_Email = f.following_email
+            LEFT JOIN User u ON p.User_Email = u.User_Email
+            LEFT JOIN Likes l ON p.Post_id = l.Post_id
+            WHERE f.follower_email = %s AND p.Is_public = TRUE
+            GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Is_public, p.Created_at
+            ORDER BY p.Created_at DESC
+            LIMIT 100
+        """, (current_user.id, current_user.id))
+        
+        posts_data = database_cursor.fetchall()
+        
+        # 為每個貼文獲取評論
+        formatted_posts = []
+        for post_item in posts_data:
+            post_id = post_item[0]
+            
+            # 獲取該貼文的評論
+            database_cursor.execute("""
+                SELECT 
+                    c.Comment_id,
+                    c.User_Email,
+                    u.User_name,
+                    c.Content,
+                    c.Reply_to_id,
+                    c.Reply_to_username,
+                    c.Is_public,
+                    c.Created_at
+                FROM Comments c
+                LEFT JOIN User u ON c.User_Email = u.User_Email
+                WHERE c.Post_id = %s AND c.Is_public = TRUE
+                ORDER BY c.Created_at ASC
+            """, (post_id,))
+            
+            comments_data = database_cursor.fetchall()
+            
+            # 組裝完整的貼文資料
+            complete_post_data = {
+                'post_id': post_item[0],
+                'user_email': post_item[1],
+                'username': post_item[2] if not post_item[6] else '匿名用戶',
+                'title': post_item[3],
+                'content': post_item[4],
+                'mood': post_item[5],
+                'is_anonymous': post_item[6],
+                'image_url': post_item[7],
+                'is_public': post_item[8],
+                'created_at': format_datetime(post_item[9]),
+                'likes_count': post_item[10],
+                'user_liked': bool(post_item[11]),
+                'comments': [
+                    {
+                        'comment_id': comment_item[0],
+                        'user_email': comment_item[1],
+                        'username': comment_item[2],
+                        'content': comment_item[3],
+                        'reply_to_id': comment_item[4],
+                        'reply_to_username': comment_item[5],
+                        'is_public': comment_item[6],
+                        'created_at': format_datetime(comment_item[7])
+                    }
+                    for comment_item in comments_data
+                ]
+            }
+            
+            formatted_posts.append(complete_post_data)
+        
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'posts': formatted_posts,
+            'total_count': len(formatted_posts)
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 獲取追蹤用戶貼文失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'獲取貼文失敗：{str(e)}'
+        }), 500
+
+
+@social_bp.route('/user/<user_email>')
+@login_required
+def user_posts(user_email):
+    """顯示特定使用者的所有公開貼文與等級資訊。"""
+    try:
+        # 連線與 cursor
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+
+        # 取得該使用者基本資料
+        database_cursor.execute("""
+            SELECT User_Email, User_name, COALESCE(level_name, ''), created_at
+            FROM User
+            WHERE User_Email = %s
+        """, (user_email,))
+        user_row = database_cursor.fetchone()
+
+        if not user_row:
+            database_connection.close()
+            return render_template('social/social_main.html', posts=[], user=None)
+
+        user_obj = {
+            'user_email': user_row[0],
+            'username': user_row[1] or '使用者',
+            'level_name': user_row[2] or '',
+            'joined_at': format_datetime(user_row[3], '%Y-%m-%d')
+        }
+
+        # 統計：發文數與獲讚數
+        database_cursor.execute("""SELECT COUNT(*) FROM Posts WHERE User_Email = %s AND Is_public = TRUE""", (user_email,))
+        user_obj['post_count'] = database_cursor.fetchone()[0] or 0
+
+        database_cursor.execute(
+            """
+            SELECT COUNT(l.Like_id) FROM Likes l
+            JOIN Posts p ON l.Post_id = p.Post_id
+            WHERE p.User_Email = %s
+            """,
+            (user_email,)
+        )
+        user_obj['likes_received'] = database_cursor.fetchone()[0] or 0
+
+        # 取得使用者的公開貼文
+        database_cursor.execute("""
+            SELECT 
+                p.Post_id,
+                p.User_Email,
+                u.User_name,
+                p.title,
+                p.Content,
+                p.Mood,
+                p.Is_Anonymous,
+                p.Image_URL,
+                p.Is_public,
+                p.Created_at,
+                COUNT(l.Like_id) AS likes_count,
+                MAX(CASE WHEN l.User_Email = %s THEN 1 ELSE 0 END) AS user_liked
+            FROM Posts p
+            LEFT JOIN User u ON p.User_Email = u.User_Email
+            LEFT JOIN Likes l ON p.Post_id = l.Post_id
+            WHERE p.Is_public = TRUE AND p.User_Email = %s
+            GROUP BY p.Post_id, p.User_Email, u.User_name, p.title, p.Content, p.Mood, p.Is_Anonymous, p.Image_URL, p.Is_public, p.Created_at
+            ORDER BY p.Created_at DESC
+            LIMIT 100
+        """, (current_user.id, user_email))
+
+        posts_data = database_cursor.fetchall()
+
+        # 處理每篇貼文與其評論
+        formatted_posts = []
+        for post_item in posts_data:
+            post_id = post_item[0]
+
+            database_cursor.execute("""
+                SELECT 
+                    c.Comment_id,
+                    c.User_Email,
+                    u.User_name,
+                    c.Content,
+                    c.Reply_to_id,
+                    c.Reply_to_username,
+                    c.Is_public,
+                    c.Created_at
+                FROM Comments c
+                LEFT JOIN User u ON c.User_Email = u.User_Email
+                WHERE c.Post_id = %s AND c.Is_public = TRUE
+                ORDER BY c.Created_at ASC
+            """, (post_id,))
+
+            comments_data = database_cursor.fetchall()
+
+            complete_post_data = {
+                'post_id': post_item[0],
+                'user_email': post_item[1],
+                'username': post_item[2] if not post_item[6] else '匿名用戶',
+                'title': post_item[3],
+                'content': post_item[4],
+                'mood': post_item[5],
+                'is_anonymous': post_item[6],
+                'image_url': post_item[7],
+                'is_public': post_item[8],
+                'created_at': format_datetime(post_item[9]),
+                'likes_count': post_item[10],
+                'user_liked': bool(post_item[11]),
+                'comments': [
+                    {
+                        'comment_id': c_item[0],
+                        'user_email': c_item[1],
+                        'username': c_item[2],
+                        'content': c_item[3],
+                        'reply_to_id': c_item[4],
+                        'reply_to_username': c_item[5],
+                        'is_public': c_item[6],
+                        'created_at': format_datetime(c_item[7])
+                    }
+                    for c_item in comments_data
+                ]
+            }
+
+            formatted_posts.append(complete_post_data)
+
+        database_connection.close()
+        return render_template('social/social_main.html', posts=formatted_posts, user=user_obj)
+
+    except Exception as e:
+        print(f"[ERROR] 獲取使用者貼文失敗: {str(e)}")
+        return jsonify({'success': False, 'message': f'獲取使用者貼文失敗：{str(e)}'}), 500
+
+@social_bp.route('/remove_follower', methods=['POST'])
+@login_required
+def remove_follower():
+    """
+    刪除粉絲（讓特定用戶不再追蹤我）
+    
+    Returns:
+        JSON: 移除結果
+    """
+    try:
+        # 獲取請求數據
+        data = request.get_json()
+        if not data or 'follower_email' not in data:
+            return jsonify({
+                'success': False,
+                'message': '缺少必要的參數'
+            }), 400
+            
+        follower_email = data['follower_email']
+        
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 檢查該用戶是否真的在追蹤我
+        database_cursor.execute("""
+            SELECT id FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (follower_email, current_user.id))
+        
+        if not database_cursor.fetchone():
+            return jsonify({
+                'success': False,
+                'message': '該用戶並未追蹤您'
+            }), 400
+        
+        # 刪除追蹤關係
+        database_cursor.execute("""
+            DELETE FROM follows 
+            WHERE follower_email = %s AND following_email = %s
+        """, (follower_email, current_user.id))
+        
+        # 獲取更新後的粉絲數
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (current_user.id,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        database_connection.commit()
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'message': '已成功移除該粉絲',
+            'followers_count': followers_count
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 移除粉絲失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'移除失敗：{str(e)}'
+        }), 500
+
+
+@social_bp.route('/social_stats/<user_email>')
+@login_required
+def social_stats(user_email):
+    """
+    獲取用戶的社交統計資料
+    """
+    try:
+        database_connection = db.get_connection()
+        database_cursor = database_connection.cursor()
+        
+        # 獲取用戶的貼文數量
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM Posts 
+            WHERE User_Email = %s AND Is_public = TRUE
+        """, (user_email,))
+        posts_count = database_cursor.fetchone()[0]
+        
+        # 獲取用戶的粉絲數量
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE following_email = %s
+        """, (user_email,))
+        followers_count = database_cursor.fetchone()[0]
+        
+        # 獲取用戶追蹤的人數
+        database_cursor.execute("""
+            SELECT COUNT(*) FROM follows WHERE follower_email = %s
+        """, (user_email,))
+        following_count = database_cursor.fetchone()[0]
+        
+        database_connection.close()
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'posts_count': posts_count,
+                'followers_count': followers_count,
+                'following_count': following_count
+            }
+        })
+        
+    except Exception as e:
+        print(f"[ERROR] 獲取社交統計失敗: {str(e)}")
+        return jsonify({
+            'success': False,
+            'message': f'獲取統計失敗：{str(e)}'
+        }), 500

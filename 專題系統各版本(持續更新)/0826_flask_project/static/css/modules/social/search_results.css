@@ -1,0 +1,721 @@
+/* ========== 搜尋結果頁面樣式 ========== */
+
+/* 重新定義左側面板為搜尋篩選 */
+.search-filter-panel {
+  width: var(--side-w);
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding: 20px 0;
+  background: rgba(0,0,0,.04);
+  border-right: 1px solid rgba(0,0,0,.05);
+  border-radius: 0 16px 16px 0;
+}
+
+body.dark-mode .search-filter-panel {
+  background: rgba(255,255,255,.04);
+  border-color: rgba(255,255,255,.06);
+}
+
+.search-filter-panel h3 {
+  margin: 0 0 16px 18px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+body.dark-mode .search-filter-panel h3 {
+  color: #e0e0e0;
+}
+
+.filter-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.filter-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 18px;
+  font-size: 16px;
+  color: #333;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s, color .2s;
+}
+
+.filter-item:hover {
+  background: var(--hover-light);
+}
+
+.filter-item.active {
+  background: rgba(0,0,0,.10);
+  font-weight: bold;
+  color: var(--primary-light);
+}
+
+.filter-count {
+  background: rgba(91, 127, 71, 0.2);
+  color: var(--primary-light);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  min-width: 20px;
+  text-align: center;
+}
+
+body.dark-mode .filter-item {
+  color: #e0e0e0;
+}
+
+body.dark-mode .filter-item:hover {
+  background: var(--hover-dark);
+}
+
+body.dark-mode .filter-item.active {
+  background: rgba(255,255,255,.15);
+  color: #8BC34A;
+}
+
+body.dark-mode .filter-count {
+  background: rgba(91, 127, 71, 0.3);
+  color: #8BC34A;
+}
+
+/* 搜尋結果區域 */
+.search-results-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+}
+
+.search-header {
+  max-width: 780px;
+  margin: 0 auto 28px;
+  padding: 20px;
+  background: var(--card-light);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+body.dark-mode .search-header {
+  background: var(--card-dark);
+  color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.search-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  color: var(--primary-light);
+}
+
+body.dark-mode .search-header h2 {
+  color: #8BC34A;
+}
+
+.search-info {
+  margin: 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+body.dark-mode .search-info {
+  color: #aaa;
+}
+
+/* 錯誤訊息樣式 */
+.error-message {
+  max-width: 780px;
+  margin: 0 auto 28px;
+  padding: 20px;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+body.dark-mode .error-message {
+  background: rgba(244, 67, 54, 0.1);
+  border-color: rgba(244, 67, 54, 0.3);
+  color: #ef5350;
+}
+
+.error-icon {
+  font-size: 1.5rem;
+  color: #f44336;
+}
+
+body.dark-mode .error-icon {
+  color: #ef5350;
+}
+
+.error-message p {
+  margin: 0;
+  color: #c62828;
+}
+
+body.dark-mode .error-message p {
+  color: #ef5350;
+}
+
+/* 搜尋結果內容區域 */
+.search-results-content {
+  max-width: 780px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* 區段標題 */
+.section-title {
+  margin: 0 0 20px 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--primary-light);
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(91, 127, 71, 0.2);
+}
+
+body.dark-mode .section-title {
+  color: #8BC34A;
+  border-bottom-color: rgba(91, 127, 71, 0.4);
+}
+
+/* ========== 用戶搜尋結果樣式 ========== */
+.users-section {
+  background: var(--card-light);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+body.dark-mode .users-section {
+  background: var(--card-dark);
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.user-card {
+  background: rgba(0,0,0,.02);
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+}
+
+.user-card:hover {
+  background: rgba(0,0,0,.04);
+  border-color: var(--primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+}
+
+body.dark-mode .user-card {
+  background: rgba(255,255,255,.02);
+  border-color: rgba(255,255,255,.08);
+}
+
+body.dark-mode .user-card:hover {
+  background: rgba(255,255,255,.04);
+  border-color: #8BC34A;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light), #8BC34A);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.avatar-icon {
+  font-size: 24px;
+  color: white;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0; /* 防止文字溢出 */
+}
+
+.user-name {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+body.dark-mode .user-name {
+  color: #e0e0e0;
+}
+
+.user-stats {
+  margin: 0 0 2px 0;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+body.dark-mode .user-stats {
+  color: #aaa;
+}
+
+.user-joined {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #999;
+}
+
+body.dark-mode .user-joined {
+  color: #888;
+}
+
+.user-actions {
+  flex-shrink: 0;
+}
+
+.view-user-posts {
+  background: var(--primary-light);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.view-user-posts:hover {
+  background: #4A6B38;
+}
+
+body.dark-mode .view-user-posts {
+  background: #5B7F47;
+}
+
+body.dark-mode .view-user-posts:hover {
+  background: #6B8F57;
+}
+
+/* ========== 貼文搜尋結果樣式 ========== */
+.posts-section {
+  background: var(--card-light);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+body.dark-mode .posts-section {
+  background: var(--card-dark);
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.search-post-card {
+  background: rgba(0,0,0,.02);
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.search-post-card:hover {
+  background: rgba(0,0,0,.04);
+  border-color: var(--primary-light);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,.1);
+}
+
+body.dark-mode .search-post-card {
+  background: rgba(255,255,255,.02);
+  border-color: rgba(255,255,255,.08);
+}
+
+body.dark-mode .search-post-card:hover {
+  background: rgba(255,255,255,.04);
+  border-color: #8BC34A;
+  box-shadow: 0 4px 12px rgba(0,0,0,.3);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.post-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.post-author strong {
+  color: #333;
+  font-weight: 600;
+}
+
+body.dark-mode .post-author strong {
+  color: #e0e0e0;
+}
+
+.post-time {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+body.dark-mode .post-time {
+  color: #888;
+}
+
+/* 搜尋結果中的心情標籤 */
+.search-post-card .mood-indicator {
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+}
+
+/* 搜尋結果中的貼文標題 */
+.search-post-card .post-title {
+  margin: 8px 0;
+}
+
+.search-post-card .post-title h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--primary-light);
+  line-height: 1.3;
+}
+
+body.dark-mode .search-post-card .post-title h4 {
+  color: #8BC34A;
+}
+
+/* 貼文內容預覽 */
+.post-content-preview {
+  margin: 12px 0;
+  color: #333;
+  line-height: 1.4;
+  font-size: 0.9rem;
+}
+
+body.dark-mode .post-content-preview {
+  color: #ddd;
+}
+
+/* 圖片預覽 */
+.post-image-preview {
+  margin: 12px 0;
+}
+
+.post-image-preview img {
+  border: 1px solid rgba(0,0,0,.1);
+}
+
+body.dark-mode .post-image-preview img {
+  border-color: rgba(255,255,255,.2);
+}
+
+/* 貼文頁腳 */
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0,0,0,.1);
+}
+
+body.dark-mode .post-footer {
+  border-top-color: rgba(255,255,255,.2);
+}
+
+.post-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+body.dark-mode .post-stats {
+  color: #aaa;
+}
+
+.likes-count,
+.comments-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-emoji {
+  font-size: 0.9rem;
+}
+
+.view-post-btn {
+  background: var(--primary-light);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: background 0.2s ease;
+}
+
+.view-post-btn:hover {
+  background: #4A6B38;
+  text-decoration: none;
+  color: white;
+}
+
+body.dark-mode .view-post-btn {
+  background: #5B7F47;
+}
+
+body.dark-mode .view-post-btn:hover {
+  background: #6B8F57;
+}
+
+/* ========== 沒有結果的狀態 ========== */
+.no-results, .no-query {
+  text-align: center;
+  padding: 60px 20px;
+  background: var(--card-light);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+body.dark-mode .no-results,
+body.dark-mode .no-query {
+  background: var(--card-dark);
+  color: #e0e0e0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+}
+
+.no-results-icon, .no-query-icon {
+  font-size: 4rem;
+  margin-bottom: 20px;
+  opacity: 0.6;
+}
+
+.no-results h3, .no-query h3 {
+  margin: 0 0 12px 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+body.dark-mode .no-results h3,
+body.dark-mode .no-query h3 {
+  color: #e0e0e0;
+}
+
+.no-results p, .no-query p {
+  margin: 0 0 24px 0;
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+body.dark-mode .no-results p,
+body.dark-mode .no-query p {
+  color: #aaa;
+}
+
+.no-results-suggestions, .search-tips {
+  text-align: left;
+  max-width: 400px;
+  margin: 0 auto;
+  background: rgba(0,0,0,.02);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+body.dark-mode .no-results-suggestions,
+body.dark-mode .search-tips {
+  background: rgba(255,255,255,.02);
+}
+
+.no-results-suggestions h4, .search-tips h4 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: var(--primary-light);
+}
+
+body.dark-mode .no-results-suggestions h4,
+body.dark-mode .search-tips h4 {
+  color: #8BC34A;
+}
+
+.no-results-suggestions ul, .search-tips ul {
+  margin: 0;
+  padding-left: 20px;
+  color: #666;
+  line-height: 1.6;
+}
+
+body.dark-mode .no-results-suggestions ul,
+body.dark-mode .search-tips ul {
+  color: #ccc;
+}
+
+.no-results-suggestions a {
+  color: var(--primary-light);
+  text-decoration: none;
+}
+
+.no-results-suggestions a:hover {
+  text-decoration: underline;
+}
+
+body.dark-mode .no-results-suggestions a {
+  color: #8BC34A;
+}
+
+/* ========== 手機端適配 ========== */
+@media (max-width: 768px) {
+  .search-filter-panel {
+    display: none;
+  }
+  
+  .search-results-area {
+    padding: 20px 16px;
+  }
+  
+  .users-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .user-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+  
+  .post-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .post-footer {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+}
+
+/* ========== 按鈕通用樣式 ========== */
+.btn {
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+
+/* ========== 匿名標記樣式（搜尋結果專用） ========== */
+.search-post-card .anonymous-badge {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+}
+
+/* ========== 追蹤按鈕樣式 ========== */
+.follow-btn {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.follow-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #5a6fd8, #6a42a3);
+}
+
+.follow-btn.following {
+  background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.follow-btn.following:hover {
+  background: linear-gradient(135deg, #218838, #1db584);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.follow-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.follow-btn .btn-emoji {
+  font-size: 0.9em;
+}
+
+/* 深色模式下的追蹤按鈕 */
+body.dark-mode .follow-btn {
+  background: linear-gradient(135deg, #5a6fd8, #6a42a3);
+}
+
+body.dark-mode .follow-btn:hover {
+  background: linear-gradient(135deg, #4e5ec7, #5d3892);
+}
+
+body.dark-mode .follow-btn.following {
+  background: linear-gradient(135deg, #20c997, #17a085);
+}
+
+body.dark-mode .follow-btn.following:hover {
+  background: linear-gradient(135deg, #1db584, #138f72);
+}

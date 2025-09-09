@@ -1,0 +1,377 @@
+/* ========== 社群版面切換功能樣式 ========== */
+
+/* 主要標籤切換 */
+.main-tabs {
+  margin-bottom: 20px;
+  padding: 0 12px;
+}
+
+.main-tab {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(0,0,0,0.1);
+  text-decoration: none;
+  color: inherit;
+}
+
+.main-tab:visited {
+  color: inherit;
+}
+
+.main-tab:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateX(4px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.main-tab.active {
+  background: linear-gradient(135deg, #5B7F47, #7F9A65);
+  color: white;
+  box-shadow: 0 2px 8px rgba(91, 127, 71, 0.3);
+}
+
+body.dark-mode .main-tab {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.1);
+  color: #e0e0e0;
+}
+
+body.dark-mode .main-tab:hover {
+  background: rgba(255,255,255,0.15);
+  color: #e0e0e0;
+}
+
+body.dark-mode .main-tab.active {
+  background: linear-gradient(135deg, #0A1C2B, #1A3C5A);
+  box-shadow: 0 2px 8px rgba(10, 28, 43, 0.5);
+  color: white;
+}
+
+.main-tab .tab-icon {
+  font-size: 1.2em;
+}
+
+.main-tab .tab-text {
+  flex: 1;
+  margin-left: 8px;
+  font-weight: 500;
+}
+
+.main-tab .tab-count {
+  background: rgba(255,255,255,0.2);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.main-tab.active .tab-count {
+  background: rgba(255,255,255,0.3);
+}
+
+/* 子標籤區域 */
+.sub-tabs {
+  padding: 0 12px;
+}
+
+.sub-tab-header {
+  font-size: 0.9em;
+  font-weight: 600;
+  color: #666;
+  padding: 8px 16px;
+  margin-bottom: 8px;
+  background: rgba(0,0,0,0.05);
+  border-radius: 8px;
+}
+
+body.dark-mode .sub-tab-header {
+  color: #aaa;
+  background: rgba(255,255,255,0.05);
+}
+
+/* 追蹤操作按鈕區域 */
+.following-actions {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+body.dark-mode .following-actions {
+  border-top-color: rgba(255,255,255,0.1);
+}
+
+.following-actions .btn {
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 0.85em;
+}
+
+/* 社交統計樣式 */
+.social-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255,255,255,0.2);
+}
+
+.social-stat-item {
+  text-align: center;
+  padding: 12px 8px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.social-stat-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255,255,255,0.4);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+body.dark-mode .social-stat-item {
+  background: rgba(0,0,0,0.3);
+}
+
+body.dark-mode .social-stat-item:hover {
+  background: rgba(0,0,0,0.4);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.social-stat-icon {
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.social-stat-value {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+body.dark-mode .social-stat-value {
+  color: #ecf0f1;
+}
+
+.social-stat-label {
+  font-size: 0.7rem;
+  color: #95a5a6;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+body.dark-mode .social-stat-label {
+  color: #7f8c8d;
+}
+
+/* 追蹤/粉絲列表彈窗樣式 */
+.follow-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.follow-modal-overlay.active {
+  display: flex;
+}
+
+.follow-modal {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 70vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .follow-modal {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+.follow-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+}
+
+body.dark-mode .follow-modal-header {
+  border-bottom-color: #444;
+}
+
+.follow-modal-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 1.2em;
+}
+
+body.dark-mode .follow-modal-header h3 {
+  color: #e0e0e0;
+}
+
+.follow-modal-body {
+  padding: 20px 24px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.follow-user-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+body.dark-mode .follow-user-item {
+  border-bottom-color: #444;
+}
+
+.follow-user-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.follow-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5B7F47, #7F9A65);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 12px;
+  font-weight: bold;
+}
+
+.follow-user-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 1em;
+  color: #333;
+}
+
+body.dark-mode .follow-user-details h4 {
+  color: #e0e0e0;
+}
+
+.follow-user-details p {
+  margin: 0;
+  font-size: 0.85em;
+  color: #666;
+}
+
+body.dark-mode .follow-user-details p {
+  color: #aaa;
+}
+
+.follow-user-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-follow,
+.btn-unfollow {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-follow {
+  background: #5B7F47;
+  color: white;
+}
+
+.btn-follow:hover {
+  background: #4A6B38;
+}
+
+.btn-unfollow {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-unfollow:hover {
+  background: #c82333;
+}
+
+.empty-follow-list {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+}
+
+body.dark-mode .empty-follow-list {
+  color: #aaa;
+}
+
+.empty-follow-list .empty-icon {
+  font-size: 3em;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+/* 手機版適配 */
+@media(max-width:768px){
+  .main-tabs {
+    padding: 0 8px;
+  }
+  
+  .main-tab {
+    padding: 10px 12px;
+  }
+  
+  .sub-tabs {
+    padding: 0 8px;
+  }
+  
+  .social-stats {
+    gap: 8px;
+  }
+  
+  .social-stat-item {
+    padding: 10px 6px;
+  }
+  
+  .follow-modal {
+    width: 95%;
+    max-height: 80vh;
+  }
+  
+  .follow-modal-body {
+    padding: 16px 20px;
+  }
+}
