@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/social_main.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/social_tabs.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/user-card-collapsible.css') }}">
 </head>
 
 <body class="page-wrapper"><!-- flex 縱向 -->
@@ -22,7 +23,8 @@
   </form>
 
   <nav class="social-nav">
-    <a href="/social/create_post"   class="action-btn" title="新增貼文">➕</a>
+    <a href="/social/create_post" class="action-btn" title="新增貼文">➕</a>
+    <button id="toggle-user-card" class="action-btn" title="切換個人資訊卡顯示">👤</button>
     <!-- <a href="#"              class="action-btn" title="通知">🔔</a> -->
     <!-- <a href="#"              class="action-btn" title="收藏">⭐</a>
     <a href="#"              class="action-btn" title="聊天">💬</a> -->
@@ -93,7 +95,7 @@
 
     <!-- 用戶等級信息卡片 -->
     <div class="user-level-card" id="user-level-card" data-level="{{ user_level_info.current_level.title if user_level_info and user_level_info.current_level else '新手村民' }}">
-      <div class="level-header">
+      <div class="level-header" id="level-card-header">
         <div class="level-icon">
           <span class="level-emoji">{{ user_level_info.current_level.emoji if user_level_info and user_level_info.current_level else '🌱' }}</span>
         </div>
@@ -107,64 +109,67 @@
         </div>
       </div>
       
-      <div class="level-progress">
-        <div class="progress-bar">
-          <div class="progress-fill" style="width: {{ user_level_info.progress_to_next if user_level_info else 0 }}%"></div>
+      <div class="level-card-content" id="level-card-content">
+        <div class="level-progress">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: {{ user_level_info.progress_to_next if user_level_info else 0 }}%"></div>
+          </div>
+          <div class="progress-text">
+            <span class="current-progress">{{ user_level_info.progress_to_next if user_level_info else 0 }}%</span>
+            <span class="next-level">下一級：{{ user_level_info.next_level.title if user_level_info and user_level_info.next_level else '活躍居民' }}</span>
+          </div>
         </div>
-        <div class="progress-text">
-          <span class="current-progress">{{ user_level_info.progress_to_next if user_level_info else 0 }}%</span>
-          <span class="next-level">下一級：{{ user_level_info.next_level.title if user_level_info and user_level_info.next_level else '活躍居民' }}</span>
+        
+        <div class="level-stats">
+          <div class="stat-item">
+            <span class="stat-icon">📝</span>
+            <span class="stat-value">{{ user_level_info.stats.posts_count if user_level_info and user_level_info.stats else 0 }}</span>
+            <span class="stat-label">發文</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">👍</span>
+            <span class="stat-value">{{ user_level_info.stats.likes_received if user_level_info and user_level_info.stats else 0 }}</span>
+            <span class="stat-label">獲讚</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">💬</span>
+            <span class="stat-value">{{ user_level_info.stats.comments_received if user_level_info and user_level_info.stats else 0 }}</span>
+            <span class="stat-label">留言</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">📅</span>
+            <span class="stat-value">{{ user_level_info.stats.login_days if user_level_info and user_level_info.stats else 1 }}</span>
+            <span class="stat-label">天數</span>
+          </div>
         </div>
-      </div>
       
-      <div class="level-stats">
-        <div class="stat-item">
-          <span class="stat-icon">📝</span>
-          <span class="stat-value">{{ user_level_info.stats.posts_count if user_level_info and user_level_info.stats else 0 }}</span>
-          <span class="stat-label">發文</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-icon">👍</span>
-          <span class="stat-value">{{ user_level_info.stats.likes_received if user_level_info and user_level_info.stats else 0 }}</span>
-          <span class="stat-label">獲讚</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-icon">💬</span>
-          <span class="stat-value">{{ user_level_info.stats.comments_received if user_level_info and user_level_info.stats else 0 }}</span>
-          <span class="stat-label">留言</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-icon">📅</span>
-          <span class="stat-value">{{ user_level_info.stats.login_days if user_level_info and user_level_info.stats else 1 }}</span>
-          <span class="stat-label">天數</span>
-        </div>
-      </div>
       
-      
-      <!-- 社交統計 -->
-      <div class="social-stats">
-        <div class="social-stat-item" data-stat="followers" style="cursor: pointer;" title="點擊查看粉絲列表">
-          <span class="social-stat-icon">👥</span>
-          <span class="social-stat-number" id="followers-count">{{ social_stats.followers_count if social_stats else 0 }}</span>
-          <span class="social-stat-label">粉絲</span>
+        <!-- 社交統計 -->
+        <div class="social-stats">
+          <div class="social-stat-item" data-stat="followers" style="cursor: pointer;" title="點擊查看粉絲列表">
+            <span class="social-stat-icon">👥</span>
+            <span class="social-stat-number" id="followers-count">{{ social_stats.followers_count if social_stats else 0 }}</span>
+            <span class="social-stat-label">粉絲</span>
+          </div>
+          <div class="social-stat-item" data-stat="following" style="cursor: pointer;" title="點擊查看追蹤列表">
+            <span class="social-stat-icon">🔔</span>
+            <span class="social-stat-number" id="following-count">{{ social_stats.following_count if social_stats else 0 }}</span>
+            <span class="social-stat-label">追蹤</span>
+          </div>
+          <div class="social-stat-item" data-stat="liked-posts" style="cursor: pointer;" title="查看喜歡的貼文" onclick="navigateToLikedPosts()">
+            <span class="social-stat-icon">💖</span>
+            <span class="social-stat-number" id="liked-posts-count">{{ social_stats.liked_posts_count if social_stats else 0 }}</span>
+            <span class="social-stat-label">喜歡的貼文</span>
+          </div>
         </div>
-        <div class="social-stat-item" data-stat="following" style="cursor: pointer;" title="點擊查看追蹤列表">
-          <span class="social-stat-icon">🔔</span>
-          <span class="social-stat-number" id="following-count">{{ social_stats.following_count if social_stats else 0 }}</span>
-          <span class="social-stat-label">追蹤</span>
+        
+        <!-- 查看等級規範 -->
+        <div class="level-actions">
+          <a href="/social/level_guide" class="btn btn-info btn-sm">
+            <span class="btn-emoji">📖</span> 查看等級規範
+          </a>
         </div>
-        <div class="social-stat-item" data-stat="liked-posts" style="cursor: pointer;" title="查看喜歡的貼文" onclick="navigateToLikedPosts()">
-          <span class="social-stat-icon">💖</span>
-          <span class="social-stat-number" id="liked-posts-count">{{ social_stats.liked_posts_count if social_stats else 0 }}</span>
-          <span class="social-stat-label">喜歡的貼文</span>
-        </div>
-      <!-- 查看等級規範 -->
-      </div>
-            <div class="level-actions">
-        <a href="/social/level_guide" class="btn btn-info btn-sm">
-          <span class="btn-emoji">📖</span> 查看等級規範
-        </a>
-      </div>
+      </div> <!-- 結束 level-card-content -->
     </div>
 
       <!-- --- 公告板 --- -->
@@ -406,6 +411,43 @@
 </script>
 <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/social/social_main.js') }}"></script>
+<script>
+  // 用戶等級信息卡片收折功能
+  document.addEventListener('DOMContentLoaded', function() {
+    const userCard = document.getElementById('user-level-card');
+    const userCardContent = document.getElementById('level-card-content');
+    const toggleUserCardButton = document.getElementById('toggle-user-card');
+    const cardHeader = document.getElementById('level-card-header');
+    
+    // 設置初始狀態 (從localStorage讀取)
+    const isUserCardCollapsed = localStorage.getItem('userCardCollapsed') === 'true';
+    if (isUserCardCollapsed) {
+      userCardContent.style.display = 'none';
+      userCard.classList.add('collapsed');
+    }
+    
+    // 切換卡片展開/收合狀態的函數
+    function toggleUserCard() {
+      const isCollapsed = userCard.classList.contains('collapsed');
+      
+      if (isCollapsed) {
+        // 展開卡片
+        userCardContent.style.display = 'block';
+        userCard.classList.remove('collapsed');
+        localStorage.setItem('userCardCollapsed', 'false');
+      } else {
+        // 收合卡片
+        userCardContent.style.display = 'none';
+        userCard.classList.add('collapsed');
+        localStorage.setItem('userCardCollapsed', 'true');
+      }
+    }
+    
+    // 綁定點擊事件
+    toggleUserCardButton.addEventListener('click', toggleUserCard);
+    cardHeader.addEventListener('click', toggleUserCard);
+  });
+</script>
 </body>
 </html>
 
