@@ -98,6 +98,8 @@
       <div class="level-header" id="level-card-header">
         <div class="level-icon">
           <span class="level-emoji">{{ user_level_info.current_level.emoji if user_level_info and user_level_info.current_level else '🌱' }}</span>
+          <!-- 新增：顯示等級稱號（稱號由後端提供於 user_level_info.current_level.title） -->
+          <span class="level-tag">{{ user_level_info.current_level.title if user_level_info and user_level_info.current_level else '' }}</span>
         </div>
         <div class="level-info">
           <h3 class="level-title">{{ current_user.username if current_user.is_authenticated else '新手村民' }}</h3>
