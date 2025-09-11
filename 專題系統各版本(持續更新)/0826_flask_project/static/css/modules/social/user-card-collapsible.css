@@ -18,26 +18,11 @@
   margin-bottom: 0;
 }
 
-.user-level-card.collapsed #level-card-header:after {
-  content: '▼';
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.8rem;
-  opacity: 0.7;
-  transition: transform 0.3s ease;
-}
-
+.user-level-card.collapsed #level-card-header:after,
 .user-level-card #level-card-header:after {
-  content: '▲';
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.8rem;
-  opacity: 0.7;
-  transition: transform 0.3s ease;
+  /* 隱藏原本用於收折指示的三角符號 */
+  display: none !important;
+  content: none !important;
 }
 
 .user-level-card.collapsed #level-card-content {
