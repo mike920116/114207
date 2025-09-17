@@ -287,17 +287,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* --- 追蹤功能 --- */
   function handleFollowAction(userEmail, action) {
+    console.log('[DEBUG] 執行handleFollowAction，參數:', {userEmail, action});
+    
     // 找到所有該用戶的追蹤按鈕
-    const buttons = document.querySelectorAll(`[data-user-email="${userEmail}"]`);
-    if (buttons.length === 0) return;
+    const buttons = document.querySelectorAll(`[data-user-email="${userEmail}"].follow-btn`);
+    console.log('[DEBUG] 找到的按鈕數量:', buttons.length);
+    
+    if (buttons.length === 0) {
+      console.error('[ERROR] 找不到匹配的追蹤按鈕');
+      return;
+    }
 
     // 禁用所有按鈕防止重複點擊
     buttons.forEach(btn => {
       btn.disabled = true;
       btn.innerHTML = '<span class="btn-emoji">⏳</span> 處理中...';
+      console.log('[DEBUG] 已禁用按鈕:', btn);
     });
 
     const url = action === 'follow' ? '/social/follow' : '/social/unfollow';
+    console.log('[DEBUG] API 請求路徑:', url);
     
     fetch(url, {
       method: 'POST',
@@ -308,31 +317,48 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .then(response => response.json())
     .then(data => {
+      console.log('[DEBUG] API 响應:', data);
+      
       if (data.success) {
+        console.log('[DEBUG] 操作成功，更新按鈕狀態');
+        
         // 更新所有該用戶的追蹤按鈕
         buttons.forEach(btn => {
+          console.log('[DEBUG] 更新按鈕:', btn);
+          
           if (action === 'follow') {
             btn.innerHTML = '<span class="btn-emoji">✓</span> 已追蹤';
             btn.setAttribute('data-action', 'unfollow');
             btn.classList.add('following');
-            btn.setAttribute('title', btn.getAttribute('title').replace('追蹤', '取消追蹤'));
+            const title = btn.getAttribute('title');
+            if (title) {
+              btn.setAttribute('title', title.replace('追蹤', '取消追蹤'));
+            }
           } else {
             btn.innerHTML = '<span class="btn-emoji">➕</span> 追蹤';
             btn.setAttribute('data-action', 'follow');
             btn.classList.remove('following');
-            btn.setAttribute('title', btn.getAttribute('title').replace('取消追蹤', '追蹤'));
+            const title = btn.getAttribute('title');
+            if (title) {
+              btn.setAttribute('title', title.replace('取消追蹤', '追蹤'));
+            }
           }
         });
         
         // 更新社交統計 - 追蹤/取消追蹤只影響自己的追蹤數
+        console.log('[DEBUG] 更新社交統計數據:', {following_count: data.following_count});
         updateSocialStats({
           following_count: data.following_count
         });
         
         const actionText = action === 'follow' ? '追蹤' : '取消追蹤';
         showNotification(`${actionText}成功！`, 'success');
+        
+        // 重新綁定事件處理（避免事件丟失）
+        console.log('[DEBUG] 按鈕已更新並重新啟用');
       } else {
         // 恢復按鈕原狀
+        console.log('[DEBUG] 操作失敗，恢復按鈕原狀');
         buttons.forEach(btn => {
           if (action === 'follow') {
             btn.innerHTML = '<span class="btn-emoji">➕</span> 追蹤';
@@ -346,8 +372,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     })
     .catch(error => {
-      console.error('追蹤操作失敗:', error);
+      console.error('[ERROR] 追蹤操作失敗:', error);
       // 恢復按鈕原狀
+      console.log('[DEBUG] 網路錯誤，恢復按鈕原狀');
       buttons.forEach(btn => {
         if (action === 'follow') {
           btn.innerHTML = '<span class="btn-emoji">➕</span> 追蹤';
@@ -361,6 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     })
     .finally(() => {
       // 重新啟用所有按鈕
+      console.log('[DEBUG] 最終步驟：重新啟用按鈕');
       buttons.forEach(btn => {
         btn.disabled = false;
       });
@@ -409,31 +437,19 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* --- 事件監聽器設置 --- */
-  // 追蹤按鈕事件（改進版：直接綁定所有追蹤按鈕）
-  document.addEventListener('DOMContentLoaded', function() {
-    // 為當前頁面所有追蹤按鈕添加事件
-    const followButtons = document.querySelectorAll('.follow-btn');
-    followButtons.forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        e.preventDefault();
-        const userEmail = this.getAttribute('data-user-email');
-        const action = this.getAttribute('data-action') || 'follow';
-        
-        if (userEmail) {
-          handleFollowAction(userEmail, action);
-        }
-      });
-    });
-  });
-  
+  // 只使用全域事件委派處理所有追蹤按鈕點擊
   // 全域事件委派 (針對動態新增的元素，包括追蹤、編輯和刪除按鈕)
   document.addEventListener('click', (e) => {
     // 處理追蹤按鈕點擊
     const followBtn = e.target.closest('.follow-btn');
     if (followBtn) {
+      console.log('[DEBUG] 點擊追蹤按鈕', followBtn);
       e.preventDefault();
+      e.stopPropagation();
       const userEmail = followBtn.getAttribute('data-user-email');
       const action = followBtn.getAttribute('data-action') || 'follow';
+      
+      console.log('[DEBUG] 追蹤參數:', {userEmail, action});
       
       if (userEmail) {
         handleFollowAction(userEmail, action);
