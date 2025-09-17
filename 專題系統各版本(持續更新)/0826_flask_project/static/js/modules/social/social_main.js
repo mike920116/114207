@@ -1071,6 +1071,100 @@ function handleRemoveFollower(userEmail, username, btnElement) {
   }
   setInterval(updateAllTimeDisplays, 60000);
 
+  /* --- 心情篩選（左側標籤） --- */
+  function updateFilterCounts() {
+    try {
+      const counts = { all: 0, 'my-posts': 0, happy: 0, sad: 0, angry: 0, surprised: 0, relaxed: 0 };
+      const posts = document.querySelectorAll('.post-card');
+      posts.forEach(post => {
+        const mood = (post.dataset.mood || 'neutral');
+        counts.all++;
+        if (counts.hasOwnProperty(mood)) counts[mood]++;
+
+        // 嘗試取得作者 email（由 header a 的 href 最後一段推斷）
+        const authorLink = post.querySelector('header strong a');
+        let authorEmail = '';
+        if (authorLink) {
+          const href = authorLink.getAttribute('href') || '';
+          const parts = href.split('/').filter(Boolean);
+          authorEmail = parts.length ? decodeURIComponent(parts[parts.length - 1]) : '';
+        }
+        if (currentUserEmail && authorEmail && currentUserEmail === authorEmail) {
+          counts['my-posts']++;
+        }
+      });
+
+      ['all', 'my-posts', 'happy', 'sad', 'angry', 'surprised', 'relaxed'].forEach(f => {
+        const el = document.getElementById(`count-${f}`);
+        if (el) el.textContent = counts[f] || 0;
+      });
+    } catch (err) {
+      console.error('[ERROR] 更新篩選統計失敗:', err);
+    }
+  }
+
+  function filterPosts(filter) {
+    try {
+      const posts = document.querySelectorAll('.post-card');
+      posts.forEach(post => {
+        let show = true;
+
+        if (filter === 'all' || filter === 'following-all') {
+          show = true;
+        } else if (filter === 'my-posts') {
+          const authorLink = post.querySelector('header strong a');
+          let authorEmail = '';
+          if (authorLink) {
+            const href = authorLink.getAttribute('href') || '';
+            const parts = href.split('/').filter(Boolean);
+            authorEmail = parts.length ? decodeURIComponent(parts[parts.length - 1]) : '';
+          }
+          show = (currentUserEmail && authorEmail && currentUserEmail === authorEmail);
+        } else if (filter === 'following-recent') {
+          // server 端應已將 "following" tab 的貼文限制為追蹤清單，這裡視為顯示全部
+          show = true;
+        } else {
+          // 心情對照
+          const mood = post.dataset.mood || 'neutral';
+          show = (mood === filter);
+        }
+
+        post.style.display = show ? '' : 'none';
+      });
+    } catch (err) {
+      console.error('[ERROR] 篩選貼文失敗:', err);
+    }
+  }
+
+  function initializeFilters() {
+    try {
+      // 綁定所有標籤（依 sub-tabs 分群）
+      document.querySelectorAll('.sub-tabs').forEach(container => {
+        container.querySelectorAll('.tag[data-filter]').forEach(tag => {
+          tag.addEventListener('click', function() {
+            // 只在這個 container 裡切換 active
+            container.querySelectorAll('.tag').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            const filter = this.dataset.filter;
+            filterPosts(filter);
+          });
+        });
+      });
+
+      // 初始化計數與預設篩選（預設為第一個 active）
+      updateFilterCounts();
+
+      // 如果有已標示 active 的標籤，套用它
+      const activeTag = document.querySelector('.sub-tabs .tag.active');
+      if (activeTag) filterPosts(activeTag.dataset.filter);
+    } catch (err) {
+      console.error('[ERROR] 初始化篩選失敗:', err);
+    }
+  }
+
+  // 初始化篩選功能
+  initializeFilters();
+
   /* --- 統一事件委派處理留言區操作 --- */
   document.querySelector('.post-list').addEventListener('click', function(e) {
     // --- 處理留言回覆 ---
