@@ -409,23 +409,451 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* --- 事件監聽器設置 --- */
-  // 追蹤按鈕事件
+  // 追蹤按鈕事件（改進版：直接綁定所有追蹤按鈕）
+  document.addEventListener('DOMContentLoaded', function() {
+    // 為當前頁面所有追蹤按鈕添加事件
+    const followButtons = document.querySelectorAll('.follow-btn');
+    followButtons.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const userEmail = this.getAttribute('data-user-email');
+        const action = this.getAttribute('data-action') || 'follow';
+        
+        if (userEmail) {
+          handleFollowAction(userEmail, action);
+        }
+      });
+    });
+  });
+  
+  // 全域事件委派 (針對動態新增的元素，包括追蹤、編輯和刪除按鈕)
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.follow-btn')) {
+    // 處理追蹤按鈕點擊
+    const followBtn = e.target.closest('.follow-btn');
+    if (followBtn) {
       e.preventDefault();
-      const btn = e.target.closest('.follow-btn');
-      const userEmail = btn.getAttribute('data-user-email');
-      const action = btn.getAttribute('data-action') || 'follow';
+      const userEmail = followBtn.getAttribute('data-user-email');
+      const action = followBtn.getAttribute('data-action') || 'follow';
       
       if (userEmail) {
         handleFollowAction(userEmail, action);
       }
+      return; // 防止後續代碼執行
+    }
+    
+    // 處理編輯貼文按鈕點擊
+    const editPostBtn = e.target.closest('.edit-post-btn');
+    if (editPostBtn) {
+      e.preventDefault();
+      const postId = editPostBtn.getAttribute('data-post-id');
+      if (postId) {
+        handleEditPost(postId);
+      }
+      return;
+    }
+    
+    // 處理刪除貼文按鈕點擊
+    const deletePostBtn = e.target.closest('.delete-post-btn');
+    if (deletePostBtn) {
+      e.preventDefault();
+      const postId = deletePostBtn.getAttribute('data-post-id');
+      if (postId) {
+        handleDeletePost(postId);
+      }
+      return;
     }
   });
 
   // 使追蹤/粉絲功能在全域可用
   window.handleFollowAction = handleFollowAction;
   window.showNotification = showNotification;
+  
+  /* --- 編輯貼文功能 --- */
+  function handleEditPost(postId) {
+    console.log(`[DEBUG] 編輯貼文，ID: ${postId}`);
+    
+    // 獲取貼文數據
+    fetch(`/social/edit_post/${postId}`)
+      .then(response => {
+        console.log(`[DEBUG] 獲取貼文資料響應: ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          console.log(`[DEBUG] 取得貼文資料: ${JSON.stringify(data.post)}`);
+          
+          // 建立編輯表單
+          const formHTML = `
+            <div class="edit-post-form-container">
+              <form id="edit-post-form">
+                <h2>編輯貼文</h2>
+                <div class="form-group">
+                  <label for="edit-post-title">標題 (選填)</label>
+                  <input type="text" id="edit-post-title" name="title" value="${data.post.title || ''}" maxlength="100">
+                </div>
+                <div class="form-group">
+                  <label for="edit-post-content">內容 *</label>
+                  <textarea id="edit-post-content" name="content" required maxlength="1000">${data.post.content || ''}</textarea>
+                </div>
+                <div class="form-group">
+                  <label>心情</label>
+                  <div class="mood-options">
+                    <label class="mood-option ${data.post.mood === 'happy' ? 'selected' : ''}">
+                      <input type="radio" name="mood" value="happy" ${data.post.mood === 'happy' ? 'checked' : ''}>
+                      <span class="mood-emoji">😄</span> 開心
+                    </label>
+                    <label class="mood-option ${data.post.mood === 'sad' ? 'selected' : ''}">
+                      <input type="radio" name="mood" value="sad" ${data.post.mood === 'sad' ? 'checked' : ''}>
+                      <span class="mood-emoji">😢</span> 難過
+                    </label>
+                    <label class="mood-option ${data.post.mood === 'angry' ? 'selected' : ''}">
+                      <input type="radio" name="mood" value="angry" ${data.post.mood === 'angry' ? 'checked' : ''}>
+                      <span class="mood-emoji">😡</span> 生氣
+                    </label>
+                    <label class="mood-option ${data.post.mood === 'surprised' ? 'selected' : ''}">
+                      <input type="radio" name="mood" value="surprised" ${data.post.mood === 'surprised' ? 'checked' : ''}>
+                      <span class="mood-emoji">😱</span> 驚訝
+                    </label>
+                    <label class="mood-option ${data.post.mood === 'relaxed' ? 'selected' : ''}">
+                      <input type="radio" name="mood" value="relaxed" ${data.post.mood === 'relaxed' ? 'checked' : ''}>
+                      <span class="mood-emoji">😌</span> 放鬆
+                    </label>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-container">
+                    <input type="checkbox" name="anonymous" value="1" ${data.post.is_anonymous ? 'checked' : ''}>
+                    <span>匿名發布</span>
+                  </label>
+                </div>
+                <div class="form-actions">
+                  <button type="button" class="btn btn-secondary cancel-edit-btn">取消</button>
+                  <button type="submit" class="btn btn-primary submit-edit-btn">更新貼文</button>
+                </div>
+              </form>
+            </div>
+          `;
+          
+          // 創建模態視窗
+          const modalOverlay = document.createElement('div');
+          modalOverlay.className = 'modal-overlay';
+          modalOverlay.innerHTML = formHTML;
+          document.body.appendChild(modalOverlay);
+          
+          // 添加樣式
+          const style = document.createElement('style');
+          style.textContent = `
+            .modal-overlay {
+              position: fixed;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              background-color: rgba(0, 0, 0, 0.5);
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              z-index: 1000;
+            }
+            
+            .edit-post-form-container {
+              width: 100%;
+              max-width: 600px;
+              background-color: white;
+              border-radius: 8px;
+              padding: 20px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+              max-height: 90vh;
+              overflow-y: auto;
+            }
+            
+            .form-group {
+              margin-bottom: 20px;
+            }
+            
+            .form-group label {
+              display: block;
+              margin-bottom: 8px;
+              font-weight: 500;
+            }
+            
+            .form-group input[type="text"],
+            .form-group textarea {
+              width: 100%;
+              padding: 10px;
+              border: 1px solid #ddd;
+              border-radius: 4px;
+              font-family: inherit;
+              font-size: 16px;
+            }
+            
+            .form-group textarea {
+              min-height: 150px;
+              resize: vertical;
+            }
+            
+            .mood-options {
+              display: flex;
+              flex-wrap: wrap;
+              gap: 10px;
+            }
+            
+            .mood-option {
+              display: flex;
+              align-items: center;
+              padding: 8px 12px;
+              border: 1px solid #ddd;
+              border-radius: 20px;
+              cursor: pointer;
+              transition: all 0.2s;
+            }
+            
+            .mood-option input[type="radio"] {
+              display: none;
+            }
+            
+            .mood-option.selected {
+              background-color: #e0f7fa;
+              border-color: #26c6da;
+            }
+            
+            .mood-option:hover {
+              background-color: #f0f0f0;
+            }
+            
+            .mood-emoji {
+              margin-right: 6px;
+              font-size: 1.2em;
+            }
+            
+            .checkbox-container {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              cursor: pointer;
+            }
+            
+            .form-actions {
+              display: flex;
+              justify-content: flex-end;
+              gap: 12px;
+              margin-top: 20px;
+            }
+            
+            .btn {
+              padding: 10px 20px;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+              font-weight: 500;
+              transition: all 0.2s;
+            }
+            
+            .btn-primary {
+              background-color: #4caf50;
+              color: white;
+            }
+            
+            .btn-primary:hover {
+              background-color: #3d8b40;
+            }
+            
+            .btn-secondary {
+              background-color: #f5f5f5;
+              color: #333;
+            }
+            
+            .btn-secondary:hover {
+              background-color: #e0e0e0;
+            }
+            
+            /* 深色模式支援 */
+            body.dark-mode .edit-post-form-container {
+              background-color: #333;
+              color: #eee;
+            }
+            
+            body.dark-mode .form-group input[type="text"],
+            body.dark-mode .form-group textarea {
+              background-color: #444;
+              border-color: #555;
+              color: #eee;
+            }
+            
+            body.dark-mode .mood-option {
+              border-color: #555;
+              color: #eee;
+            }
+            
+            body.dark-mode .mood-option:hover {
+              background-color: #444;
+            }
+            
+            body.dark-mode .mood-option.selected {
+              background-color: #01579b;
+              border-color: #0277bd;
+            }
+            
+            body.dark-mode .btn-secondary {
+              background-color: #555;
+              color: #eee;
+            }
+            
+            body.dark-mode .btn-secondary:hover {
+              background-color: #666;
+            }
+          `;
+          document.head.appendChild(style);
+          
+          // 綁定表單事件
+          const form = document.getElementById('edit-post-form');
+          const cancelBtn = document.querySelector('.cancel-edit-btn');
+          const moodOptions = document.querySelectorAll('.mood-option');
+          
+          // 選擇心情
+          moodOptions.forEach(option => {
+            option.addEventListener('click', function() {
+              // 移除所有選中樣式
+              moodOptions.forEach(o => o.classList.remove('selected'));
+              // 為當前點擊的選項添加選中樣式
+              this.classList.add('selected');
+              // 選中對應的單選框
+              const radio = this.querySelector('input[type="radio"]');
+              radio.checked = true;
+            });
+          });
+          
+          // 取消按鈕
+          cancelBtn.addEventListener('click', function() {
+            modalOverlay.remove();
+            style.remove();
+          });
+          
+          // 點擊遮罩取消
+          modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+              modalOverlay.remove();
+              style.remove();
+            }
+          });
+          
+          // 提交表單
+          form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(form);
+            const submitBtn = document.querySelector('.submit-edit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '更新中...';
+            
+            fetch(`/social/edit_post/${postId}`, {
+              method: 'POST',
+              body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // 關閉模態框
+                modalOverlay.remove();
+                style.remove();
+                
+                // 顯示成功通知
+                showNotification(data.message || '貼文已成功更新！', 'success');
+                
+                // 頁面重新加載以顯示更新後的貼文
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1000);
+              } else {
+                showNotification(data.message || '更新失敗', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '更新貼文';
+              }
+            })
+            .catch(error => {
+              console.error('[ERROR] 更新貼文失敗:', error);
+              showNotification('網路錯誤，請稍後再試', 'error');
+              submitBtn.disabled = false;
+              submitBtn.textContent = '更新貼文';
+            });
+          });
+          
+        } else {
+          showNotification(data.message || '無法編輯貼文', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 獲取貼文資料失敗:', error);
+        showNotification('網路錯誤，請稍後再試', 'error');
+      });
+  }
+  
+  /* --- 刪除貼文功能 --- */
+  function handleDeletePost(postId) {
+    console.log(`[DEBUG] 刪除貼文，ID: ${postId}`);
+    
+    // 顯示確認對話框
+    if (confirm('確定要刪除這篇貼文嗎？此操作無法撤銷。')) {
+      fetch(`/social/delete_post/${postId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        console.log(`[DEBUG] 刪除貼文響應: ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          console.log(`[DEBUG] 貼文刪除成功`);
+          
+          // 顯示成功通知
+          showNotification(data.message || '貼文已成功刪除！', 'success');
+          
+          // 移除貼文卡片
+          const postCard = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+          if (postCard) {
+            postCard.style.animation = 'fadeOut 0.5s forwards';
+            setTimeout(() => {
+              postCard.remove();
+              
+              // 如果已經沒有貼文，顯示空狀態
+              const postList = document.querySelector('.post-list');
+              if (postList && postList.children.length === 0) {
+                postList.innerHTML = `
+                  <div class="no-posts">
+                    <div class="no-posts-icon">📝</div>
+                    <p>目前還沒有任何貼文，成為第一個分享心情的人吧！</p>
+                    <a href="/social/create_post" class="btn btn-primary">
+                      <span class="btn-emoji">➕</span> 立即發文
+                    </a>
+                  </div>
+                `;
+              }
+            }, 500);
+            
+            // 添加淡出動畫樣式
+            const style = document.createElement('style');
+            style.textContent = `
+              @keyframes fadeOut {
+                from { opacity: 1; transform: translateY(0); }
+                to { opacity: 0; transform: translateY(-20px); }
+              }
+            `;
+            document.head.appendChild(style);
+          }
+        } else {
+          console.error(`[ERROR] 刪除貼文失敗: ${data.message}`);
+          showNotification(data.message || '刪除失敗', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('[ERROR] 刪除貼文請求失敗:', error);
+        showNotification('網路錯誤，請稍後再試', 'error');
+      });
+    }
+  }
 
   /* --- 按讚與留言功能 --- */
   document.querySelectorAll('.like-btn').forEach(likeButton => {
