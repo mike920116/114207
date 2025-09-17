@@ -49,12 +49,12 @@
       <a href="/social/main" class="main-tab {{ 'active' if current_tab != 'following' else '' }}" data-tab="all-posts">
         <span class="tab-icon">📋</span>
         <span class="tab-text">所有貼文</span>
-        <span class="tab-count" id="all-posts-count">{{ posts|length if posts else 0 }}</span>
+        <!-- <span class="tab-count" id="all-posts-count">{{ posts|length if posts else 0 }}</span> -->
       </a>
       <a href="/social/main?tab=following" class="main-tab {{ 'active' if current_tab == 'following' else '' }}" data-tab="following">
         <span class="tab-icon">👥</span>
         <span class="tab-text">正在追蹤</span>
-        <span class="tab-count" id="following-posts-count">0</span>
+        <!-- <span class="tab-count" id="following-posts-count">{{ posts|length if current_tab == 'following' else 0 }}</span> -->
       </a>
     </div>
     
@@ -73,20 +73,58 @@
     </div>
     
     <!-- 追蹤用戶管理 -->
+    {# 計算正在追蹤分頁的各類別數量。若後端已經只回傳追蹤的貼文到 `posts`，則直接使用 posts；否則這段會以 current_tab 進行保護 #}
+    {% if current_tab == 'following' %}
+      {% set following_posts = posts if posts else [] %}
+      {% set ns = namespace(all=0, recent=0, my_posts=0, happy=0, sad=0, angry=0, surprised=0, relaxed=0) %}
+      {% for p in following_posts %}
+        {% set ns.all = ns.all + 1 %}
+        {# 如果貼文有 recent_likes_count 屬性，且大於 0，把它當作「最近按讚」的指標 #}
+        {% if p.recent_likes_count is defined and p.recent_likes_count > 0 %}
+          {% set ns.recent = ns.recent + 1 %}
+        {% endif %}
+        {# 計算心情分類 #}
+        {% if p.mood == 'happy' %}
+          {% set ns.happy = ns.happy + 1 %}
+        {% elif p.mood == 'sad' %}
+          {% set ns.sad = ns.sad + 1 %}
+        {% elif p.mood == 'angry' %}
+          {% set ns.angry = ns.angry + 1 %}
+        {% elif p.mood == 'surprised' %}
+          {% set ns.surprised = ns.surprised + 1 %}
+        {% elif p.mood == 'relaxed' %}
+          {% set ns.relaxed = ns.relaxed + 1 %}
+        {% endif %}
+        {# 計算是否為自己的貼文（我的貢獻） #}
+        {% if current_user.is_authenticated and p.user_email == current_user.id %}
+          {% set ns.my_posts = ns.my_posts + 1 %}
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% set following_posts = [] %}
+      {% set ns = namespace(all=0, recent=0, my_posts=0, happy=0, sad=0, angry=0, surprised=0, relaxed=0) %}
+    {% endif %}
+
     <div class="sub-tabs" id="following-filters" style="display: {{ 'block' if current_tab == 'following' else 'none' }};">
-      <div class="sub-tab-header">👥 追蹤管理</div>
+      <div class="sub-tab-header">📊 心情篩選</div>
       <ul>
-        <li data-filter="following-all" class="tag active">📋 全部追蹤 <span class="tag-count" id="count-following-all">{{ posts|length if current_tab == 'following' else 0 }}</span></li>
-        <li data-filter="following-recent" class="tag">⏰ 最近更新 <span class="tag-count" id="count-following-recent">0</span></li>
+        <li data-filter="following-all" class="tag active">📋 全部 <span class="tag-count" id="count-following-all">{{ ns.all }}</span></li>
+        <!-- <li data-filter="following-recent" class="tag">⏰ 最近按讚 <span class="tag-count" id="count-following-recent">{{ ns.recent }}</span></li>
+        <li data-filter="my-posts" class="tag">👤 我的貢獻 <span class="tag-count" id="count-my-posts">{{ ns.my_posts }}</span></li> -->
+        <li data-filter="happy" class="tag">😄 開心 <span class="tag-count" id="count-happy">{{ ns.happy }}</span></li>
+        <li data-filter="sad" class="tag">😢 難過 <span class="tag-count" id="count-sad">{{ ns.sad }}</span></li>
+        <li data-filter="angry" class="tag">😡 生氣 <span class="tag-count" id="count-angry">{{ ns.angry }}</span></li>
+        <li data-filter="surprised" class="tag">😱 驚訝 <span class="tag-count" id="count-surprised">{{ ns.surprised }}</span></li>
+        <li data-filter="relaxed" class="tag">😌 放鬆 <span class="tag-count" id="count-relaxed">{{ ns.relaxed }}</span></li>
       </ul>
-      <div class="following-actions">
+      <!-- <div class="following-actions">
         <button class="btn btn-sm btn-secondary" onclick="showFollowModal('following')">
           <span class="btn-emoji">👁️</span> 查看追蹤列表
         </button>
         <button class="btn btn-sm btn-secondary" onclick="showFollowModal('followers')">
           <span class="btn-emoji">👥</span> 查看粉絲列表
         </button>
-      </div>
+      </div> -->
     </div>
   </aside>
 
@@ -193,7 +231,7 @@
     <div class="post-list">
       {% if posts %}
         {% for post in posts %}
-        <article class="post-card" data-post-id="{{ post.post_id }}" data-mood="{{ post.mood or 'neutral' }}">
+  <article class="post-card" data-post-id="{{ post.post_id }}" data-mood="{{ post.mood or 'neutral' }}" data-user-email="{{ post.user_email }}" {% if post.recent_likes_count is defined and post.recent_likes_count > 0 %}data-recent-liked="true"{% else %}data-recent-liked="false"{% endif %}>
           <header>
             <div class="post-header-left">
               <strong><a href="{{ url_for('social.user_posts', user_email=post.user_email) }}">{{ post.username }}</a></strong>
@@ -411,6 +449,60 @@
   // 定義當前用戶信息，供JavaScript使用
   const currentUserEmail = '{{ current_user.id if current_user.is_authenticated else "" }}';
 </script>
+  <script>
+    // 前端備援：若後端沒有提供完整的計數，根據目前渲染出的貼文計算並更新追蹤篩選面板的數字
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        const followingFilters = document.getElementById('following-filters');
+        if (!followingFilters) return;
+        const isFollowingVisible = getComputedStyle(followingFilters).display !== 'none';
+        if (!isFollowingVisible) return;
+
+        const posts = document.querySelectorAll('.post-card');
+        const counts = { all: 0, recent: 0, my_posts: 0, happy: 0, sad: 0, angry: 0, surprised: 0, relaxed: 0 };
+
+        posts.forEach(post => {
+          counts.all += 1;
+          const mood = (post.dataset.mood || '').toLowerCase();
+          if (mood === 'happy') counts.happy += 1;
+          else if (mood === 'sad') counts.sad += 1;
+          else if (mood === 'angry') counts.angry += 1;
+          else if (mood === 'surprised') counts.surprised += 1;
+          else if (mood === 'relaxed') counts.relaxed += 1;
+
+          // 判斷是否為自己的貼文（備援）：嘗試從按鈕或其他欄位讀取 user email
+          let postUserEmail = post.dataset.userEmail || '';
+          if (!postUserEmail) {
+            const followBtn = post.querySelector('.follow-btn');
+            if (followBtn) postUserEmail = followBtn.getAttribute('data-user-email') || '';
+          }
+          if (postUserEmail && currentUserEmail && postUserEmail === currentUserEmail) counts.my_posts += 1;
+
+          // 最近按讚：需要後端提供 data-recent-liked 或 recent_likes_count；如果有 dataset.recentLiked 則計入
+          if (post.dataset.recentLiked === 'true') counts.recent += 1;
+        });
+
+        const idMap = {
+          'count-following-all': 'all',
+          'count-following-recent': 'recent',
+          'count-my-posts': 'my_posts',
+          'count-happy': 'happy',
+          'count-sad': 'sad',
+          'count-angry': 'angry',
+          'count-surprised': 'surprised',
+          'count-relaxed': 'relaxed'
+        };
+
+        Object.keys(idMap).forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = counts[idMap[id]] || 0;
+        });
+      } catch (e) {
+        // 安靜失敗：不阻斷主流程
+        console.warn('Fallback count updater failed:', e);
+      }
+    });
+  </script>
 <script src="{{ url_for('static', filename='js/base.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/social/social_main.js') }}"></script>
 <script>
