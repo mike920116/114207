@@ -75,43 +75,33 @@ document.addEventListener('DOMContentLoaded', function() {
         observer.observe(bar);
     });
     
-    // FAQ 展開/收合功能
+    // FAQ 展開/收合功能（使用 .active 與 CSS max-height 進行切換）
     window.toggleFAQ = function(questionElement) {
         const faqItem = questionElement.parentElement;
         const answer = faqItem.querySelector('.faq-answer');
         const toggle = questionElement.querySelector('.faq-toggle');
-        
-        // 切換展開狀態
-        const isExpanded = answer.style.display === 'block';
-        
-        if (isExpanded) {
-            answer.style.display = 'none';
-            toggle.textContent = '+';
-            faqItem.classList.remove('expanded');
-        } else {
-            // 關閉其他已展開的 FAQ
-            document.querySelectorAll('.faq-item').forEach(item => {
-                const otherAnswer = item.querySelector('.faq-answer');
-                const otherToggle = item.querySelector('.faq-toggle');
-                if (otherAnswer.style.display === 'block') {
-                    otherAnswer.style.display = 'none';
-                    otherToggle.textContent = '+';
-                    item.classList.remove('expanded');
-                }
-            });
-            
-            // 展開當前 FAQ
-            answer.style.display = 'block';
-            toggle.textContent = '−';
-            faqItem.classList.add('expanded');
-            
-            // 平滑滾動到展開的內容
+
+        // 判斷目前是否已展開
+        const wasActive = faqItem.classList.contains('active');
+
+        // 先關閉所有已展開的項目
+        document.querySelectorAll('.faq-item.active').forEach(item => {
+            item.classList.remove('active');
+            const t = item.querySelector('.faq-toggle');
+            if (t) t.textContent = '+';
+        });
+
+        // 若之前沒有展開，則展開此次點擊的項目
+        if (!wasActive) {
+            faqItem.classList.add('active');
+            if (toggle) toggle.textContent = '−';
+
+            // 平滑滾動到展開的內容（稍微延遲以配合 CSS 過渡）
             setTimeout(() => {
-                answer.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'nearest'
-                });
-            }, 100);
+                if (answer) {
+                    answer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }, 150);
         }
     };
     

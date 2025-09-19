@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>喜歡的貼文 | 社群互動</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/social_main.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/social_tabs.css') }}">
+</head>
+
+<body class="page-wrapper"><!-- flex 縱向 -->
+
+<!-- ===== 頁首 ===== -->
+<header class="custom-header">
+  <a href="/social/main" class="back-btn" title="返回社群主頁">❮</a>
+
+  <div class="header-title">
+    <h1>💖 喜歡的貼文</h1>
+    <p class="header-subtitle">您按讚過的所有貼文 ({{ total_liked_posts }} 篇)</p>
+  </div>
+
+  <nav class="social-nav">
+    <a href="/social/create_post" class="action-btn" title="新增貼文">➕</a>
+
+    <div class="more-wrapper">
+      <button type="button" class="action-btn more-toggle" title="更多">⋯</button>
+      <div class="more-menu">
+        <button type="button" id="toggle-dark" class="more-item">🌗 深色模式</button>
+        <a href="/settings/profile" class="more-item">⚙️ 個人設定</a>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<!-- ===== 主要區域：左右雙欄 ===== -->
+<div class="content-flex">
+
+  <!-- — 左側固定標籤（獨立滾動） — -->
+  <aside class="tag-panel">
+    <!-- 快速導航 -->
+    <div class="main-tabs">
+      <a href="/social/main" class="main-tab" data-tab="back-to-main">
+        <span class="tab-icon">🔙</span>
+        <span class="tab-text">返回主頁</span>
+      </a>
+      <div class="main-tab active" data-tab="liked-posts">
+        <span class="tab-icon">💖</span>
+        <span class="tab-text">喜歡的貼文</span>
+        <span class="tab-count">{{ total_liked_posts }}</span>
+      </div>
+    </div>
+    
+    <!-- 貼文篩選 -->
+    <div class="sub-tabs">
+      <div class="sub-tab-header">📊 篩選條件</div>
+      <ul>
+        <li data-filter="all" class="tag active">📋 全部 <span class="tag-count" id="count-all">{{ total_liked_posts }}</span></li>
+        <li data-filter="recent" class="tag">⏰ 最近按讚 <span class="tag-count" id="count-recent">0</span></li>
+        <li data-filter="happy" class="tag">😄 開心 <span class="tag-count" id="count-happy">0</span></li>
+        <li data-filter="sad" class="tag">😢 難過 <span class="tag-count" id="count-sad">0</span></li>
+        <li data-filter="angry" class="tag">😡 生氣 <span class="tag-count" id="count-angry">0</span></li>
+        <li data-filter="surprised" class="tag">😱 驚訝 <span class="tag-count" id="count-surprised">0</span></li>
+        <li data-filter="relaxed" class="tag">😌 放鬆 <span class="tag-count" id="count-relaxed">0</span></li>
+      </ul>
+    </div>
+    
+    <!-- 統計信息 -->
+    <div class="sub-tabs">
+      <div class="sub-tab-header">📈 統計信息</div>
+      <div class="stats-panel">
+        <div class="stat-item">
+          <span class="stat-icon">💖</span>
+          <span class="stat-value">{{ total_liked_posts }}</span>
+          <span class="stat-label">按讚貼文</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">📅</span>
+          <span class="stat-value" id="liked-days-count">-</span>
+          <span class="stat-label">活躍天數</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- — 右側內容滾動區 — -->
+  <section class="scroll-area">
+
+    <!-- 用戶等級信息卡片 -->
+    {% if user_level_info %}
+    <div class="user-level-card" id="user-level-card" data-level="{{ user_level_info.current_level.title if user_level_info.current_level else '新手村民' }}">
+      <div class="level-header">
+        <div class="level-icon">
+          <span class="level-emoji">{{ user_level_info.current_level.emoji if user_level_info.current_level else '🌱' }}</span>
+        </div>
+        <div class="level-info">
+          <h3 class="level-title">{{ current_user.username if current_user.is_authenticated else '新手村民' }}</h3>
+          <p class="level-description">{{ user_level_info.current_level.description if user_level_info.current_level else '剛加入社群的新朋友' }}</p>
+        </div>
+        <div class="level-points">
+          <span class="points-value">{{ user_level_info.points if user_level_info else 0 }}</span>
+          <span class="points-label">積分</span>
+        </div>
+      </div>
+      
+      <div class="level-progress">
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: {{ user_level_info.progress_to_next if user_level_info else 0 }}%"></div>
+        </div>
+        <div class="progress-text">
+          <span class="current-progress">{{ user_level_info.progress_to_next if user_level_info else 0 }}%</span>
+          <span class="next-level">下一級：{{ user_level_info.next_level.title if user_level_info.next_level else '活躍居民' }}</span>
+        </div>
+      </div>
+      
+      <div class="level-stats">
+        <div class="stat-item">
+          <span class="stat-icon">📝</span>
+          <span class="stat-value">{{ user_level_info.stats.posts_count if user_level_info.stats else 0 }}</span>
+          <span class="stat-label">發文</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">👍</span>
+          <span class="stat-value">{{ user_level_info.stats.likes_received if user_level_info.stats else 0 }}</span>
+          <span class="stat-label">獲讚</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">💬</span>
+          <span class="stat-value">{{ user_level_info.stats.comments_received if user_level_info.stats else 0 }}</span>
+          <span class="stat-label">留言</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">📅</span>
+          <span class="stat-value">{{ user_level_info.stats.login_days if user_level_info.stats else 1 }}</span>
+          <span class="stat-label">天數</span>
+        </div>
+      </div>
+      
+      <!-- 社交統計 -->
+      <div class="social-stats">
+        <div class="social-stat-item" data-stat="followers" style="cursor: pointer;" title="點擊查看粉絲列表">
+          <span class="social-stat-icon">👥</span>
+          <span class="social-stat-number" id="followers-count">-</span>
+          <span class="social-stat-label">粉絲</span>
+        </div>
+        <div class="social-stat-item" data-stat="following" style="cursor: pointer;" title="點擊查看追蹤列表">
+          <span class="social-stat-icon">🔔</span>
+          <span class="social-stat-number" id="following-count">-</span>
+          <span class="social-stat-label">追蹤</span>
+        </div>
+        <div class="social-stat-item active" data-stat="liked-posts" title="當前頁面">
+          <span class="social-stat-icon">💖</span>
+          <span class="social-stat-number">{{ total_liked_posts }}</span>
+          <span class="social-stat-label">喜歡</span>
+        </div>
+      </div>
+      
+      <!-- 查看等級規範 -->
+      <div class="level-actions">
+        <a href="/social/level_guide" class="btn btn-info btn-sm">
+          <span class="btn-emoji">📖</span> 查看等級規範
+        </a>
+        <a href="/social/main" class="btn btn-secondary btn-sm">
+          <span class="btn-emoji">🔙</span> 返回主頁
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 錯誤訊息 -->
+    {% if error_message %}
+    <div class="error-message">
+      <div class="error-content">
+        <span class="error-icon">⚠️</span>
+        <p class="error-text">{{ error_message }}</p>
+        <a href="/social/main" class="btn btn-primary">返回主頁</a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- 空狀態 -->
+    {% if total_liked_posts == 0 and not error_message %}
+    <div class="empty-state">
+      <div class="empty-content">
+        <span class="empty-icon">💔</span>
+        <h3 class="empty-title">還沒有按讚的貼文</h3>
+        <p class="empty-description">到社群主頁為您喜歡的貼文按讚吧！</p>
+        <a href="/social/main" class="btn btn-primary">
+          <span class="btn-emoji">📋</span> 瀏覽貼文
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- --- 喜歡的貼文清單 --- -->
+    {% if posts %}
+    <div class="posts-container" id="posts-container">
+      {% for post in posts %}
+      <article class="post-card" 
+               data-post-id="{{ post.post_id }}" 
+               data-mood="{{ post.mood }}" 
+               data-author="{{ post.user_email }}"
+               data-liked-date="{{ post.liked_at }}">
+        
+        <!-- 貼文頭部 -->
+        <header class="post-header">
+          <div class="post-author">
+            <div class="author-avatar">
+              {% if post.is_anonymous %}
+                <span class="avatar-icon">👤</span>
+              {% else %}
+                <span class="avatar-icon">{{ post.username[0] if post.username else '?' }}</span>
+              {% endif %}
+            </div>
+            <div class="author-info">
+              <h4 class="author-name">{{ post.username }}</h4>
+              <div class="post-meta">
+                <time class="post-time" title="發文時間">{{ post.created_at }}</time>
+                <span class="liked-time" title="按讚時間">💖 {{ post.liked_at }}</span>
+                {% if post.mood %}
+                <span class="mood-tag mood-{{ post.mood }}" title="心情">
+                  {% if post.mood == 'happy' %}😄{% elif post.mood == 'sad' %}😢{% elif post.mood == 'angry' %}😡{% elif post.mood == 'surprised' %}😱{% elif post.mood == 'relaxed' %}😌{% else %}😐{% endif %}
+                </span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          
+          <!-- 追蹤按鈕 -->
+          {% if not post.is_anonymous and post.user_email != current_user.id %}
+          <div class="post-actions">
+            <button class="follow-btn {{ 'following' if post.is_following else '' }}" 
+                    data-user-email="{{ post.user_email }}"
+                    title="{{ '取消追蹤' if post.is_following else '追蹤用戶' }}">
+              <span class="follow-text">{{ '已追蹤' if post.is_following else '追蹤' }}</span>
+            </button>
+          </div>
+          {% endif %}
+        </header>
+
+        <!-- 貼文內容 -->
+        <div class="post-content">
+          {% if post.title %}
+          <h3 class="post-title">{{ post.title }}</h3>
+          {% endif %}
+          <div class="post-text">{{ post.content }}</div>
+          {% if post.image_url %}
+          <div class="post-image">
+            <img src="{{ post.image_url }}" alt="貼文圖片" loading="lazy">
+          </div>
+          {% endif %}
+        </div>
+
+        <!-- 貼文底部 -->
+        <footer class="post-footer">
+          <div class="post-stats">
+            <button class="like-btn active" data-post-id="{{ post.post_id }}" title="已按讚">
+              <span class="like-icon">❤️</span>
+              <span class="like-count">{{ post.likes_count }}</span>
+            </button>
+            <button class="comment-btn" data-post-id="{{ post.post_id }}" title="查看留言">
+              <span class="comment-icon">💬</span>
+              <span class="comment-count">{{ post.comments|length }}</span>
+            </button>
+            <!-- 移除按讚按鈕 -->
+            <button class="unlike-btn" data-post-id="{{ post.post_id }}" title="移除喜歡">
+              <span class="unlike-icon">💔</span>
+              <span class="unlike-text">移除</span>
+            </button>
+          </div>
+        </footer>
+
+        <!-- 留言區域（摺疊） -->
+        {% if post.comments %}
+        <div class="comments-section" style="display: none;">
+          <div class="comments-list" data-post-id="{{ post.post_id }}">
+            {% for comment in post.comments %}
+            <div class="comment-item" data-comment-id="{{ comment.comment_id }}">
+              <div class="comment-header">
+                <div class="comment-author">
+                  <span class="comment-avatar">{{ comment.username[0] if comment.username else '?' }}</span>
+                  <span class="comment-name">{{ comment.username }}</span>
+                  {% if not post.is_anonymous and comment.user_email != current_user.id and comment.user_email != post.user_email %}
+                  <button class="follow-btn {{ 'following' if comment.is_following else '' }}" 
+                          data-user-email="{{ comment.user_email }}"
+                          title="{{ '取消追蹤' if comment.is_following else '追蹤用戶' }}">
+                    <span class="follow-text">{{ '已追蹤' if comment.is_following else '追蹤' }}</span>
+                  </button>
+                  {% endif %}
+                </div>
+                <time class="comment-time">{{ comment.created_at }}</time>
+              </div>
+              <div class="comment-content">
+                {% if comment.reply_to_username %}
+                <span class="reply-to">回覆 @{{ comment.reply_to_username }}：</span>
+                {% endif %}
+                {{ comment.content }}
+              </div>
+              <div class="comment-actions">
+                <button class="reply-comment-btn" data-comment-id="{{ comment.comment_id }}" data-username="{{ comment.username }}">回覆</button>
+                {% if comment.user_email == current_user.id %}
+                <button class="edit-comment-btn" data-comment-id="{{ comment.comment_id }}">編輯</button>
+                <button class="delete-comment-btn" data-comment-id="{{ comment.comment_id }}">刪除</button>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          
+          <!-- 新增留言表單 -->
+          <form class="comment-form" data-post-id="{{ post.post_id }}">
+            <div class="comment-input-group">
+              <input type="text" class="comment-input" placeholder="新增留言..." maxlength="500">
+              <input type="hidden" class="reply-to-id">
+              <input type="hidden" class="reply-to-username">
+              <button type="submit" class="comment-submit-btn">發送</button>
+            </div>
+            <div class="reply-info" style="display: none;">
+              <span class="reply-text">回覆 <span class="reply-target"></span></span>
+              <button type="button" class="cancel-reply-btn">取消</button>
+            </div>
+          </form>
+        </div>
+        {% endif %}
+
+      </article>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+  </section>
+
+</div>
+
+<!-- JavaScript -->
+<script src="{{ url_for('static', filename='js/base.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/social/social_main.js') }}"></script>
+<script>
+// 初始化喜歡的貼文頁面
+document.addEventListener('DOMContentLoaded', function() {
+    // 更新篩選計數器
+    updateFilterCounts();
+    
+    // 載入社交統計
+    loadSocialStats();
+    
+    // 綁定事件監聽器
+    bindEventListeners();
+    
+    // 初始化篩選功能
+    initializeFilters();
+    
+    console.log('喜歡的貼文頁面已初始化');
+});
+
+// 更新篩選計數器
+function updateFilterCounts() {
+    const posts = document.querySelectorAll('.post-card');
+    const counts = {
+        all: posts.length,
+        recent: 0,
+        happy: 0,
+        sad: 0,
+        angry: 0,
+        surprised: 0,
+        relaxed: 0
+    };
+    
+    // 計算最近一週的按讚貼文
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    
+    posts.forEach(post => {
+        const mood = post.dataset.mood;
+        const likedDate = new Date(post.dataset.likedDate);
+        
+        if (mood && counts.hasOwnProperty(mood)) {
+            counts[mood]++;
+        }
+        
+        if (likedDate >= oneWeekAgo) {
+            counts.recent++;
+        }
+    });
+    
+    // 更新計數器顯示
+    Object.keys(counts).forEach(filter => {
+        const element = document.getElementById(`count-${filter}`);
+        if (element) {
+            element.textContent = counts[filter];
+        }
+    });
+    
+    // 計算活躍天數（有按讚活動的天數）
+    const likedDates = Array.from(posts).map(post => 
+        new Date(post.dataset.likedDate).toDateString()
+    );
+    const uniqueDays = new Set(likedDates).size;
+    const likedDaysElement = document.getElementById('liked-days-count');
+    if (likedDaysElement) {
+        likedDaysElement.textContent = uniqueDays;
+    }
+}
+
+// 載入社交統計
+function loadSocialStats() {
+    fetch('/social/get_social_stats')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('followers-count').textContent = data.followers_count;
+                document.getElementById('following-count').textContent = data.following_count;
+            }
+        })
+        .catch(error => {
+            console.error('載入社交統計失敗:', error);
+        });
+}
+
+// 綁定事件監聽器
+function bindEventListeners() {
+    // 移除喜歡按鈕
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.unlike-btn')) {
+            const unlikeBtn = e.target.closest('.unlike-btn');
+            const postId = unlikeBtn.dataset.postId;
+            removeLike(postId);
+        }
+    });
+}
+
+// 移除喜歡
+function removeLike(postId) {
+    if (!confirm('確定要移除對這篇貼文的喜歡嗎？')) {
+        return;
+    }
+    
+    fetch(`/social/toggle_like/${postId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && !data.is_liked) {
+            // 移除成功，隱藏該貼文
+            const postCard = document.querySelector(`[data-post-id="${postId}"]`);
+            if (postCard) {
+                postCard.style.transition = 'opacity 0.3s ease';
+                postCard.style.opacity = '0';
+                setTimeout(() => {
+                    postCard.remove();
+                    updateFilterCounts();
+                    
+                    // 更新總數
+                    const totalCountElements = document.querySelectorAll('.tab-count, .social-stat-number');
+                    totalCountElements.forEach(el => {
+                        const currentCount = parseInt(el.textContent) || 0;
+                        if (currentCount > 0) {
+                            el.textContent = currentCount - 1;
+                        }
+                    });
+                    
+                    // 如果沒有貼文了，顯示空狀態
+                    const remainingPosts = document.querySelectorAll('.post-card');
+                    if (remainingPosts.length === 0) {
+                        location.reload();
+                    }
+                }, 300);
+            }
+            
+            showToast('已移除喜歡', 'success');
+        } else {
+            showToast(data.message || '操作失敗', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('移除喜歡失敗:', error);
+        showToast('操作失敗', 'error');
+    });
+}
+
+// 初始化篩選功能
+function initializeFilters() {
+    const filterTags = document.querySelectorAll('.tag[data-filter]');
+    
+    filterTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+            // 移除其他標籤的 active 狀態
+            filterTags.forEach(t => t.classList.remove('active'));
+            
+            // 添加當前標籤的 active 狀態
+            this.classList.add('active');
+            
+            // 執行篩選
+            const filter = this.dataset.filter;
+            filterPosts(filter);
+        });
+    });
+}
+
+// 篩選貼文
+function filterPosts(filter) {
+    const posts = document.querySelectorAll('.post-card');
+    
+    posts.forEach(post => {
+        let shouldShow = false;
+        
+        switch (filter) {
+            case 'all':
+                shouldShow = true;
+                break;
+            case 'recent':
+                // 最近一週按讚的貼文
+                const oneWeekAgo = new Date();
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+                const likedDate = new Date(post.dataset.likedDate);
+                shouldShow = likedDate >= oneWeekAgo;
+                break;
+            default:
+                // 按心情篩選
+                shouldShow = post.dataset.mood === filter;
+                break;
+        }
+        
+        post.style.display = shouldShow ? 'block' : 'none';
+    });
+}
+</script>
+
+</body>
+</html>
