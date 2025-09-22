@@ -1,3 +1,236 @@
+// 定義全局的確認對話框函數
+window.showCustomConfirmDialog = function(title, message, confirmCallback) {
+  // 創建對話框元素
+  const dialogOverlay = document.createElement('div');
+  dialogOverlay.className = 'custom-confirm-overlay';
+  
+  // 對話框HTML
+  dialogOverlay.innerHTML = `
+    <div class="custom-confirm-dialog">
+      <div class="custom-confirm-header">
+        <h3>${title}</h3>
+        <button class="custom-confirm-close">&times;</button>
+      </div>
+      <div class="custom-confirm-body">
+        <div class="custom-confirm-icon">
+          <i class="warning-icon">⚠️</i>
+        </div>
+        <div class="custom-confirm-message">${message}</div>
+      </div>
+      <div class="custom-confirm-footer">
+        <button class="btn btn-secondary btn-cancel">取消</button>
+        <button class="btn btn-danger btn-confirm">確認刪除</button>
+      </div>
+    </div>
+  `;
+  
+  // 添加樣式
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    .custom-confirm-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.2s ease-out;
+    }
+    
+    .custom-confirm-dialog {
+      width: 90%;
+      max-width: 400px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      overflow: hidden;
+      animation: scaleIn 0.3s ease-out;
+    }
+    
+    .custom-confirm-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .custom-confirm-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #343a40;
+    }
+    
+    .custom-confirm-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #adb5bd;
+      padding: 0 5px;
+      transition: color 0.2s;
+    }
+    
+    .custom-confirm-close:hover {
+      color: #495057;
+    }
+    
+    .custom-confirm-body {
+      padding: 24px 20px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .custom-confirm-icon {
+      margin-right: 15px;
+      font-size: 36px;
+    }
+    
+    .warning-icon {
+      color: #e74c3c;
+    }
+    
+    .custom-confirm-message {
+      flex: 1;
+      font-size: 16px;
+      line-height: 1.5;
+      color: #495057;
+    }
+    
+    .custom-confirm-footer {
+      padding: 16px 20px;
+      background-color: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-secondary {
+      background-color: #e9ecef;
+      color: #212529;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #dee2e6;
+    }
+    
+    .btn-danger {
+      background-color: #e74c3c;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes scaleIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    /* 深色模式 */
+    body.dark-mode .custom-confirm-dialog {
+      background-color: #343a40;
+    }
+    
+    body.dark-mode .custom-confirm-header,
+    body.dark-mode .custom-confirm-footer {
+      background-color: #2d3238;
+      border-color: #495057;
+    }
+    
+    body.dark-mode .custom-confirm-header h3 {
+      color: #f8f9fa;
+    }
+    
+    body.dark-mode .custom-confirm-message {
+      color: #e9ecef;
+    }
+    
+    body.dark-mode .btn-secondary {
+      background-color: #495057;
+      color: #e9ecef;
+    }
+    
+    body.dark-mode .btn-secondary:hover {
+      background-color: #6c757d;
+    }
+  `;
+  
+  document.head.appendChild(styleEl);
+  document.body.appendChild(dialogOverlay);
+  
+  // 綁定事件
+  const closeBtn = dialogOverlay.querySelector('.custom-confirm-close');
+  const cancelBtn = dialogOverlay.querySelector('.btn-cancel');
+  const confirmBtn = dialogOverlay.querySelector('.btn-confirm');
+  
+  // 關閉對話框的函數
+  function closeDialog() {
+    dialogOverlay.classList.add('closing');
+    dialogOverlay.style.animation = 'fadeOut 0.2s forwards';
+    setTimeout(() => {
+      dialogOverlay.remove();
+      styleEl.remove();
+    }, 200);
+  }
+  
+  // 綁定關閉按鈕
+  closeBtn.addEventListener('click', closeDialog);
+  
+  // 綁定取消按鈕
+  cancelBtn.addEventListener('click', closeDialog);
+  
+  // 綁定確認按鈕
+  confirmBtn.addEventListener('click', () => {
+    closeDialog();
+    if (typeof confirmCallback === 'function') {
+      confirmCallback();
+    }
+  });
+  
+  // 點擊背景關閉
+  dialogOverlay.addEventListener('click', (e) => {
+    if (e.target === dialogOverlay) {
+      closeDialog();
+    }
+  });
+  
+  // 添加淡出動畫樣式
+  const fadeOutStyle = document.createElement('style');
+  fadeOutStyle.textContent = `
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+  `;
+  document.head.appendChild(fadeOutStyle);
+  
+  // 清理淡出樣式
+  setTimeout(() => fadeOutStyle.remove(), 300);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[DEBUG] DOM 載入完成，開始初始化社群功能');
 
@@ -804,13 +1037,17 @@ document.addEventListener('DOMContentLoaded', () => {
       });
   }
   
-  /* --- 刪除貼文功能 --- */
+  /* --- 自訂確認對話框 --- */
+  // 注意：showCustomConfirmDialog 已經移到全局範圍，這裡不再需要重複定義  /* --- 刪除貼文功能 --- */
   function handleDeletePost(postId) {
     console.log(`[DEBUG] 刪除貼文，ID: ${postId}`);
     
-    // 顯示確認對話框
-    if (confirm('確定要刪除這篇貼文嗎？此操作無法撤銷。')) {
-      fetch(`/social/delete_post/${postId}`, {
+    // 使用自訂確認對話框
+    showCustomConfirmDialog(
+      '刪除貼文', 
+      '確定要刪除這篇貼文嗎？<br><strong>此操作無法撤銷，貼文將永久刪除。</strong>', 
+      () => {
+        fetch(`/social/delete_post/${postId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -868,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('[ERROR] 刪除貼文請求失敗:', error);
         showNotification('網路錯誤，請稍後再試', 'error');
       });
-    }
+    });
   }
 
   /* --- 按讚與留言功能 --- */
@@ -1675,29 +1912,77 @@ function handleRemoveFollower(userEmail, username, btnElement) {
     if (deleteBtn) {
         e.preventDefault();
         const commentId = deleteBtn.dataset.commentId;
-        if (confirm('確定要刪除這則留言嗎？')) {
-          fetch(`/social/delete_comment/${commentId}`, {
-            method: 'POST'
-          })
-          .then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              const commentItem = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
-              if(commentItem) commentItem.remove();
-              
-              const commentBtn = document.querySelector(`.comment-btn[data-post-id="${data.post_id}"]`);
-              if(commentBtn){
-                const textNodes = Array.from(commentBtn.childNodes).filter(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '');
-                if (textNodes.length > 0) {
-                  textNodes[0].textContent = ` ${data.comments_count}`;
-                }
-              }
-              showNotification('留言已刪除', 'success');
-            } else {
-              showNotification(data.message || '刪除失敗', 'error');
+        console.log(`[DEBUG] 點擊留言刪除按鈕，留言ID: ${commentId}`);
+        
+        // 使用全局範圍的自訂確認對話框
+        window.showCustomConfirmDialog(
+          '刪除留言', 
+          '確定要刪除這則留言嗎？<br><strong>此操作無法撤銷，留言將永久刪除。</strong>', 
+          function() {
+            // 顯示刪除中狀態
+            const commentItem = document.querySelector(`.comment-item[data-comment-id="${commentId}"]`);
+            if (commentItem) {
+              commentItem.classList.add('deleting');
+              commentItem.style.opacity = '0.5';
             }
-          });
-        }
+            
+            fetch(`/social/delete_comment/${commentId}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              }
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.success) {
+                // 使用淡出動畫效果
+                if (commentItem) {
+                  commentItem.style.animation = 'fadeOut 0.3s forwards';
+                  setTimeout(() => {
+                    commentItem.remove();
+                    
+                    // 檢查是否還有其他留言，如果沒有則顯示空狀態
+                    const postId = data.post_id;
+                    const commentsList = document.getElementById(`comments-list-${postId}`);
+                    if (commentsList && commentsList.children.length === 0) {
+                      commentsList.innerHTML = '<div class="no-comments"><p>目前還沒有留言，成為第一個留言的人吧！</p></div>';
+                    }
+                  }, 300);
+                }
+                
+                // 更新留言數
+                const commentBtn = document.querySelector(`.comment-btn[data-post-id="${data.post_id}"]`);
+                if (commentBtn) {
+                  const textNodes = Array.from(commentBtn.childNodes).filter(node => node.nodeType === Node.TEXT_NODE && node.textContent.trim() !== '');
+                  if (textNodes.length > 0) {
+                    textNodes[0].textContent = ` ${data.comments_count}`;
+                  }
+                }
+                
+                showNotification('留言已成功刪除', 'success');
+              } else {
+                // 還原留言項目的樣式
+                if (commentItem) {
+                  commentItem.classList.remove('deleting');
+                  commentItem.style.opacity = '';
+                }
+                showNotification(data.message || '刪除失敗，請稍後再試', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('[ERROR] 刪除留言失敗:', error);
+              
+              // 還原留言項目的樣式
+              if (commentItem) {
+                commentItem.classList.remove('deleting');
+                commentItem.style.opacity = '';
+              }
+              
+              showNotification('網路錯誤，請稍後再試', 'error');
+            });
+          }
+        );
         return;
     }
   });
+
