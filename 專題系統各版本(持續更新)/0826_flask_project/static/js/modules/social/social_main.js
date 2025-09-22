@@ -231,6 +231,291 @@ window.showCustomConfirmDialog = function(title, message, confirmCallback) {
   setTimeout(() => fadeOutStyle.remove(), 300);
 };
 
+// 定義留言編輯對話框函數
+window.showCommentEditDialog = function(comment, confirmCallback) {
+  // 創建對話框元素
+  const dialogOverlay = document.createElement('div');
+  dialogOverlay.className = 'comment-edit-overlay';
+  
+  // 對話框HTML
+  dialogOverlay.innerHTML = `
+    <div class="comment-edit-dialog">
+      <div class="comment-edit-header">
+        <h3>編輯留言</h3>
+        <button class="comment-edit-close">&times;</button>
+      </div>
+      <div class="comment-edit-body">
+        <textarea class="comment-edit-textarea" maxlength="500" placeholder="請輸入您的留言...">${comment.content}</textarea>
+        <div class="char-counter"><span class="current-count">${comment.content.length}</span>/<span class="max-count">500</span></div>
+      </div>
+      <div class="comment-edit-footer">
+        <button class="btn btn-secondary btn-cancel">取消</button>
+        <button class="btn btn-primary btn-save">儲存變更</button>
+      </div>
+    </div>
+  `;
+  
+  // 添加樣式
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    .comment-edit-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.2s ease-out;
+    }
+    
+    .comment-edit-dialog {
+      width: 90%;
+      max-width: 500px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      overflow: hidden;
+      animation: scaleIn 0.3s ease-out;
+    }
+    
+    .comment-edit-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+    }
+    
+    .comment-edit-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #343a40;
+    }
+    
+    .comment-edit-close {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #adb5bd;
+      padding: 0 5px;
+      transition: color 0.2s;
+    }
+    
+    .comment-edit-close:hover {
+      color: #495057;
+    }
+    
+    .comment-edit-body {
+      padding: 20px;
+    }
+    
+    .comment-edit-textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border: 1px solid #ced4da;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1.5;
+      resize: vertical;
+      font-family: inherit;
+    }
+    
+    .char-counter {
+      margin-top: 8px;
+      text-align: right;
+      font-size: 14px;
+      color: #6c757d;
+    }
+    
+    .comment-edit-footer {
+      padding: 16px 20px;
+      background-color: #f8f9fa;
+      border-top: 1px solid #e9ecef;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    
+    .btn-primary {
+      background-color: #4caf50;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .btn-primary:hover {
+      background-color: #3d8b40;
+    }
+
+    .btn-secondary {
+      background-color: #e9ecef;
+      color: #212529;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #dee2e6;
+    }
+    
+    @keyframes scaleIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    
+    .validation-notification {
+      position: absolute;
+      bottom: -30px;
+      left: 20px;
+      background-color: #e74c3c;
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      animation: fadeIn 0.2s forwards;
+    }
+    
+    /* 深色模式 */
+    body.dark-mode .comment-edit-dialog {
+      background-color: #343a40;
+    }
+    
+    body.dark-mode .comment-edit-header,
+    body.dark-mode .comment-edit-footer {
+      background-color: #2d3238;
+      border-color: #495057;
+    }
+    
+    body.dark-mode .comment-edit-header h3 {
+      color: #f8f9fa;
+    }
+    
+    body.dark-mode .comment-edit-textarea {
+      background-color: #454d55;
+      border-color: #6c757d;
+      color: #f8f9fa;
+    }
+    
+    body.dark-mode .char-counter {
+      color: #adb5bd;
+    }
+
+    body.dark-mode .btn-secondary {
+      background-color: #495057;
+      color: #e9ecef;
+    }
+    
+    body.dark-mode .btn-secondary:hover {
+      background-color: #6c757d;
+    }
+  `;
+  
+  document.head.appendChild(styleEl);
+  document.body.appendChild(dialogOverlay);
+  
+  // 綁定事件
+  const closeBtn = dialogOverlay.querySelector('.comment-edit-close');
+  const cancelBtn = dialogOverlay.querySelector('.btn-cancel');
+  const saveBtn = dialogOverlay.querySelector('.btn-save');
+  const textarea = dialogOverlay.querySelector('.comment-edit-textarea');
+  const charCounter = dialogOverlay.querySelector('.current-count');
+  
+  // 字數計數器
+  textarea.addEventListener('input', function() {
+    charCounter.textContent = this.value.length;
+    // 如果接近字數上限，改變計數器顏色提醒用戶
+    if (this.value.length > 450) {
+      charCounter.style.color = '#e74c3c';
+    } else {
+      charCounter.style.color = '';
+    }
+  });
+  
+  // 自動聚焦文本框，並將游標放在文字末尾
+  setTimeout(() => {
+    textarea.focus();
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+  }, 100);
+  
+  // 關閉對話框函數
+  function closeDialog() {
+    dialogOverlay.classList.add('closing');
+    dialogOverlay.style.animation = 'fadeOut 0.2s forwards';
+    setTimeout(() => {
+      dialogOverlay.remove();
+      styleEl.remove();
+    }, 200);
+  }
+  
+  // 綁定關閉按鈕
+  closeBtn.addEventListener('click', closeDialog);
+  
+  // 綁定取消按鈕
+  cancelBtn.addEventListener('click', closeDialog);
+  
+  // 綁定儲存按鈕
+  saveBtn.addEventListener('click', () => {
+    const newContent = textarea.value.trim();
+    if (newContent === '') {
+      // 提示用戶不能保存空白留言
+      const notification = document.createElement('div');
+      notification.className = 'validation-notification';
+      notification.textContent = '留言內容不能為空';
+      
+      const commentEditBody = dialogOverlay.querySelector('.comment-edit-body');
+      commentEditBody.appendChild(notification);
+      
+      setTimeout(() => notification.remove(), 2000);
+      return;
+    }
+    
+    closeDialog();
+    if (typeof confirmCallback === 'function') {
+      confirmCallback(newContent);
+    }
+  });
+  
+  // 點擊背景關閉
+  dialogOverlay.addEventListener('click', (e) => {
+    if (e.target === dialogOverlay) {
+      closeDialog();
+    }
+  });
+  
+  // 添加淡出動畫樣式
+  const fadeOutStyle = document.createElement('style');
+  fadeOutStyle.textContent = `
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  `;
+  document.head.appendChild(fadeOutStyle);
+  
+  // 清理淡出樣式
+  setTimeout(() => fadeOutStyle.remove(), 300);
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('[DEBUG] DOM 載入完成，開始初始化社群功能');
 
@@ -1881,25 +2166,27 @@ function handleRemoveFollower(userEmail, username, btnElement) {
           .then(res => res.json())
           .then(data => {
             if (data.success) {
-              const newContent = prompt('編輯您的留言:', data.comment.content);
-              if (newContent && newContent !== data.comment.content) {
-                const formData = new FormData();
-                formData.append('content', newContent);
-                fetch(`/social/edit_comment/${commentId}`, {
-                  method: 'POST',
-                  body: formData
-                })
-                .then(res => res.json())
-                .then(updateData => {
-                  if (updateData.success) {
-                    const commentContent = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .comment-content`);
-                    if(commentContent) commentContent.textContent = updateData.content;
-                    showNotification('留言更新成功！', 'success');
-                  } else {
-                    showNotification(updateData.message || '更新失敗', 'error');
-                  }
-                });
-              }
+              // 使用自訂編輯對話框來編輯留言
+              window.showCommentEditDialog(data.comment, function(newContent) {
+                if (newContent && newContent !== data.comment.content) {
+                  const formData = new FormData();
+                  formData.append('content', newContent);
+                  fetch(`/social/edit_comment/${commentId}`, {
+                    method: 'POST',
+                    body: formData
+                  })
+                  .then(res => res.json())
+                  .then(updateData => {
+                    if (updateData.success) {
+                      const commentContent = document.querySelector(`.comment-item[data-comment-id="${commentId}"] .comment-content`);
+                      if(commentContent) commentContent.textContent = updateData.content;
+                      showNotification('留言更新成功！', 'success');
+                    } else {
+                      showNotification(updateData.message || '更新失敗', 'error');
+                    }
+                  });
+                }
+              });
             } else {
               showNotification(data.message || '無法編輯留言', 'error');
             }
