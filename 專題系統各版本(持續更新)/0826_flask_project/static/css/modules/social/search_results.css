@@ -308,6 +308,7 @@ body.dark-mode .user-joined {
 
 .view-user-posts:hover {
   background: #4A6B38;
+  color: #ffffff !important;
 }
 
 body.dark-mode .view-user-posts {
@@ -316,6 +317,7 @@ body.dark-mode .view-user-posts {
 
 body.dark-mode .view-user-posts:hover {
   background: #6B8F57;
+  
 }
 
 /* ========== 貼文搜尋結果樣式 ========== */
@@ -478,28 +480,39 @@ body.dark-mode .post-stats {
   font-size: 0.9rem;
 }
 
+/* 主要按鈕（淺色模式） */
 .view-post-btn {
   background: var(--primary-light);
-  color: white;
+  color: #ffffff; /* 預設淺色模式下文字為白色 */
   padding: 6px 12px;
   border-radius: 6px;
   text-decoration: none;
   font-size: 0.8rem;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, color 0.12s ease;
+}
+
+/* 確保所有互動/連結狀態在淺色模式下都顯示白色文字 */
+.view-post-btn:link,
+.view-post-btn:visited,
+.view-post-btn:active,
+.view-post-btn:focus,
+.view-post-btn:hover {
+  color: #ffffff !important;
+  text-decoration: none;
 }
 
 .view-post-btn:hover {
   background: #4A6B38;
-  text-decoration: none;
-  color: white;
 }
 
 body.dark-mode .view-post-btn {
   background: #5B7F47;
+  color: #ffffff !important;
 }
 
 body.dark-mode .view-post-btn:hover {
   background: #6B8F57;
+  color: #ffffff !important;
 }
 
 /* ========== 沒有結果的狀態 ========== */
