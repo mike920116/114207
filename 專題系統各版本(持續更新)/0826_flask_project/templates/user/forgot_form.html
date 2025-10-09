@@ -3,14 +3,21 @@
 {% block title %}日記之森 | 忘記密碼{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/user/user.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/user/user.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+{% include 'components/starry_background.html' %}
+
 <div class="user-page-wrapper">
   <div class="auth-box">
-    <h2 class="text-center mb-4">🔐 重設密碼驗證</h2>
+    <h2 class="text-center mb-4"><i class="fas fa-lock"></i> 重設密碼驗證</h2>
 
     {% if error_message %}
     <div class="alert alert-danger" role="alert">

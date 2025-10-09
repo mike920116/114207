@@ -3,24 +3,29 @@
 {% block title %}個人資料{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/user/settings.css') }}">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/user/settings.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
+
 <div class="settings-page-wrapper">
   <div class="settings-box">
     <h2>編輯個人資料</h2>
     <form method="POST" enctype="multipart/form-data">
-      <label for="username">暱稱</label>
+      <label for="username"><i class="fas fa-user"></i> 暱稱</label>
       <input type="text" id="username" name="username" class="form-control" value="{{ username }}" required>
 
-      <label for="bio">自我介紹（最多 200 字）</label>
+      <label for="bio"><i class="fas fa-comment-dots"></i> 自我介紹（最多 200 字）</label>
       <textarea id="bio" name="bio" class="form-control" maxlength="200">{{ bio or '' }}</textarea>
       <p id="bio-counter">剩餘 200 字</p>
 
       <div class="avatar-wrapper">
-        <label>頭像設定</label>
+        <label><i class="fas fa-image"></i> 頭像設定</label>
         
         <!-- 目前頭像 - 點擊可開啟選擇視窗 -->
         <div class="current-avatar-container">
@@ -64,7 +69,7 @@
         </div>
       </div>  
 
-      <button type="submit" class="btn btn-success" style="margin-top: 20px;">💾 儲存變更</button>
+      <button type="submit" class="btn btn-success" style="margin-top: 20px;"><i class="fas fa-save"></i> 儲存變更</button>
     </form>
   </div>
 </div>

@@ -1,0 +1,389 @@
+/**
+ * 任務卡片確認視窗樣式
+ * 用於刪除任務和退出任務的確認對話框
+ */
+
+/* ===== 確認視窗遮罩層 ===== */
+.card-confirm-modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.2s ease-out;
+}
+
+.card-confirm-modal-overlay.active {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ===== 確認視窗主體 ===== */
+.card-confirm-modal {
+    background: linear-gradient(135deg, rgba(20, 20, 30, 0.98), rgba(30, 30, 40, 0.98));
+    border-radius: 20px;
+    border: 2px solid rgba(100, 255, 218, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    width: 90%;
+    max-width: 480px;
+    overflow: hidden;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ===== 視窗頭部 ===== */
+.confirm-modal-header {
+    padding: 25px 30px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.confirm-icon {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    animation: iconPulse 2s infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* 刪除圖標 - 紅色 */
+.delete-confirm .delete-icon {
+    background: rgba(244, 67, 54, 0.15);
+    color: #F44336;
+    border: 2px solid rgba(244, 67, 54, 0.3);
+}
+
+/* 退出圖標 - 藍色 */
+.leave-confirm .leave-icon {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+    border: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.confirm-modal-header h3 {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.4rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* ===== 視窗內容 ===== */
+.confirm-modal-body {
+    padding: 25px 30px;
+}
+
+.confirm-message {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1rem;
+    margin: 0 0 12px 0;
+    text-align: center;
+}
+
+.confirm-card-title {
+    color: #64ffda;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 15px 0;
+    padding: 12px 15px;
+    background: rgba(100, 255, 218, 0.1);
+    border-left: 3px solid #64ffda;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.confirm-warning {
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.5;
+}
+
+.confirm-warning i {
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+/* 刪除視窗的警告 */
+.delete-confirm .confirm-warning {
+    background: rgba(244, 67, 54, 0.1);
+    border-left: 3px solid rgba(244, 67, 54, 0.5);
+}
+
+.delete-confirm .confirm-warning i {
+    color: #F44336;
+}
+
+/* 退出視窗的提示 */
+.leave-confirm .confirm-warning {
+    background: rgba(59, 130, 246, 0.1);
+    border-left: 3px solid rgba(59, 130, 246, 0.5);
+}
+
+.leave-confirm .confirm-warning i {
+    color: #3b82f6;
+}
+
+/* ===== 視窗底部按鈕區 ===== */
+.confirm-modal-footer {
+    padding: 20px 30px;
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.confirm-modal-footer button {
+    flex: 1;
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* 取消按鈕 */
+.btn-cancel {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* 確認按鈕 - 基礎樣式 */
+.btn-confirm {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-confirm::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-confirm:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* 刪除確認按鈕 - 紅色 */
+.btn-delete {
+    background: linear-gradient(135deg, #F44336, #d32f2f);
+    color: white;
+    box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+}
+
+.btn-delete:hover {
+    background: linear-gradient(135deg, #d32f2f, #b71c1c);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(244, 67, 54, 0.4);
+}
+
+.btn-delete:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(244, 67, 54, 0.3);
+}
+
+/* 退出確認按鈕 - 藍色 */
+.btn-leave {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.btn-leave:hover {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+}
+
+.btn-leave:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+}
+
+/* 按鈕禁用狀態 */
+.btn-confirm:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ===== 響應式設計 ===== */
+@media (max-width: 768px) {
+    .card-confirm-modal {
+        width: 95%;
+        margin: 0 10px;
+    }
+    
+    .confirm-modal-header {
+        padding: 20px 20px;
+    }
+    
+    .confirm-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8em;
+    }
+    
+    .confirm-modal-header h3 {
+        font-size: 1.2rem;
+    }
+    
+    .confirm-modal-body {
+        padding: 20px;
+    }
+    
+    .confirm-modal-footer {
+        padding: 15px 20px;
+        flex-direction: column;
+    }
+    
+    .confirm-modal-footer button {
+        width: 100%;
+    }
+}
+
+/* ===== 無障礙與鍵盤導航 ===== */
+.card-confirm-modal-overlay:focus {
+    outline: none;
+}
+
+.confirm-modal-footer button:focus {
+    outline: 2px solid rgba(100, 255, 218, 0.5);
+    outline-offset: 2px;
+}
+
+/* ===== 結算確認視窗特殊樣式 ===== */
+
+/* 結算視窗 - 移除背景遮罩（無變暗、無模糊） */
+#cardStoreConfirmModal {
+    background: transparent;
+    backdrop-filter: none;
+}
+
+/* 結算圖標 - 橙金色漸變 */
+.store-confirm .store-icon {
+    background: linear-gradient(135deg, rgba(255, 159, 64, 0.15), rgba(255, 206, 86, 0.15));
+    color: #ff9f40;
+    border: 2px solid rgba(255, 159, 64, 0.4);
+    box-shadow: 0 0 20px rgba(255, 159, 64, 0.2);
+}
+
+/* 結算視窗主體 - 增強邊框以補償無背景遮罩 */
+.store-confirm {
+    border: 3px solid rgba(255, 159, 64, 0.5);
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7),
+                0 0 0 1px rgba(255, 159, 64, 0.2);
+}
+
+/* 結算視窗的警告提示 - 橙金色 */
+.store-confirm .confirm-warning {
+    background: linear-gradient(135deg, rgba(255, 159, 64, 0.1), rgba(255, 206, 86, 0.1));
+    border-left: 3px solid rgba(255, 159, 64, 0.6);
+}
+
+.store-confirm .confirm-warning i {
+    color: #ff9f40;
+}
+
+/* 結算視窗的卡片標題 - 橙金色強調 */
+.store-confirm .confirm-card-title {
+    color: #ffce56;
+    background: linear-gradient(135deg, rgba(255, 159, 64, 0.15), rgba(255, 206, 86, 0.15));
+    border-left: 3px solid #ff9f40;
+}
+
+/* 結算確認按鈕 - 橙金色漸變 */
+.btn-store {
+    background: linear-gradient(135deg, #ff9f40, #ffce56);
+    color: #1a1a2e;
+    font-weight: 700;
+    box-shadow: 0 4px 15px rgba(255, 159, 64, 0.4);
+}
+
+.btn-store:hover {
+    background: linear-gradient(135deg, #ffb84d, #ffd966);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(255, 159, 64, 0.5);
+}
+
+.btn-store:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(255, 159, 64, 0.4);
+}
+
+.btn-store:disabled {
+    background: linear-gradient(135deg, rgba(255, 159, 64, 0.5), rgba(255, 206, 86, 0.5));
+    color: rgba(26, 26, 46, 0.6);
+}
+
+/* 結算視窗頭部標題 - 橙金色點綴 */
+.store-confirm .confirm-modal-header h3 {
+    background: linear-gradient(90deg, #ff9f40, #ffce56);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+

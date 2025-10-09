@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}好友列表 | 日記之森{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/friends_list.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="friends-list-wrapper">
+  <div class="page-header">
+  <a href="{{ url_for('coopcard.coopcard_main') }}" class="back-btn">❮ 返回任務卡片</a>
+    <h1 class="page-title">
+  <span class="page-emoji">👥</span>
+  好友列表 ({{ friends|length }})
+    </h1>
+    
+    <div class="search-filter">
+      <input type="text" id="friend-search" class="search-input" placeholder="搜尋好友姓名...">
+      <button class="filter-btn" onclick="toggleSortOptions()">
+        <span class="filter-emoji">🔄</span>
+        排序
+      </button>
+    </div>
+  </div>
+
+  <div class="friends-content">
+    {% if friends %}
+    <div class="friends-grid" id="friends-grid">
+      {% for friend in friends %}
+      <div class="friend-card" data-name="{{ friend[1] }}" data-level="{{ friend[4] }}" data-date="{{ friend[5] }}">
+        <div class="friend-avatar">
+          <img src="{{ friend[2] or '/static/icons/avatars/default.png' }}" 
+               alt="{{ friend[1] }}的頭像"
+               onerror="this.src='/static/icons/avatars/default.png'">
+          <div class="online-status"></div>
+        </div>
+        
+        <div class="friend-info">
+          <h3 class="friend-name">{{ friend[1] }}</h3>
+          <p class="friend-email">{{ friend[0] }}</p>
+          
+          <div class="friend-details">
+            <div class="detail-item">
+              <span class="detail-label">等級</span>
+              <span class="level-badge level-{{ friend[4] }}">{{ friend[4] }}</span>
+            </div>
+            
+            {% if friend[3] %}
+            <div class="detail-item">
+              <span class="detail-label">個人介紹</span>
+              <p class="friend-bio">{{ friend[3][:50] }}{% if friend[3]|length > 50 %}...{% endif %}</p>
+            </div>
+            {% endif %}
+            
+            <div class="detail-item">
+              <span class="detail-label">成為好友</span>
+              <span class="friend-since">{{ friend[5].strftime('%Y-%m-%d') if friend[5] else '未知' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="friend-actions">
+          <button class="action-btn primary-btn" onclick="startChat('{{ friend[0] }}')">
+            <span class="btn-emoji">💬</span>
+            聊天
+          </button>
+          <button class="action-btn secondary-btn" onclick="viewProfile('{{ friend[0] }}')">
+            <span class="btn-emoji">👤</span>
+            檔案
+          </button>
+          <button class="action-btn dropdown-toggle" onclick="toggleFriendMenu(this)">
+            <span class="btn-emoji">⋯</span>
+          </button>
+          <div class="friend-menu">
+            <button class="menu-item" onclick="blockFriend('{{ friend[0] }}')">
+              <span class="menu-emoji">🚫</span>
+              封鎖
+            </button>
+            <button class="menu-item danger" onclick="removeFriend('{{ friend[0] }}')">
+              <span class="menu-emoji">❌</span>
+              移除好友
+            </button>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    
+    <!-- 排序選項 -->
+    <div id="sort-options" class="sort-options" style="display: none;">
+      <h4>排序方式</h4>
+      <label><input type="radio" name="sort" value="name" onchange="sortFriends(this.value)"> 姓名 A-Z</label>
+      <label><input type="radio" name="sort" value="level" onchange="sortFriends(this.value)"> 等級高低</label>
+      <label><input type="radio" name="sort" value="date" checked onchange="sortFriends(this.value)"> 成為好友時間</label>
+    </div>
+    
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">👥</div>
+      <h3>還沒有好友</h3>
+      <p>使用搜尋功能找到朋友或加入任務卡片並邀請好友一同參與</p>
+      <a href="{{ url_for('coopcard.coopcard_main') }}" class="empty-action-btn">
+        <span class="btn-emoji">🔍</span>
+        開始搜尋/創建任務卡片
+      </a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- 好友資訊模態框 -->
+<div id="friend-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modal-title">好友資訊</h3>
+      <button class="modal-close" onclick="closeFriendModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modal-body">
+      <!-- 好友詳細資訊會動態載入到這裡 -->
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/modules/coopcard/friends_list.js') }}"></script>
+{% endblock %}

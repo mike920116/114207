@@ -1,4 +1,6 @@
 /* === Diary List – Filtering, Sorting, Searching, Pagination === */
+/* 背景系統已移至 common/starry_background.js */
+
 document.addEventListener('DOMContentLoaded', () => {
     const diaryItems      = Array.from(document.querySelectorAll('.diary-item'));
     const diaryList       = document.querySelector('.diary-list');
@@ -422,9 +424,70 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    /* --- 佈局切換功能 --- */
+    const layoutToggleBtn = document.getElementById('layoutToggleBtn');
+    const layoutIcon = document.getElementById('layoutIcon');
+    const layoutText = document.getElementById('layoutText');
+    const diaryListContainer = document.querySelector('.diary-list');
+    
+    // 從 localStorage 讀取偏好設定
+    let currentLayout = localStorage.getItem('diaryLayout') || 'list';
+    
+    // 初始化佈局
+    function initLayout() {
+        if (currentLayout === 'grid') {
+            diaryListContainer.classList.add('grid-layout');
+            layoutIcon.className = 'fas fa-list';
+            layoutText.textContent = '列表模式';
+        } else {
+            diaryListContainer.classList.remove('grid-layout');
+            layoutIcon.className = 'fas fa-th';
+            layoutText.textContent = '網格模式';
+        }
+    }
+    
+    // 切換佈局
+    function toggleLayout() {
+        if (currentLayout === 'list') {
+            currentLayout = 'grid';
+            diaryListContainer.classList.add('grid-layout');
+            layoutIcon.className = 'fas fa-list';
+            layoutText.textContent = '列表模式';
+        } else {
+            currentLayout = 'list';
+            diaryListContainer.classList.remove('grid-layout');
+            layoutIcon.className = 'fas fa-th';
+            layoutText.textContent = '網格模式';
+        }
+        
+        // 儲存偏好到 localStorage
+        localStorage.setItem('diaryLayout', currentLayout);
+    }
+    
+    // 綁定按鈕事件
+    if (layoutToggleBtn) {
+        layoutToggleBtn.addEventListener('click', toggleLayout);
+    }
+    
+    // 網格模式下的卡片展開/收合功能
+    if (diaryListContainer) {
+        diaryListContainer.addEventListener('click', function(e) {
+            // 只在網格模式下且點擊的是卡片本身時觸發
+            if (currentLayout === 'grid') {
+                const diaryCard = e.target.closest('.diary-item');
+                if (diaryCard && !e.target.closest('.diary-actions') && !e.target.closest('button')) {
+                    diaryCard.classList.toggle('expanded');
+                }
+            }
+        });
+    }
+
     /* --- 初始化 --- */
     // 初始化成長系統
     initGrowthSystem();
+    
+    // 初始化佈局
+    initLayout();
     
     // 初始化分頁
     applySort();

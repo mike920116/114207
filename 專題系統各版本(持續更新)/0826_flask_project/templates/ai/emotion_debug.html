@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>情緒AI - API數據流觀察區</title>
+    <link rel="stylesheet" href="/static/css/common/starry_background.css">
     <style>
         * {
             margin: 0;
@@ -13,7 +14,7 @@
 
         body {
             font-family: 'Microsoft JhengHei', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: transparent;
             min-height: 100vh;
             padding: 20px;
             color: #e0f9f2;
@@ -295,6 +296,10 @@
     </style>
 </head>
 <body>
+    <!-- 星空背景 -->
+    <div class="starry-particle-background" id="starryParticleBackground"></div>
+    <div class="starry-rainbow-overlay"></div>
+    
     <div class="container">
         <div class="header">
             <h1>🎭 情緒AI - API數據流觀察區</h1>
@@ -684,5 +689,6 @@
             refreshFavorites();
         });
     </script>
+    <script src="/static/js/common/starry_background.js"></script>
 </body>
 </html>

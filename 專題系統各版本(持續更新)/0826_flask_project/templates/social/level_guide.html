@@ -6,10 +6,15 @@
   <title>社群等級規範 | 用戶指南</title>
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/level_guide.css') }}">
 </head>
 
 <body class="page-wrapper">
+
+<!-- 統一星空背景系統 -->
+<div class="starry-particle-background" id="starryParticleBackground"></div>
+<div class="starry-rainbow-overlay"></div>
 
 <!-- ===== 頁首 ===== -->
 <header class="custom-header">
@@ -184,6 +189,7 @@
 {% include 'components/footer.html' %}
 
 <script src="{{ url_for('static', filename='js/base.js') }}"></script>
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/social/level_guide.js') }}"></script>
 </body>
 </html>

@@ -280,7 +280,10 @@ def forgot_password():
 
         if user_exists:
             reset_token = serializer.dumps(email, salt="password-reset")
-            reset_link = url_for("user.reset_password_form", token=reset_token, _external=True)
+
+            # 手動拼接 domain，避免重複
+            reset_path = url_for("user.reset_password_form", token=reset_token)
+            reset_link = f"https://soulcraftjournal.studio{reset_path}"
             
             # 發送重設密碼信件
             sender_email = os.environ.get("MAIL_USERNAME")
@@ -299,8 +302,10 @@ def forgot_password():
 
             return render_template("user/forgot_password_sent.html", email=email)
         else:
-            # 用戶不存在，返回錯誤信息而不是成功頁面
-            return render_template('user/forgot_form.html', error_message="此電子郵件地址尚未註冊帳號，請先註冊或確認電子郵件地址是否正確。")
+            return render_template(
+                'user/forgot_form.html',
+                error_message="此電子郵件地址尚未註冊帳號，請先註冊或確認電子郵件地址是否正確。"
+            )
     except Exception as e:
         logger.error(f"密碼重設請求失敗: {e}")
         return render_template('user/forgot_form.html', error_message="處理請求時發生錯誤")

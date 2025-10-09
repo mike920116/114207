@@ -3,15 +3,16 @@
 {% block title %}情緒洞察 - 統計分析{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/ai/emo_stats.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 {% endblock %}
 
 {% block content %}
-<!-- 原型C的背景動畫系統 -->
-<div class="particle-background" id="particleBackground"></div>
-<div class="rainbow-overlay"></div>
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
 
 <!-- 三欄布局容器 -->
 <div class="emotion-three-column-container" id="statsContainer">

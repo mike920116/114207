@@ -36,6 +36,7 @@ from services.line import line_webhook_bp
 from services.support import support_bp
 from services.social import social_bp
 from services.announcement import announcement_bp
+from services.coopcard import coopcard_bp
 # ─────────────────────────────────────────
 
 # ── 建立 Flask App ────────────────────────
@@ -67,6 +68,7 @@ app.register_blueprint(settings_bp,     url_prefix="/settings")
 app.register_blueprint(support_bp,      url_prefix="/support") 
 app.register_blueprint(line_webhook_bp)
 app.register_blueprint(social_bp,       url_prefix="/social")
+app.register_blueprint(coopcard_bp)                   # 移除重複的url_prefix，已在Blueprint定義中設定
 app.register_blueprint(announcement_bp)               # frontend API
 app.register_blueprint(admin_announcement_bp)         # admin CRUD
 

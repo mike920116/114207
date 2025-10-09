@@ -1,0 +1,366 @@
+/* User ID 覆蓋層樣式 */
+/* 設計目標：與現有情緒AI風格完美融合，提供流暢的用戶體驗 */
+
+/* 背景遮罩層 */
+.user-id-overlay::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(3px);
+    z-index: -1;
+}
+
+.user-id-overlay {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    max-width: 450px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    z-index: 1000;
+    animation: overlayFadeIn 0.3s ease;
+    padding: 1rem;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.overlay-content {
+    width: 100%;
+    padding: 2rem;
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px);
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 1px 0 rgba(255, 255, 255, 0.8) inset;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-align: center;
+    position: relative;
+}
+
+.overlay-header {
+    margin-bottom: 2rem;
+}
+
+.overlay-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: bounceIn 0.6s ease;
+    display: block;
+}
+
+.overlay-header h3 {
+    color: #4338ca;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+}
+
+.overlay-subtitle {
+    color: #6b7280;
+    font-size: 0.9rem;
+    margin: 0;
+    opacity: 0.8;
+}
+
+.overlay-form {
+    text-align: left;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+.input-group label {
+    display: block;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.user-id-input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 1rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    color: #1f2937;
+    box-sizing: border-box;
+}
+
+.user-id-input:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 
+        0 0 0 3px rgba(99, 102, 241, 0.1),
+        0 4px 12px rgba(99, 102, 241, 0.15);
+    background: rgba(255, 255, 255, 1);
+}
+
+.user-id-input:valid {
+    border-color: #10b981;
+}
+
+.user-id-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.input-feedback {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    min-height: 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.input-feedback.success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+}
+
+.input-feedback.success::before {
+    content: "✓";
+    color: #10b981;
+    font-weight: bold;
+}
+
+.input-feedback.error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.input-feedback.error::before {
+    content: "⚠";
+    color: #ef4444;
+    font-weight: bold;
+}
+
+.input-feedback.checking {
+    background: #fef3c7;
+    color: #d97706;
+    border: 1px solid #fed7aa;
+}
+
+.input-feedback.checking::before {
+    content: "⏳";
+    animation: pulse 1s infinite;
+}
+
+.input-rules {
+    background: rgba(239, 246, 255, 0.6);
+    border: 1px solid rgba(147, 197, 253, 0.3);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.input-rules h5 {
+    color: #1e40af;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.input-rules ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.input-rules li {
+    color: #3730a3;
+    font-size: 0.8rem;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.overlay-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.btn-primary, .btn-secondary {
+    flex: 1;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: white;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.btn-primary:disabled {
+    background: #d1d5db;
+    color: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-secondary {
+    background: rgba(107, 114, 128, 0.1);
+    color: #6b7280;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+}
+
+.btn-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* 動畫效果 */
+@keyframes overlayFadeIn {
+    from { 
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+    to { 
+        opacity: 1;
+        backdrop-filter: blur(10px);
+    }
+}
+
+@keyframes bounceIn {
+    0%, 20%, 40%, 60%, 80% { 
+        transform: translateY(0) scale(1); 
+    }
+    10%, 30%, 50%, 70% { 
+        transform: translateY(-10px) scale(1.05); 
+    }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 成功創建的慶祝動畫 */
+.overlay-content.success {
+    animation: successPulse 0.6s ease;
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .user-id-overlay {
+        padding: 0.5rem;
+    }
+    
+    .overlay-content {
+        padding: 1.5rem;
+    }
+    
+    .overlay-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .overlay-actions {
+        flex-direction: column;
+    }
+    
+    .btn-primary, .btn-secondary {
+        width: 100%;
+    }
+}
+
+/* 載入狀態指示器 */
+.loading-dots {
+    display: inline-flex;
+    gap: 0.25rem;
+}
+
+.loading-dots span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: loadingDots 1.4s infinite ease-in-out;
+}
+
+.loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+.loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes loadingDots {
+    0%, 80%, 100% { 
+        transform: scale(0);
+        opacity: 0.5;
+    }
+    40% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 輸入框焦點環效果 */
+.user-id-input:focus + .input-feedback {
+    animation: fadeInUp 0.3s ease;
+}
+
+/* 覆蓋層關閉動畫 */
+.user-id-overlay.closing {
+    animation: overlayFadeOut 0.3s ease forwards;
+}
+
+@keyframes overlayFadeOut {
+    from { 
+        opacity: 1;
+        backdrop-filter: blur(10px);
+    }
+    to { 
+        opacity: 0;
+        backdrop-filter: blur(0px);
+    }
+}

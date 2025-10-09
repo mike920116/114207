@@ -3,11 +3,18 @@
 {% block title %}日記之森 | 註冊{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/user/user.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/user/user.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+{% include 'components/starry_background.html' %}
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
@@ -29,23 +36,25 @@
         <label for="password1">密碼</label>
         <div class="password-wrapper">
           <input type="password" class="form-control" id="password1" name="password1" required>
-          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password1')"></button>
+          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password1')">
+            <i class="fas fa-eye-slash"></i>
+          </button>
         </div>
         
         <!-- 密碼強度指示器 -->
         <div class="password-strength-indicator" id="password-strength">
           <div class="strength-title">密碼要求：</div>
           <div class="strength-requirement" id="length-check">
-            <span class="check-icon">✗</span> 至少8個字元
+            <i class="fas fa-times check-icon"></i> 至少8個字元
           </div>
           <div class="strength-requirement" id="letter-check">
-            <span class="check-icon">✗</span> 包含英文字母
+            <i class="fas fa-times check-icon"></i> 包含英文字母
           </div>
           <div class="strength-requirement" id="number-check">
-            <span class="check-icon">✗</span> 包含數字
+            <i class="fas fa-times check-icon"></i> 包含數字
           </div>
           <div class="strength-requirement" id="account-check">
-            <span class="check-icon">✗</span> 與帳號不同
+            <i class="fas fa-times check-icon"></i> 與帳號不同
           </div>
         </div>
 
@@ -57,7 +66,7 @@
         <!-- 密碼確認指示器 -->
         <div class="password-match-indicator" id="password-match" style="display: none;">
           <div class="strength-requirement" id="match-check">
-            <span class="check-icon">✗</span> 兩次密碼輸入一致
+            <i class="fas fa-times check-icon"></i> 兩次密碼輸入一致
           </div>
         </div>
 
