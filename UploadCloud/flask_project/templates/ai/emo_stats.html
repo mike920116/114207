@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block title %}情緒洞察 - 統計分析{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/ai/emo_stats.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
+
+<!-- 三欄布局容器 -->
+<div class="emotion-three-column-container" id="statsContainer">
+  <!-- 左側面板 (統計控制與快速操作) -->
+  <div class="left-panel glass-panel" id="leftPanel">
+    <button class="panel-toggle-btn" id="leftPanelToggle" title="收起/展開左側面板">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <div class="autonomous-left-header">
+      <h3>🎯 統計控制</h3>
+    </div>
+    <div class="panel-content">
+      <!-- 統計控制區域 -->
+      <div class="stats-controls-panel">
+        <div class="control-section">
+          <h5><i class="fas fa-calendar-alt"></i> 時間範圍</h5>
+          <div class="date-range-selector">
+            <select id="dateRange" class="form-select">
+              <option value="today">今天</option>
+              <option value="7" selected>最近 7 天</option>
+              <option value="14">最近 14 天</option>
+              <option value="30">最近 30 天</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="control-section">
+          <h5><i class="fas fa-sync-alt"></i> 數據操作</h5>
+          <div class="control-buttons">
+            <button id="refreshBtn" class="control-btn primary">
+              <i class="fas fa-sync-alt"></i> 重新整理
+            </button>
+            <button id="exportDataBtn" class="control-btn secondary">
+              <i class="fas fa-download"></i> 匯出數據
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 今日總預覽 -->
+      <div class="quick-preview-section">
+        <h5><i class="fas fa-tachometer-alt"></i> 今日總預覽</h5>
+        <div class="quick-stats-grid">
+          <div class="quick-stat-item">
+            <div class="quick-stat-icon">💬</div>
+            <div class="quick-stat-content">
+              <span class="quick-stat-label">總互動</span>
+              <span id="quickTotalInteractions" class="quick-stat-value">--</span>
+            </div>
+          </div>
+          <div class="quick-stat-item">
+            <div class="quick-stat-icon">💡</div>
+            <div class="quick-stat-content">
+              <span class="quick-stat-label">情緒向</span>
+              <span id="quickEmotionDirection" class="quick-stat-value">--</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 快速導航 -->
+      <div class="quick-navigation">
+        <h5><i class="fas fa-link"></i> 快速導航</h5>
+        <a href="/ai/emotion" class="nav-link">
+          <i class="fas fa-arrow-left"></i> 返回情緒 AI
+        </a>
+        <a href="/ai/emo_stats" class="nav-link active">
+          <i class="fas fa-chart-line"></i> 情緒洞察
+        </a>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- 中央統計區域 -->
+  <div class="stats-main-container">
+    <div class="stats-main-header">
+      <h2>🎭 情緒洞察統計分析</h2>
+      <div class="date-range-info" id="dateRangeInfo">近 7 天數據</div>
+    </div>
+
+    <!-- 統計摘要區域 -->
+    <div class="stats-summary-section">
+      <div class="stats-cards-grid">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-comments"></i>
+          </div>
+          <div class="stat-content">
+            <h3>總互動次數</h3>
+            <span id="totalInteractions" class="stat-value">載入中...</span>
+            <small class="stat-desc">AI 對話互動總數</small>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-heart"></i>
+          </div>
+          <div class="stat-content">
+            <h3>主導情緒</h3>
+            <span id="dominantEmotion" class="stat-value">載入中...</span>
+            <small class="stat-desc">最常出現的情緒</small>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="stat-content">
+            <h3>平均信心度</h3>
+            <span id="avgConfidence" class="stat-value">載入中...</span>
+            <small class="stat-desc">情緒分析準確度</small>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-balance-scale"></i>
+          </div>
+          <div class="stat-content">
+            <h3>情緒穩定度</h3>
+            <span id="emotionStability" class="stat-value">載入中...</span>
+            <small class="stat-desc">情緒變化穩定程度</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 圖表分析區域 -->
+    <div class="charts-analysis-section">
+      <div class="charts-grid">
+        <!-- 情緒趨勢圖 -->
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3><i class="fas fa-line-chart"></i> 情緒趨勢分析</h3>
+            <p class="chart-desc">查看您的情緒變化趨勢</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="emotionTrendChart"></canvas>
+          </div>
+        </div>
+        
+        <!-- 情緒分布圖 -->
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3><i class="fas fa-pie-chart"></i> 情緒分布統計</h3>
+            <p class="chart-desc">不同情緒的比例分布</p>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="emotionDistributionChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- 右側面板 (歷史記錄與詳細分析) -->
+  <div class="right-panel glass-panel" id="rightPanel">
+    <button class="panel-toggle-btn" id="rightPanelToggle" title="收起/展開右側面板">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+    <div class="autonomous-right-header">
+      <h3>📊 歷史記錄</h3>
+    </div>
+    <div class="panel-content">
+      <!-- 歷史記錄區域 -->
+      <div class="history-section-compact">
+        <div class="section-header">
+          <h5><i class="fas fa-history"></i> 最近記錄</h5>
+          <button id="showMoreHistory" class="show-more-btn">
+            <i class="fas fa-eye"></i>
+          </button>
+        </div>
+        
+        <div class="history-list" id="historyList">
+          <div class="history-item loading">
+            <div class="history-content">
+              <div class="history-emotion">載入中...</div>
+              <div class="history-time">--</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 主題切換控制 -->
+      <div class="theme-controls" id="themeControls">
+        <h5>
+          🎨 主題切換
+          <button class="theme-toggle-btn" id="themeToggleBtn" title="展開/收合主題選項">
+            <i class="fas fa-chevron-up"></i>
+          </button>
+        </h5>
+        <div class="theme-buttons">
+          <button class="theme-btn" data-theme="day" title="主題:晨星">☀️</button>
+          <button class="theme-btn" data-theme="sunset" title="主題:烈日">🌅</button>
+          <button class="theme-btn" data-theme="night" title="主題:夜森">🌙</button>
+        </div>
+      </div>
+      
+      <!-- 詳細分析區域 -->
+      <div class="detailed-analysis">
+        <h5><i class="fas fa-analytics"></i> 詳細分析</h5>
+        <div class="analysis-content" id="analysisContent">
+          <div class="analysis-item">
+            <div class="analysis-label">情緒變化趨勢</div>
+            <div class="analysis-value" id="emotionTrend">分析中...</div>
+          </div>
+          <div class="analysis-item">
+            <div class="analysis-label">活躍時段</div>
+            <div class="analysis-value" id="activeTime">分析中...</div>
+          </div>
+          <div class="analysis-item">
+            <div class="analysis-label">建議</div>
+            <div class="analysis-value" id="recommendation">分析中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 歷史記錄詳細視窗 -->
+<div class="history-detail-modal" id="historyDetailModal" style="display: none;">
+  <div class="modal-overlay"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📋 詳細歷史記錄</h3>
+      <button class="modal-close-btn" id="historyModalClose">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="history-table-wrapper">
+        <table id="historyTable" class="emotion-history-table">
+          <thead>
+            <tr>
+              <th>日期時間</th>
+              <th>主導情緒</th>
+              <th>信心度</th>
+              <th>整體語調</th>
+              <th>訊息預覽</th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody">
+            <tr>
+              <td colspan="5" class="loading-cell">載入歷史記錄中...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 載入指示器 -->
+<div id="loadingOverlay" class="loading-overlay" style="display: none;">
+  <div class="loading-content">
+    <i class="fas fa-spinner fa-spin"></i>
+    <p>正在載入數據...</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/modules/ai/emo_stats.js') }}"></script>
+<script>
+// 頁面載入時初始化
+document.addEventListener('DOMContentLoaded', function() {
+    // 初始化情緒統計功能
+    if (typeof EmotionStats !== 'undefined') {
+        EmotionStats.init();
+    } else {
+        console.error('EmotionStats module not loaded');
+    }
+    
+    // 初始化主題和面板控制
+    initThemeControls();
+    initPanelControls();
+});
+
+// 初始化主題控制
+function initThemeControls() {
+    const themeButtons = document.querySelectorAll('.theme-btn');
+    themeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const theme = this.dataset.theme;
+            document.body.className = document.body.className.replace(/\b\w*-theme\b/g, '');
+            document.body.classList.add(theme + '-theme');
+            
+            // 更新按鈕狀態
+            themeButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // 設定預設主題
+    document.body.classList.add('night-theme');
+    document.querySelector('[data-theme="night"]').classList.add('active');
+}
+
+// 初始化面板控制
+function initPanelControls() {
+    const leftToggle = document.getElementById('leftPanelToggle');
+    const rightToggle = document.getElementById('rightPanelToggle');
+    const container = document.getElementById('statsContainer');
+    const leftPanel = document.getElementById('leftPanel');
+    const rightPanel = document.getElementById('rightPanel');
+    
+    if (leftToggle) {
+        leftToggle.addEventListener('click', function() {
+            leftPanel.classList.toggle('collapsed');
+            container.classList.toggle('left-collapsed');
+            
+            const icon = this.querySelector('i');
+            if (leftPanel.classList.contains('collapsed')) {
+                icon.className = 'fas fa-chevron-right';
+            } else {
+                icon.className = 'fas fa-chevron-left';
+            }
+        });
+    }
+    
+    if (rightToggle) {
+        rightToggle.addEventListener('click', function() {
+            rightPanel.classList.toggle('collapsed');
+            container.classList.toggle('right-collapsed');
+            
+            const icon = this.querySelector('i');
+            if (rightPanel.classList.contains('collapsed')) {
+                icon.className = 'fas fa-chevron-left';
+            } else {
+                icon.className = 'fas fa-chevron-right';
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

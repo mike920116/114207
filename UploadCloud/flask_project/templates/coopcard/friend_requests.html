@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}好友請求管理 | 日記之森{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/friend_requests.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="friend-requests-wrapper">
+  <div class="page-header">
+  <a href="{{ url_for('coopcard.coopcard_main') }}" class="back-btn">❮ 返回任務卡片</a>
+    <h1 class="page-title">
+      <span class="page-emoji">📨</span>
+      好友請求管理
+    </h1>
+  </div>
+
+  <div class="requests-content">
+    <!-- 收到的請求 -->
+    <div class="requests-section">
+      <h2 class="section-title">
+        <span class="section-emoji">📥</span>
+        收到的請求 ({{ incoming_requests|length }})
+      </h2>
+      
+      {% if incoming_requests %}
+      <div class="requests-list">
+        {% for request in incoming_requests %}
+        <div class="request-item incoming" data-request-id="{{ request[0] }}">
+          <div class="user-avatar">
+            <img src="{{ request[3] or '/static/icons/avatars/default.png' }}" alt="頭像">
+          </div>
+          <div class="request-info">
+            <h4 class="user-name">{{ request[2] }}</h4>
+            <p class="user-email">{{ request[1] }}</p>
+            <span class="request-time">{{ request[4].strftime('%Y-%m-%d %H:%M') if request[4] else '' }}</span>
+          </div>
+          <div class="request-actions">
+            <button class="action-btn accept-btn" onclick="respondRequest({{ request[0] }}, 'accept')">
+              <span class="btn-emoji">✅</span>
+              接受
+            </button>
+            <button class="action-btn reject-btn" onclick="respondRequest({{ request[0] }}, 'reject')">
+              <span class="btn-emoji">❌</span>
+              拒絕
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h3>目前沒有待處理的好友請求</h3>
+        <p>當有人發送好友請求時，會顯示在這裡</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- 發送的請求 -->
+    <div class="requests-section">
+      <h2 class="section-title">
+        <span class="section-emoji">📤</span>
+        發送的請求 ({{ outgoing_requests|length }})
+      </h2>
+      
+      {% if outgoing_requests %}
+      <div class="requests-list">
+        {% for request in outgoing_requests %}
+        <div class="request-item outgoing status-{{ request[4] }}">
+          <div class="user-avatar">
+            <img src="{{ request[3] or '/static/icons/avatars/default.png' }}" alt="頭像">
+          </div>
+          <div class="request-info">
+            <h4 class="user-name">{{ request[2] }}</h4>
+            <p class="user-email">{{ request[1] }}</p>
+            <span class="request-time">{{ request[5].strftime('%Y-%m-%d %H:%M') if request[5] else '' }}</span>
+          </div>
+          <div class="request-status">
+            {% if request[4] == 'pending' %}
+            <span class="status-badge pending">
+              <span class="status-emoji">⏳</span>
+              等待回應
+            </span>
+            {% elif request[4] == 'accepted' %}
+            <span class="status-badge accepted">
+              <span class="status-emoji">✅</span>
+              已接受
+            </span>
+            {% elif request[4] == 'rejected' %}
+            <span class="status-badge rejected">
+              <span class="status-emoji">❌</span>
+              已拒絕
+            </span>
+            {% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">📮</div>
+        <h3>尚未發送任何好友請求</h3>
+        <p>使用搜尋功能找到朋友並發送請求</p>
+        <a href="{{ url_for('coopcard.coopcard_main') }}" class="empty-action-btn">開始搜尋好友</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- 操作確認模態框 -->
+<div id="confirm-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="confirm-title">確認操作</h3>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-message">確定要執行此操作嗎？</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeConfirmModal()">取消</button>
+      <button class="btn btn-primary" id="confirm-btn" onclick="executeAction()">確認</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/modules/coopcard/friend_requests.js') }}"></script>
+{% endblock %}

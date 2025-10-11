@@ -1,0 +1,644 @@
+{% extends "base.html" %}
+
+{% block title %}任務卡片 - CoopCard | 日記之森{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/coopcard_main.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/coopcard_inline.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/user-id-overlay.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/friend_selector.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/task_detail_modal.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/invitation_cards.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/coopcard/card_confirm_modal.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
+<!-- 設置用戶email變量供WebSocket使用 -->
+<meta name="user-email" content="{{ current_user.id }}">
+{% endblock %}
+
+{% block content %}
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
+
+<!-- 三欄布局容器 -->
+<div class="coopcard-three-column-container">
+  <!-- 左側面板 - 搜尋功能 -->
+  <div class="left-panel glass-panel" id="leftPanel">
+    <button class="panel-toggle-btn" id="leftPanelToggle" title="收起/展開左側面板">
+      <i class="fas fa-chevron-left"></i>
+    </button>
+    <div class="panel-header">
+      <h3>🔍 好友搜尋</h3>
+    </div>
+    <div class="panel-content">
+      <!-- 搜尋好友輸入框 -->
+      <div class="friend-search-container">
+        <div class="search-input-group">
+          <input type="text" id="search-input" class="friend-search-input" 
+                 placeholder="輸入用戶名稱或 Email 搜尋好友..." autocomplete="off">
+          <button type="button" id="clear-search-btn" class="clear-search-btn" title="清除搜尋" style="display: none;">
+            <i class="fas fa-times"></i>
+          </button>
+          <div class="search-icon">
+            <i class="fas fa-search"></i>
+          </div>
+        </div>
+        
+        <!-- 搜尋結果下拉框 -->
+        <div class="search-results-dropdown" id="search-results-dropdown" style="display: none;">
+          <div class="search-results-header">
+            <span class="results-count" id="results-count">搜尋中...</span>
+          </div>
+          <div class="search-results-list" id="search-results-list">
+            <!-- 搜尋結果會動態載入到這裡 -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- 好友請求觸發按鈕 -->
+      <div class="request-section">
+        <div class="request-dropdown">
+          <button class="request-toggle" id="request-toggle-btn" title="好友請求">
+            <span class="request-icon">📨</span>
+            <span class="request-text">好友請求</span>
+            <span class="request-badge" id="request-badge">{{ pending_requests_count }}</span>
+          </button>
+          
+          <!-- 好友請求下拉面板 -->
+          <div id="friend-request-panel" class="friend-request-dropdown-panel" style="display: none;">
+            <div class="panel-header">
+              <h4>好友請求</h4>
+              <div class="panel-actions">
+                <a href="{{ url_for('coopcard.friend_requests') }}" class="view-all-link" title="查看全部">
+                  <i class="fas fa-external-link-alt"></i>
+                </a>
+                <button class="panel-close" id="panel-close-btn" title="關閉">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            <div class="panel-content">
+              <div class="request-list" id="floating-request-list">
+                <div class="loading-item">載入中...</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 搜尋提示 -->
+      <div class="search-tips">
+        <h5><i class="fas fa-lightbulb"></i> 搜尋提示</h5>
+        <ul>
+          <li>輸入完整的 Email 地址</li>
+          <li>或輸入用戶的顯示名稱</li>
+          <li>支援模糊搜尋匹配</li>
+        </ul>
+      </div>
+      
+      <!-- 開發測試區域 -->
+      <div class="dev-test-section">
+        <div class="dev-test-header">
+          <h5><i class="fas fa-code"></i> 開發測試選單</h5>
+          <button class="dev-toggle-btn" id="devToggleBtn" title="展開/收起用戶列表">
+            <i class="fas fa-chevron-down"></i>
+          </button>
+        </div>
+        <div class="dev-test-content" id="devTestContent" style="display: none;">
+          <div class="dev-description">
+            <p><i class="fas fa-exclamation-triangle"></i> 此為開發測試功能</p>
+            <p>點擊加號可直接成為好友，無需對方同意</p>
+          </div>
+          <div class="dev-users-container">
+            <div class="dev-loading" id="devLoading">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span>載入用戶列表中...</span>
+            </div>
+            <div class="dev-users-list" id="devUsersList" style="display: none;">
+              <!-- 用戶列表會由JavaScript動態載入 -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 中央區域 - 主要功能展示 -->
+  <div class="center-panel">
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <h1 class="page-title">
+        <span class="page-emoji">🤝</span>
+        任務卡片 CoopCard
+      </h1>
+      <p class="page-subtitle">與好友一起探索、成長與完成任務挑戰</p>
+    </div>
+
+    <!-- 任務卡片清單顯示區域 -->
+    <div class="task-cards-list-section" id="taskCardsListSection">
+      <div class="section-header">
+        <div class="section-title-area">
+          <h3><i class="fas fa-list"></i> 任務卡片清單</h3>
+          <div class="cards-count" id="cardsCount">0 張卡片</div>
+        </div>
+        <!-- 邀請拖拽區域 -->
+        <div class="invite-drop-zone" id="inviteDropZone">
+          <i class="fas fa-paper-plane"></i>
+          <span>寄送好友邀請</span>
+        </div>
+        
+        <div class="delete-drop-zone" id="deleteDropZone">
+          <i class="fas fa-calendar-times"></i>
+          <span>刪除/退出任務</span>
+        </div>
+        
+        <!-- 結算卡片拖拽區域 -->
+        <div class="store-drop-zone" id="storeDropZone">
+          <i class="fas fa-calculator"></i>
+          <span>結算卡片</span>
+        </div>
+      </div>
+      <div class="task-cards-grid" id="taskCardsGrid">
+        <!-- 任務卡片會動態載入到這裡 -->
+      </div>
+    </div>
+
+    <!-- 主要功能區域 -->
+    <div class="main-features-container">
+      
+      <!-- 任務卡片撰寫區域 -->
+      <div class="feature-card card-writing-card active">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="fas fa-edit"></i>
+          </div>
+          <div class="card-title">
+            <h3>撰寫任務卡片</h3>
+            <p>創建與好友共同完成的任務挑戰卡片</p>
+          </div>
+          <div class="status-badge available">現已開放</div>
+        </div>
+        <div class="card-content" id="cardContent">
+          <!-- 卡片撰寫區域 -->
+          <div class="card-writing-area" id="cardWritingArea">
+            <div class="task-card-editor" id="taskCardEditor">
+              <!-- 郵戳圖標選擇 -->
+              <div class="stamp-selector">
+                <div class="stamp-icon active" data-icon="fas fa-leaf" title="葉子">
+                  <i class="fas fa-leaf"></i>
+                </div>
+                <div class="stamp-icon" data-icon="fas fa-star" title="星星">
+                  <i class="fas fa-star"></i>
+                </div>
+                <div class="stamp-icon" data-icon="fas fa-sun" title="太陽">
+                  <i class="fas fa-sun"></i>
+                </div>
+                <div class="stamp-icon" data-icon="fas fa-heart" title="愛心">
+                  <i class="fas fa-heart"></i>
+                </div>
+                <div class="stamp-icon" data-icon="fas fa-gem" title="寶石">
+                  <i class="fas fa-gem"></i>
+                </div>
+              </div>
+
+              <!-- 可編輯的卡片內容 -->
+              <div class="editable-card-content">
+                <div class="card-title-input">
+                  <div class="input-label">卡片標題</div>
+                  <div class="editable-title" contenteditable="true" 
+                       data-placeholder="點擊輸入任務標題..."
+                       id="editableTitle">點擊輸入任務標題...</div>
+                </div>
+                
+                <div class="card-content-input">
+                  <div class="input-label">任務內容</div>
+                  <div class="editable-content" contenteditable="true" 
+                       data-placeholder="點擊輸入任務詳細內容..."
+                       id="editableContent">點擊輸入任務詳細內容...</div>
+                </div>
+
+                <!-- 任務設定選項 -->
+                <div class="task-settings">
+                  <div class="setting-group">
+                    <label>每日執行次數</label>
+                    <div class="simple-input-container">
+                      <input type="number" id="dailyExecutions" 
+                             min="1" max="20" value="2" 
+                             class="simple-number-input" placeholder="2">
+                      <div class="input-hint">最多20次</div>
+                    </div>
+                  </div>
+                  
+                  <div class="setting-group">
+                    <label>結束日期</label>
+                    <div class="date-input-container">
+                      <input type="date" id="endDate" 
+                             class="date-picker">
+                      <span class="date-helper" id="dateHelper">選擇任務結束日期</span>
+                    </div>
+                  </div>
+                  
+                  <div class="setting-group">
+                    <label>參與人數上限</label>
+                    <div class="rating-container">
+                      <div class="rating-circles" id="maxParticipantsRating">
+                        <!-- 1-10個圓圈，由JavaScript動態生成 -->
+                      </div>
+                      <div class="rating-display">
+                        <span class="selected-count" id="selectedParticipants">5</span>
+                        <span class="max-label">人上限</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 提交按鈕 -->
+                <div class="submit-section">
+                  <button class="submit-card-btn" id="submitCardBtn">
+                    <i class="fas fa-paper-plane"></i>
+                    掛上任務卡片清單！
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 接收漂流信 (預留) -->
+      <div class="feature-card bottles-card placeholder">
+        <div class="card-header">
+          <div class="card-icon">
+            <i class="fas fa-paper-plane"></i>
+          </div>
+          <div class="card-title">
+            <h3>接收漂流信</h3>
+            <p>收到匿名好友發送的溫暖訊息</p>
+          </div>
+          <div class="coming-soon-badge">即將推出</div>
+        </div>
+        <div class="card-content">
+          <div class="placeholder-content">
+            <div class="placeholder-icon">💌</div>
+            <h4>匿名互動系統</h4>
+            <ul class="feature-preview-list">
+              <li><i class="fas fa-check"></i> 隨機匿名配對</li>
+              <li><i class="fas fa-check"></i> 溫暖訊息交換</li>
+              <li><i class="fas fa-check"></i> 情緒分析整合</li>
+              <li><i class="fas fa-check"></i> 每日接收限制</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  
+  <!-- 右側面板 - 好友列表與統計 -->
+  <div class="right-panel glass-panel" id="rightPanel">
+    <button class="panel-toggle-btn" id="rightPanelToggle" title="收起/展開右側面板">
+      <i class="fas fa-chevron-right"></i>
+    </button>
+    <div class="panel-header">
+      <h3>👥 好友管理</h3>
+    </div>
+    <div class="panel-content">
+      
+      <!-- 好友統計 -->
+      <div class="friends-stats">
+        <div class="stat-item">
+          <div class="stat-icon">👥</div>
+          <div class="stat-content">
+            <div class="stat-number">{{ friends_count }}</div>
+            <div class="stat-label">位好友</div>
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-icon">📨</div>
+          <div class="stat-content">
+            <div class="stat-number">{{ pending_requests_count }}</div>
+            <div class="stat-label">待處理請求</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 好友互動小視窗 -->
+      <div class="friends-interaction-widget">
+        
+        <!-- 標籤切換按鈕 -->
+        <div class="widget-tabs">
+          <button class="tab-btn active" data-tab="friends" title="好友列表">
+            <i class="fas fa-address-book"></i>
+          </button>
+          <button class="tab-btn" data-tab="cards" title="卡片收件夾">
+            <i class="fas fa-folder-open"></i>
+          </button>
+          <button class="tab-btn" data-tab="others" title="其他功能">
+            <i class="fas fa-archive"></i>
+          </button>
+          <button class="tab-btn" data-tab="userid" title="ID設定">
+            <i class="fas fa-id-card"></i>
+          </button>
+        </div>
+        
+        <!-- 標籤內容區域 -->
+        <div class="widget-content">
+          <!-- 好友列表標籤 -->
+          <div class="tab-panel active" id="friends-panel">
+            <h5><i class="fas fa-address-book"></i> 好友列表</h5>
+            
+            <!-- 好友請求通知 -->
+            <div class="friend-requests-notification" id="friendRequestsNotification" style="display: none;">
+              <div class="notification-content">
+                <i class="fas fa-envelope"></i>
+                <span class="request-text">有 <span id="requestCount">0</span> 個好友請求</span>
+                <button class="view-requests-btn" onclick="toggleRequestsNotification()">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+            
+            <!-- 好友請求列表 -->
+            <div class="friend-requests-section" id="friendRequestsSection" style="display: none;">
+              <div class="section-header">
+                <h6><i class="fas fa-envelope"></i> 待處理請求</h6>
+                <button class="collapse-btn" onclick="toggleRequestsSection()">
+                  <i class="fas fa-chevron-up"></i>
+                </button>
+              </div>
+              <div class="requests-list" id="requestsList">
+                <!-- 好友請求會動態載入到這裡 -->
+              </div>
+            </div>
+            
+            <div class="friends-content" id="friendsContent">
+              <!-- 好友列表內容將由JavaScript動態載入 -->
+              <div class="friends-placeholder">
+                <i class="fas fa-user-friends"></i>
+                <span>載入好友列表中...</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 卡片收件夾標籤 -->
+          <div class="tab-panel" id="cards-panel">
+            <h5><i class="fas fa-folder-open"></i> 卡片收件夾</h5>
+            <div class="cards-inbox-content">
+              <!-- 邀請卡片將由JavaScript動態載入 -->
+              <div class="invitation-loading">
+                <div class="spinner"></div>
+                <span>載入邀請中...</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 其他功能標籤 - 已結算任務 -->
+          <div class="tab-panel" id="others-panel">
+            <h5><i class="fas fa-calculator"></i> 已結算任務</h5>
+            <div class="others-content">
+              <div class="stored-cards-section">
+                <div class="stored-cards-header">
+                  <div class="stored-stats">
+                    <span class="stored-count" id="storedCardsCount">0</span>
+                    <span class="stored-label">個已結算任務</span>
+                  </div>
+                  <button class="refresh-stored-btn" id="refreshStoredBtn" title="重新載入">
+                    <i class="fas fa-sync-alt"></i>
+                  </button>
+                </div>
+                <div class="stored-cards-list" id="storedCardsList">
+                  <div class="stored-cards-loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <span>載入已結算任務中...</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- ID設定標籤 -->
+          <div class="tab-panel" id="userid-panel">
+            <h5><i class="fas fa-id-card"></i> ID設定</h5>
+            <div class="userid-content">
+              <!-- 洞察引導區域 -->
+              <div class="exploration-item insight-guidance" id="insightGuidance">
+                <h5><i class="fas fa-lightbulb"></i> 引導提示</h5>
+                <div class="guidance-content" id="guidanceContent">
+                  <div class="guidance-message active" data-message="1">
+                    <div class="guidance-icon">🔐</div>
+                    <div class="guidance-text">創建個人ID讓好友更容易找到您！</div>
+                  </div>
+                  <div class="guidance-message" data-message="2">
+                    <div class="guidance-icon">✨</div>
+                    <div class="guidance-text">個人ID就像您的數位名片，獨一無二</div>
+                  </div>
+                  <div class="guidance-message" data-message="3">
+                    <div class="guidance-icon">🌟</div>
+                    <div class="guidance-text">設定完成後即可開始任務卡片體驗</div>
+                  </div>
+                  <div class="guidance-message" data-message="4">
+                    <div class="guidance-icon">💫</div>
+                    <div class="guidance-text">與好友一起探索、成長與互動吧！</div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 推薦項目區域(取代原本的輸入框位置) -->
+              <div class="exploration-item reco-item" id="recoItem">
+                <h5><i class="fas fa-user-plus"></i> 創建ID</h5>
+                <div class="reco-content">
+                  <div class="input-group">
+                    <label for="userIdInput">個人ID</label>
+                    <input 
+                      type="text" 
+                      id="userIdInput" 
+                      class="user-id-input reco-input"
+                      placeholder="請輸入3-30個字元的ID"
+                      maxlength="30"
+                      autocomplete="off"
+                    >
+                    <div class="input-feedback" id="userIdFeedback"></div>
+                  </div>
+                  
+                  <div class="input-rules">
+                    <h6>規則說明：</h6>
+                    <ul class="rules-list">
+                      <li><i class="fas fa-check"></i> 長度：3-30個字元</li>
+                      <li><i class="fas fa-check"></i> 字元：英文字母、數字、底線(_)、連字號(-)</li>
+                      <li><i class="fas fa-check"></i> 唯一性：不能與其他用戶重複</li>
+                    </ul>
+                  </div>
+                  
+                  <div class="reco-actions">
+                    <button id="createUserIdBtn" class="btn-primary reco-btn" disabled>
+                      <span class="btn-text">創建ID</span>
+                      <span class="btn-loading" style="display: none;">
+                        <i class="fas fa-spinner fa-spin"></i> 創建中...
+                      </span>
+                    </button>
+                    <button id="skipUserIdBtn" class="btn-secondary reco-btn-alt">稍後設定</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 排行榜預覽 (預留) -->
+      <div class="leaderboard-preview-section placeholder">
+        <h4>🏆 好友排行榜</h4>
+        <div class="placeholder-content mini">
+          <div class="placeholder-icon">🏆</div>
+          <p>競爭與激勵系統</p>
+          <div class="coming-soon-badge mini">即將推出</div>
+        </div>
+      </div>
+
+      <!-- 戰績存放預覽 (預留) -->
+      <div class="achievements-preview-section placeholder">
+        <h4>🏅 個人戰績</h4>
+        <div class="placeholder-content mini">
+          <div class="placeholder-icon">🏅</div>
+          <p>成就收藏系統</p>
+          <div class="coming-soon-badge mini">即將推出</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 搜尋結果模態框 -->
+<div id="search-modal" class="modal-overlay" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>搜尋結果</h3>
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-body" id="search-results">
+      <!-- 搜尋結果會動態載入到這裡 -->
+    </div>
+  </div>
+</div>
+
+<!-- 刪除任務卡片確認視窗 -->
+<div id="cardDeleteConfirmModal" class="card-confirm-modal-overlay">
+  <div class="card-confirm-modal delete-confirm">
+    <div class="confirm-modal-header">
+      <div class="confirm-icon delete-icon">
+        <i class="fas fa-exclamation-triangle"></i>
+      </div>
+      <h3>刪除任務卡片</h3>
+    </div>
+    <div class="confirm-modal-body">
+      <p class="confirm-message">確定要刪除任務卡片嗎？</p>
+      <p class="confirm-card-title" id="deleteCardTitle"></p>
+      <p class="confirm-warning">
+        <i class="fas fa-info-circle"></i>
+        此操作無法復原，卡片將被永久歸檔。
+      </p>
+    </div>
+    <div class="confirm-modal-footer">
+      <button class="btn-cancel" onclick="closeDeleteConfirmModal()">
+        <i class="fas fa-times"></i> 取消
+      </button>
+      <button class="btn-confirm btn-delete" id="confirmDeleteBtn">
+        <i class="fas fa-trash-alt"></i> 確定刪除
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 退出任務卡片確認視窗 -->
+<div id="cardLeaveConfirmModal" class="card-confirm-modal-overlay">
+  <div class="card-confirm-modal leave-confirm">
+    <div class="confirm-modal-header">
+      <div class="confirm-icon leave-icon">
+        <i class="fas fa-sign-out-alt"></i>
+      </div>
+      <h3>退出任務卡片</h3>
+    </div>
+    <div class="confirm-modal-body">
+      <p class="confirm-message">確定要退出這個任務嗎？</p>
+      <p class="confirm-card-title" id="leaveCardTitle"></p>
+      <p class="confirm-warning">
+        <i class="fas fa-info-circle"></i>
+        退出後將不再收到此任務的更新通知。
+      </p>
+    </div>
+    <div class="confirm-modal-footer">
+      <button class="btn-cancel" onclick="closeLeaveConfirmModal()">
+        <i class="fas fa-times"></i> 取消
+      </button>
+      <button class="btn-confirm btn-leave" id="confirmLeaveBtn">
+        <i class="fas fa-sign-out-alt"></i> 確定退出
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- 結算任務卡片確認視窗 -->
+<div id="cardStoreConfirmModal" class="card-confirm-modal-overlay">
+  <div class="card-confirm-modal store-confirm">
+    <div class="confirm-modal-header">
+      <div class="confirm-icon store-icon">
+        <i class="fas fa-calculator"></i>
+      </div>
+      <h3>結算任務卡片</h3>
+    </div>
+    <div class="confirm-modal-body">
+      <p class="confirm-message">確定要結算這個任務卡片嗎？</p>
+      <p class="confirm-card-title" id="storeCardTitle"></p>
+      <p class="confirm-warning">
+        <i class="fas fa-info-circle"></i>
+        結算後的卡片將移至「已結算任務」區域，您可以隨時復活它。
+      </p>
+    </div>
+    <div class="confirm-modal-footer">
+      <button class="btn-cancel" onclick="closeStoreConfirmModal()">
+        <i class="fas fa-times"></i> 取消
+      </button>
+      <button class="btn-confirm btn-store" id="confirmStoreBtn">
+        <i class="fas fa-calculator"></i> 確定結算
+      </button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+  {{ super() }}
+  <!-- Socket.IO 和邀請通知 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+  <script src="{{ url_for('static', filename='js/modules/coopcard/invitation_notifications.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/modules/coopcard/invitation_card_manager.js') }}"></script>
+  
+  <!-- CoopCard 模組 -->
+  <script src="{{ url_for('static', filename='js/modules/coopcard/user-id-manager.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/modules/coopcard/friend_selector.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/modules/coopcard/coopcard_main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/modules/coopcard/coopcard_inline.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/modules/coopcard/task_detail_modal.js') }}"></script>
+  
+  <!-- 設置用戶email變量供WebSocket使用 -->
+  <script>
+    window.userEmail = '{{ current_user.id }}';
+    window.currentUserEmail = '{{ current_user.id }}'; // 用於邀請卡片顏色區分
+    
+    // 初始化邀請相關功能
+    document.addEventListener('DOMContentLoaded', function() {
+      // 初始化邀請通知系統
+      if (typeof InvitationNotifications !== 'undefined') {
+        window.invitationNotifications = new InvitationNotifications();
+      }
+      
+      // 初始化邀請卡片管理器
+      if (typeof InvitationCardManager !== 'undefined') {
+        window.invitationCardManager = new InvitationCardManager();
+      }
+    });
+  </script>
+{% endblock %}

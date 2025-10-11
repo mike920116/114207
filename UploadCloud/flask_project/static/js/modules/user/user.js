@@ -79,25 +79,25 @@ document.addEventListener('DOMContentLoaded', function () {
         // 檢查密碼長度（至少8個字元）
         const lengthCheck = document.getElementById('length-check');
         if (password.length >= 8) {
-            updateRequirement(lengthCheck, true, '✓');
+            updateRequirement(lengthCheck, true);
         } else {
-            updateRequirement(lengthCheck, false, '✗');
+            updateRequirement(lengthCheck, false);
         }
         
         // 檢查是否包含英文字母
         const letterCheck = document.getElementById('letter-check');
         if (/[a-zA-Z]/.test(password)) {
-            updateRequirement(letterCheck, true, '✓');
+            updateRequirement(letterCheck, true);
         } else {
-            updateRequirement(letterCheck, false, '✗');
+            updateRequirement(letterCheck, false);
         }
         
         // 檢查是否包含數字
         const numberCheck = document.getElementById('number-check');
         if (/[0-9]/.test(password)) {
-            updateRequirement(numberCheck, true, '✓');
+            updateRequirement(numberCheck, true);
         } else {
-            updateRequirement(numberCheck, false, '✗');
+            updateRequirement(numberCheck, false);
         }
         
         // 檢查密碼是否與帳號不同
@@ -109,12 +109,12 @@ document.addEventListener('DOMContentLoaded', function () {
                            !emailUsername.toLowerCase().includes(password.toLowerCase());
             
             if (isValid) {
-                updateRequirement(accountCheck, true, '✓');
+                updateRequirement(accountCheck, true);
             } else {
-                updateRequirement(accountCheck, false, '✗');
+                updateRequirement(accountCheck, false);
             }
         } else {
-            updateRequirement(accountCheck, false, '✗');
+            updateRequirement(accountCheck, false);
         }
     }
     
@@ -127,19 +127,25 @@ document.addEventListener('DOMContentLoaded', function () {
         if (password2) {
             matchIndicator.style.display = 'block';
             if (password1 === password2 && password1.length > 0) {
-                updateRequirement(matchCheck, true, '✓');
+                updateRequirement(matchCheck, true);
             } else {
-                updateRequirement(matchCheck, false, '✗');
+                updateRequirement(matchCheck, false);
             }
         } else {
             matchIndicator.style.display = 'none';
         }
     }
     
-    function updateRequirement(element, isValid, icon) {
+    function updateRequirement(element, isValid) {
         const iconElement = element.querySelector('.check-icon');
         if (iconElement) {
-            iconElement.textContent = icon;
+            if (isValid) {
+                iconElement.classList.remove('fa-times');
+                iconElement.classList.add('fa-check');
+            } else {
+                iconElement.classList.remove('fa-check');
+                iconElement.classList.add('fa-times');
+            }
         }
         
         if (isValid) {
@@ -153,13 +159,20 @@ document.addEventListener('DOMContentLoaded', function () {
     window.togglePasswordVisibility = function(inputId) {
         const inputElement = document.getElementById(inputId);
         const buttonElement = document.querySelector(`button[onclick="togglePasswordVisibility('${inputId}')"]`);
+        const iconElement = buttonElement.querySelector('i');
 
         if (inputElement.type === 'password') {
             inputElement.type = 'text';
-            buttonElement.classList.add('hidden');
+            if (iconElement) {
+                iconElement.classList.remove('fa-eye-slash');
+                iconElement.classList.add('fa-eye');
+            }
         } else {
             inputElement.type = 'password';
-            buttonElement.classList.remove('hidden');
+            if (iconElement) {
+                iconElement.classList.remove('fa-eye');
+                iconElement.classList.add('fa-eye-slash');
+            }
         }
     }
 });

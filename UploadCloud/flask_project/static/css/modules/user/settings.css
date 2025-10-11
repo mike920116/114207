@@ -1,6 +1,6 @@
 .settings-page-wrapper {
-  background: linear-gradient(to bottom right, #d9f2d9, #b5e3b5);
-  color: #2f3d2f;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
   font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
   min-height: 100vh;
   padding-top: 100px;
@@ -10,40 +10,67 @@
   align-items: flex-start;
 }
 
+/* 設定框 - 玻璃擬態設計 */
 .settings-box {
-  background: rgba(240, 255, 240, 0.95);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(100, 255, 218, 0.3);
   padding: 50px;
   max-width: 720px;
   width: 100%;
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(60, 120, 60, 0.35);
+  border-radius: 25px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  transition: all 0.3s ease;
+}
+
+.settings-box:hover {
+  border-color: rgba(100, 255, 218, 0.5);
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5);
 }
 
 .settings-box h2,
 .settings-box h3 {
-  color: #5a9b4c;
+  color: #64ffda;
   margin-bottom: 24px;
   text-align: center;
   font-size: 24px;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
 }
 
 .settings-box label {
   display: block;
   margin-bottom: 6px;
-  color: #4b6a3e;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: bold;
 }
 
+.settings-box label i {
+  margin-right: 8px; /* icon 在左側時的右側間距 */
+  color: #64ffda;
+  opacity: 0.9;
+  font-size: 0.95em;
+  vertical-align: middle;
+}
+
+/* 輸入框 - 玻璃擬態風格 */
 .settings-box input.form-control,
 .settings-box textarea.form-control {
   width: 100%;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.6);
-  border: 1px solid #8fcf8c;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 255, 218, 0.3);
   border-radius: 10px;
   font-size: 16px;
-  color: #2f3d2f;
+  color: rgba(255, 255, 255, 0.95);
   margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.settings-box input.form-control::placeholder,
+.settings-box textarea.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .settings-box textarea#bio {
@@ -56,14 +83,17 @@
 .settings-box input.form-control:focus,
 .settings-box textarea.form-control:focus {
   outline: none;
-  border-color: #6aad5b;
-  box-shadow: 0 0 6px #aadfaa;
+  border-color: rgba(100, 255, 218, 0.6);
+  background: rgba(100, 255, 218, 0.1);
+  box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1),
+              0 0 15px rgba(100, 255, 218, 0.2);
+  color: rgba(255, 255, 255, 1);
 }
 
 .settings-box #bio-counter {
   text-align: right;
   font-size: 0.9rem;
-  color: #666;
+  color: rgba(255, 255, 255, 0.7);
   margin-top: -14px;
   margin-bottom: 18px;
 }
@@ -80,42 +110,62 @@
   object-fit: cover;
   width: 140px;
   height: 140px;
-  border: 2px solid #7ec67c;
-  background: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 3px solid rgba(100, 255, 218, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(100, 255, 218, 0.2);
+  transition: all 0.3s ease;
 }
 
-/* 按鈕置中與樣式 */
+.settings-box img#avatar-preview:hover {
+  border-color: #64ffda;
+  box-shadow: 0 6px 20px rgba(100, 255, 218, 0.4);
+  transform: scale(1.05);
+}
+
+/* 按鈕 - 青綠色玻璃擬態風格 */
 .settings-box .btn {
-  background: linear-gradient(135deg, #6aad5b, #89cc7c);
-  color: white;
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.3), rgba(100, 255, 218, 0.2));
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(100, 255, 218, 0.5);
+  color: #64ffda;
   font-weight: bold;
   font-size: 16px;
-  border: none;
   padding: 12px 24px;
-  border-radius: 8px;
-  transition: 0.3s ease;
+  border-radius: 25px;
+  transition: all 0.3s ease;
   display: block;
   margin: 30px auto 0 auto;
   width: 60%;
   text-align: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(100, 255, 218, 0.2);
 }
 
 .settings-box .btn:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.4), rgba(100, 255, 218, 0.3));
+  border-color: #64ffda;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(100, 255, 218, 0.4);
 }
 
 /* 登入資訊段落 */
 .settings-box .login-info {
   font-size: 15px;
-  color: #3a3a3a;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 30px;
-  background: #f0f8f0;
+  background: rgba(100, 255, 218, 0.1);
+  backdrop-filter: blur(10px);
   padding: 16px;
   border-radius: 10px;
-  border-left: 5px solid #8fcf8c;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-left: 5px solid rgba(100, 255, 218, 0.5);
   text-align: left;
+  transition: all 0.3s ease;
+}
+
+.settings-box .login-info:hover {
+  background: rgba(100, 255, 218, 0.15);
+  border-left-color: #64ffda;
 }
 
 .settings-box .login-info p {
@@ -128,20 +178,25 @@
   margin-bottom: 20px;
 }
 
+.current-avatar-container p {
+  color: rgba(255, 255, 255, 0.8);
+}
+
 .current-avatar-container img#current-avatar {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  border: 3px solid #7ec67c;
+  border: 3px solid rgba(100, 255, 218, 0.5);
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(100, 255, 218, 0.2);
+  position: relative;
 }
 
 .current-avatar-container img#current-avatar:hover {
   transform: scale(1.05);
-  border-color: #6aad5b;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  border-color: #64ffda;
+  box-shadow: 0 6px 20px rgba(100, 255, 218, 0.4);
 }
 
 /* 頭像選擇彈出視窗 */
@@ -153,21 +208,43 @@
   top: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
   animation: fadeIn 0.3s ease;
 }
 
 .modal-content {
-  background-color: #fefefe;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(100, 255, 218, 0.3);
   margin: 5% auto;
   padding: 0;
-  border-radius: 12px;
+  border-radius: 20px;
   width: 90%;
   max-width: 600px;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
   animation: slideIn 0.3s ease;
+}
+
+/* 自訂滾動條 */
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background: rgba(100, 255, 218, 0.3);
+  border-radius: 3px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 255, 218, 0.5);
 }
 
 .modal-header {
@@ -175,27 +252,38 @@
   justify-content: space-between;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid #eee;
-  background: linear-gradient(135deg, #6aad5b, #89cc7c);
-  color: white;
-  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid rgba(100, 255, 218, 0.2);
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.2), rgba(100, 255, 218, 0.1));
+  color: rgba(255, 255, 255, 0.95);
+  border-radius: 20px 20px 0 0;
 }
 
 .modal-header h3 {
   margin: 0;
   font-size: 20px;
+  color: #64ffda;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
 }
 
 .close-modal {
   font-size: 28px;
   font-weight: bold;
   cursor: pointer;
-  color: white;
-  transition: color 0.2s ease;
+  color: rgba(255, 255, 255, 0.8);
+  transition: all 0.3s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .close-modal:hover {
-  color: #ddd;
+  color: #64ffda;
+  background: rgba(100, 255, 218, 0.2);
+  transform: rotate(90deg);
 }
 
 .modal-body {
@@ -204,39 +292,50 @@
 
 .modal-footer {
   padding: 15px 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid rgba(100, 255, 218, 0.2);
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0 0 20px 20px;
 }
 
+/* 次要按鈕 */
 .btn-secondary {
-  background: #6c757d;
-  border: none;
-  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
 }
 
 .btn-secondary:hover {
-  background: #5a6268;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
 }
 
+/* 主要按鈕 */
 .btn-primary {
-  background: linear-gradient(135deg, #6aad5b, #89cc7c);
-  border: none;
-  color: white;
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.3), rgba(100, 255, 218, 0.2));
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(100, 255, 218, 0.5);
+  color: #64ffda;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 20px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  font-weight: bold;
 }
 
 .btn-primary:hover {
-  transform: scale(1.05);
-  filter: brightness(1.1);
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.4), rgba(100, 255, 218, 0.3));
+  border-color: #64ffda;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(100, 255, 218, 0.3);
 }
 
 @keyframes fadeIn {
@@ -266,11 +365,17 @@
 .avatar-modal .avatar-option {
   text-align: center;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: all 0.3s ease;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
 }
 
 .avatar-modal .avatar-option:hover {
-  transform: scale(1.05);
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.3);
+  transform: translateY(-3px);
 }
 
 .avatar-modal .avatar-img {
@@ -278,12 +383,14 @@
   height: 80px;
   border-radius: 50%;
   border: 3px solid transparent;
-  transition: border 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .avatar-modal .avatar-radio:checked + .avatar-img {
-  border-color: #28a745;
-  box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+  border-color: #64ffda;
+  box-shadow: 0 0 15px rgba(100, 255, 218, 0.5);
+  transform: scale(1.1);
 }
 
 .avatar-radio {
@@ -381,90 +488,109 @@
 
 /* 深色模式（配合暗色主題） */
 body.dark-mode .settings-page-wrapper {
-  background: linear-gradient(to bottom right, #0a1c2b, #1a3c5a);
-  color: #e6f0fa;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 body.dark-mode .settings-box {
-  background: rgba(20, 35, 50, 0.9);
-  box-shadow: 0 0 20px rgba(42, 75, 124, 0.4);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(15px);
+  border-color: rgba(100, 255, 218, 0.4);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.5);
 }
 
 body.dark-mode .settings-box h2,
 body.dark-mode .settings-box h3,
 body.dark-mode .settings-box label {
-  color: #cde4ff;
+  color: #64ffda;
 }
 
 body.dark-mode .settings-box input.form-control,
 body.dark-mode .settings-box textarea.form-control {
-  background: rgba(0, 0, 0, 0.25);
-  color: #e6f0fa;
-  border-color: #4a7b9d;
+  background: rgba(0, 0, 0, 0.3);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(100, 255, 218, 0.4);
 }
 
 body.dark-mode .settings-box .btn {
-  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.25), rgba(100, 255, 218, 0.15));
+  border-color: rgba(100, 255, 218, 0.5);
 }
 
 body.dark-mode .settings-box .login-info {
-  background: rgba(255, 255, 255, 0.08);
-  color: #e0ecf0;
-  border-left: 5px solid #6ca2d5;
+  background: rgba(100, 255, 218, 0.08);
+  color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(100, 255, 218, 0.3);
+  border-left-color: rgba(100, 255, 218, 0.5);
 }
 
 body.dark-mode .modal-content {
-  background-color: #2c3e50;
-  color: #ecf0f1;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px);
+  border-color: rgba(100, 255, 218, 0.4);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 body.dark-mode .modal-header {
-  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.25), rgba(100, 255, 218, 0.15));
+  border-bottom-color: rgba(100, 255, 218, 0.3);
 }
 
 body.dark-mode .modal-body,
 body.dark-mode .modal-footer {
-  border-color: #34495e;
+  border-color: rgba(100, 255, 218, 0.2);
 }
 
 body.dark-mode .btn-secondary {
-  background: #495057;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 body.dark-mode .btn-secondary:hover {
-  background: #6c757d;
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
-/* 訊息提示樣式 */
+/* 訊息提示樣式 - 玻璃擬態風格 */
 .message-toast {
   position: fixed;
   top: 20px;
   right: 20px;
   padding: 12px 20px;
-  border-radius: 6px;
-  color: white;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.95);
   font-weight: bold;
   z-index: 1001;
   animation: slideInRight 0.3s ease;
   max-width: 300px;
   word-wrap: break-word;
+  backdrop-filter: blur(10px);
+  border: 2px solid;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .message-success {
-  background: linear-gradient(135deg, #28a745, #34ce57);
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.2));
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #22c55e;
 }
 
 .message-warning {
-  background: linear-gradient(135deg, #ffc107, #ffcd39);
-  color: #212529;
+  background: linear-gradient(135deg, rgba(255, 193, 7, 0.3), rgba(255, 193, 7, 0.2));
+  border-color: rgba(255, 193, 7, 0.5);
+  color: #ffc107;
 }
 
 .message-info {
-  background: linear-gradient(135deg, #17a2b8, #20c997);
+  background: linear-gradient(135deg, rgba(100, 255, 218, 0.3), rgba(100, 255, 218, 0.2));
+  border-color: rgba(100, 255, 218, 0.5);
+  color: #64ffda;
 }
 
 .message-error {
-  background: linear-gradient(135deg, #dc3545, #e74c3c);
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.2));
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
 }
 
 @keyframes slideInRight {

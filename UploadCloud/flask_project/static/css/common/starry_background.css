@@ -1,0 +1,87 @@
+/* ===== 統一星空背景系統 - 基於 diary_list 設計 ===== */
+/* 星空 + 往上漂浮的藍色粒子 + 些微藍紫色霧 */
+
+.starry-particle-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(135deg, 
+    rgba(25, 25, 112, 0.5) 0%, 
+    rgba(72, 61, 139, 0.4) 50%, 
+    rgba(0, 20, 40, 0.7) 100%
+  );
+}
+
+.starry-rainbow-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, 
+    rgba(100, 255, 218, 0.1) 0%, 
+    rgba(79, 172, 254, 0.1) 25%, 
+    rgba(0, 242, 254, 0.1) 50%, 
+    rgba(100, 255, 218, 0.1) 75%, 
+    rgba(106, 173, 91, 0.1) 100%
+  );
+  animation: starryRainbowShift 10s infinite ease-in-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes starryRainbowShift {
+  0%, 100% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+}
+
+/* 粒子動畫 - 往上漂浮 */
+@keyframes starryFloatParticle {
+  0% {
+    transform: translateY(100vh) translateX(-50px) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-100px) translateX(50px) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+/* 星星閃爍動畫 */
+@keyframes starryTwinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* 確保頁面內容在背景之上 */
+.content-wrapper,
+.container,
+main,
+.diary-container,
+.growth-tree-section,
+.coopcard-three-column-container,
+.social-container,
+.support-container,
+.settings-container,
+.user-container,
+[class*="-container"],
+[class*="-section"] {
+  position: relative;
+  z-index: 10;
+}

@@ -3,10 +3,15 @@
 {% block title %}問題舉報 - 支援中心{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/support/report.css') }}">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
+
 <div class="support-wrapper">
   <div class="support-container">
     <!-- 頁面標題 -->
@@ -21,7 +26,9 @@
         
         <!-- 舉報主題 -->
         <div class="form-group">
-          <label for="theme" class="form-label required">回饋主題</label>
+          <label for="theme" class="form-label required">
+            <i class="fas fa-heading"></i> 回饋主題
+          </label>
           <input type="text" 
                  id="theme" 
                  name="theme" 
@@ -34,7 +41,9 @@
 
         <!-- 問題類型 -->
         <div class="form-group">
-          <label class="form-label required">問題類型（可多選）</label>
+          <label class="form-label required">
+            <i class="fas fa-tags"></i> 問題類型（可多選）
+          </label>
           <div class="checkbox-group">
             <div class="checkbox-item">
               <input type="checkbox" id="bug" name="options" value="功能異常">
@@ -69,7 +78,9 @@
 
         <!-- 相關貼文 ID（可選） -->
         <div class="form-group">
-          <label for="post_id" class="form-label">相關貼文 ID（可選）</label>
+          <label for="post_id" class="form-label">
+            <i class="fas fa-link"></i> 相關貼文 ID（可選）
+          </label>
           <input type="number" 
                  id="post_id" 
                  name="post_id" 
@@ -80,7 +91,9 @@
 
         <!-- 詳細說明 -->
         <div class="form-group">
-          <label for="context" class="form-label required">詳細說明</label>
+          <label for="context" class="form-label required">
+            <i class="fas fa-align-left"></i> 詳細說明
+          </label>
           <textarea id="context" 
                     name="context" 
                     class="form-control" 
@@ -105,10 +118,10 @@
     <!-- 支援中心導航 -->
     <div class="support-navigation">
       <div class="nav-section">
-        <h4>📋回饋相關</h4>
+        <h4>📋 回饋相關</h4>
         <div class="nav-links">
           <a href="{{ url_for('support.report_history') }}" class="nav-link">
-            <i class="icon-history"></i>
+            <i class="fas fa-history"></i>
             <span>回饋歷史</span>
           </a>
         </div>
@@ -118,11 +131,11 @@
         <h4>❓ 幫助中心</h4>
         <div class="nav-links">
           <a href="{{ url_for('support.support_usage') }}" class="nav-link">
-            <i class="icon-help"></i>
+            <i class="fas fa-question-circle"></i>
             <span>使用說明</span>
           </a>
           <a href="{{ url_for('support.support_faq') }}" class="nav-link">
-            <i class="icon-question"></i>
+            <i class="fas fa-circle-question"></i>
             <span>常見問題</span>
           </a>
         </div>

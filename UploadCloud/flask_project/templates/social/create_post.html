@@ -3,23 +3,31 @@
 {% block title %}新增貼文 | 心靈之森{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/social/create_post.css') }}">
 {% endblock %}
 
 {% block content %}
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
+
 <div class="create-post-wrapper">
     <div class="create-post-container">
         <!-- 標題列 -->
         <div class="header-section">
-            <a href="/social/main" class="back-btn">← 返回社群</a>
-            <h1>✨ 分享你的心情</h1>
+            <a href="/social/main" class="back-btn">
+                <i class="fas fa-arrow-left"></i> 返回社群
+            </a>
+            <h1><i class="fas fa-feather-alt"></i> 分享你的心情</h1>
         </div>
 
         <!-- 新增貼文表單 -->
         <form id="create-post-form" method="POST" enctype="multipart/form-data">
             <!-- 貼文標題 -->
             <div class="form-group">
-                <label for="title">貼文標題</label>
+                <label for="title">
+                    <i class="fas fa-heading"></i> 貼文標題
+                </label>
                 <input 
                     type="text" 
                     id="title" 
@@ -34,7 +42,9 @@
 
             <!-- 貼文內容 -->
             <div class="form-group">
-                <label for="content">你想分享什麼？</label>
+                <label for="content">
+                    <i class="fas fa-pen-fancy"></i> 你想分享什麼？
+                </label>
                 <textarea 
                     id="content" 
                     name="content" 
@@ -49,7 +59,9 @@
 
             <!-- 心情標籤選擇 -->
             <div class="form-group">
-                <label>選擇你的心情標籤</label>
+                <label>
+                    <i class="fas fa-smile"></i> 選擇你的心情標籤
+                </label>
                 <div class="mood-tags">
                     <input type="radio" id="mood-happy" name="mood" value="happy" required>
                     <label for="mood-happy" class="mood-tag">😄 開心</label>
@@ -75,17 +87,21 @@
             <div class="form-group">
                 <div class="anonymous-option">
                     <input type="checkbox" id="anonymous" name="anonymous" value="1">
-                    <label for="anonymous">匿名發文 (其他人看不到你的名稱)</label>
+                    <label for="anonymous">
+                        <i class="fas fa-user-secret"></i> 匿名發文 (其他人看不到你的名稱)
+                    </label>
                 </div>
             </div>
 
             <!-- 圖片上傳 (可選) -->
             <div class="form-group">
-                <label for="image">上傳圖片 (可選)</label>
+                <label for="image">
+                    <i class="fas fa-image"></i> 上傳圖片 (可選)
+                </label>
                 <div class="image-upload-area">
                     <input type="file" id="image" name="image" accept="image/*" class="file-input">
                     <div class="upload-placeholder">
-                        <span class="upload-icon">📷</span>
+                        <i class="fas fa-camera upload-icon"></i>
                         <span class="upload-text">點擊選擇圖片或拖拽到此處</span>
                         <span class="upload-hint">支援 JPG、PNG 格式，最大 5MB</span>
                     </div>
@@ -95,22 +111,27 @@
 
             <!-- 提交按鈕 -->
             <div class="form-actions">
-                <button type="button" class="btn btn-secondary" onclick="history.back()">取消</button>
-                <button type="submit" class="btn btn-primary">發布貼文</button>
+                <button type="button" class="btn btn-secondary" onclick="history.back()">
+                    <i class="fas fa-times"></i> 取消
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i> 發布貼文
+                </button>
             </div>
         </form>
 
         <!-- 成功/錯誤訊息 -->
         <div id="success-message" class="alert alert-success" style="display: none;">
-            貼文已成功發布！正在跳轉...
+            <i class="fas fa-check-circle"></i> 貼文已成功發布！正在跳轉...
         </div>
         <div id="error-message" class="alert alert-danger" style="display: none;">
-            發布失敗，請稍後再試。
+            <i class="fas fa-exclamation-circle"></i> 發布失敗，請稍後再試。
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/social/create_post.js') }}"></script>
 {% endblock %}

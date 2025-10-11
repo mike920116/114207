@@ -3,39 +3,42 @@
 {% block title %}日記之森 | 使用說明{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet"
-      href="{{ url_for('static',
-                       filename='css/modules/support/support.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/modules/support/support.css') }}">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
+
 <section class="support-hero">
   <h1>使用說明</h1>
   <p>一步步帶你進入日記之森，體驗全方位身心療癒。</p>
 </section>
 
 <section class="support-section">
-  <h2>1. 註冊 / 登入</h2>
+  <h2><i class="fas fa-user-plus"></i> 1. 註冊 / 登入</h2>
   <p>點擊右上角「用戶功能」→ 登入／註冊，即可建立帳號並開始使用。</p>
 </section>
 
 <section class="support-section">
-  <h2>2. 撰寫日記</h2>
+  <h2><i class="fas fa-book"></i> 2. 撰寫日記</h2>
   <p>前往「心理日記」→ 新增日記，輸入當下心情及事件，系統將自動保存。</p>
 </section>
 
 <section class="support-section">
-  <h2>3. AI 助手互動</h2>
+  <h2><i class="fas fa-robot"></i> 3. AI 助手互動</h2>
   <p>在「AI 助手」頁面向智慧助理發問，獲得即時建議與情緒陪伴。</p>
 </section>
 
 <section class="support-section">
-  <h2>4. 社群分享</h2>
+  <h2><i class="fas fa-users"></i> 4. 社群分享</h2>
   <p>進入「社群互動」區，與其他使用者交流、按讚或留言，建立支持網絡。</p>
 </section>
 
 <section class="support-section">
-  <h2>5. 反饋與客服</h2>
+  <h2><i class="fas fa-headset"></i> 5. 反饋與客服</h2>
   <p>於「問題反饋」提交建議，或查看下方常見問題尋求協助。</p>
 </section>
 {% endblock %}

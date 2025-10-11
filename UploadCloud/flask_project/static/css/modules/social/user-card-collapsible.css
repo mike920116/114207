@@ -1,0 +1,54 @@
+/* 用戶等級卡片收折功能樣式 */
+.user-level-card {
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.user-level-card.collapsed {
+  box-shadow: 0 1px 3px rgba(0,0,0,.1);
+}
+
+.user-level-card #level-card-header {
+  cursor: pointer;
+  position: relative;
+  margin-bottom: 0;
+}
+
+.user-level-card.collapsed #level-card-header {
+  margin-bottom: 0;
+}
+
+.user-level-card.collapsed #level-card-header:after,
+.user-level-card #level-card-header:after {
+  /* 隱藏原本用於收折指示的三角符號 */
+  display: none !important;
+  content: none !important;
+}
+
+.user-level-card.collapsed #level-card-content {
+  display: none;
+}
+
+body.dark-mode .user-level-card #level-card-header:after,
+body.dark-mode .user-level-card.collapsed #level-card-header:after {
+  color: #aaa;
+}
+
+/* 收合和展開時的過渡動畫 */
+@keyframes collapseCard {
+  from { max-height: 600px; }
+  to { max-height: 60px; }
+}
+
+@keyframes expandCard {
+  from { max-height: 60px; }
+  to { max-height: 600px; }
+}
+
+.user-level-card.collapsing {
+  animation: collapseCard 0.3s ease forwards;
+}
+
+.user-level-card.expanding {
+  animation: expandCard 0.3s ease forwards;
+}

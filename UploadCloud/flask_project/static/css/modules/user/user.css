@@ -1,7 +1,31 @@
-/* === 淺色模式（青青草原風格） === */
+/* ===== 玻璃擬態風格 - 使用者模組 ===== */
+/* 統一使用青綠色系 (#64ffda) 配色方案 */
+
+/* === 淡入動畫 === */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(100, 255, 218, 0.3);
+  }
+}
+
+/* === 主容器 === */
 .user-page-wrapper {
-  background: linear-gradient(to bottom right, #d9f2d9, #b5e3b5);
-  color: #2f3d2f;
+  background: transparent; /* 讓星空背景透過 */
+  color: rgba(255, 255, 255, 0.9);
   font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
   min-height: 100vh;
   padding-top: 120px;
@@ -11,82 +35,148 @@
   align-items: flex-start;
 }
 
+/* === 認證框 - 玻璃擬態設計 === */
 .user-page-wrapper .auth-box {
-  background: rgba(240, 255, 240, 0.9);
-  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(100, 255, 218, 0.3);
+  border-radius: 25px;
   padding: 40px;
   max-width: 480px;
   width: 100%;
-  box-shadow: 0 8px 24px rgba(45, 100, 45, 0.35);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease-out;
 }
 
+.user-page-wrapper .auth-box:hover {
+  border-color: rgba(100, 255, 218, 0.5);
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.5);
+}
+
+/* === 標題樣式 === */
 .user-page-wrapper h2,
 .user-page-wrapper h1 {
-  color: #6aad5b;
+  color: #64ffda;
   text-align: center;
   margin-bottom: 24px;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+  font-weight: 600;
 }
 
+/* === 表單標籤 === */
 .user-page-wrapper label {
   display: block;
-  margin-bottom: 6px;
-  color: #4b6a3e;
-  font-weight: bold;
+  margin-bottom: 8px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 
+/* === 玻璃擬態輸入框 === */
 .user-page-wrapper input.form-control {
   width: 100%;
-  padding: 10px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid #8fcf8c;
-  border-radius: 8px;
-  color: #2f3d2f;
+  padding: 12px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
   margin-bottom: 20px;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.user-page-wrapper input.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.user-page-wrapper input.form-control:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(100, 255, 218, 0.4);
 }
 
 .user-page-wrapper input.form-control:focus {
   outline: none;
-  border-color: #6aad5b;
-  box-shadow: 0 0 5px #aadfaa;
+  background: rgba(100, 255, 218, 0.1);
+  border-color: rgba(100, 255, 218, 0.6);
+  box-shadow: 0 0 0 3px rgba(100, 255, 218, 0.1),
+              0 0 15px rgba(100, 255, 218, 0.2);
+  color: #ffffff;
 }
 
+/* === 玻璃擬態按鈕 === */
 .user-page-wrapper .btn {
-  background: linear-gradient(135deg, #6aad5b, #89cc7c);
-  color: #ffffff;
-  border: none;
-  padding: 12px;
-  border-radius: 6px;
+  background: linear-gradient(135deg, 
+    rgba(100, 255, 218, 0.3), 
+    rgba(100, 255, 218, 0.2));
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(100, 255, 218, 0.5);
+  border-radius: 25px;
+  color: #64ffda;
+  padding: 12px 24px;
   width: 100%;
   font-weight: bold;
-  transition: 0.3s ease;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  text-shadow: 0 0 5px rgba(100, 255, 218, 0.3);
 }
 
 .user-page-wrapper .btn:hover {
-  transform: scale(1.03);
-  filter: brightness(1.1);
+  background: linear-gradient(135deg, 
+    rgba(100, 255, 218, 0.4), 
+    rgba(100, 255, 218, 0.3));
+  border-color: #64ffda;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(100, 255, 218, 0.4);
+  color: #ffffff;
 }
 
+.user-page-wrapper .btn:active {
+  transform: translateY(0);
+}
+
+/* 成功按鈕變體 */
 .user-page-wrapper .btn-success {
-  background: linear-gradient(135deg, #8fcf8c, #b1e6ae);
-  color: #2f3d2f;
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.3), 
+    rgba(34, 197, 94, 0.2));
+  border-color: rgba(34, 197, 94, 0.5);
+  color: #22c55e;
 }
 
 .user-page-wrapper .btn-success:hover {
-  filter: brightness(1.1);
+  background: linear-gradient(135deg, 
+    rgba(34, 197, 94, 0.4), 
+    rgba(34, 197, 94, 0.3));
+  border-color: #22c55e;
+  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+  color: #ffffff;
 }
 
+/* 危險按鈕變體 */
 .user-page-wrapper .btn-danger {
-  background: linear-gradient(135deg, #e57373, #f28b82);
-  color: #fff;
+  background: linear-gradient(135deg, 
+    rgba(239, 68, 68, 0.3), 
+    rgba(239, 68, 68, 0.2));
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
 }
 
 .user-page-wrapper .btn-danger:hover {
-  filter: brightness(1.1);
+  background: linear-gradient(135deg, 
+    rgba(239, 68, 68, 0.4), 
+    rgba(239, 68, 68, 0.3));
+  border-color: #ef4444;
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+  color: #ffffff;
 }
 
+/* === 訊息區域 === */
 .user-page-wrapper .success-message,
 .user-page-wrapper .error-message {
   text-align: center;
@@ -94,43 +184,71 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.6s ease-out;
 }
 
-
 .user-page-wrapper .success-message {
-  color: #4b6a3e; /* 草地綠 */
+  background: rgba(34, 197, 94, 0.1);
+  border: 2px solid rgba(34, 197, 94, 0.3);
+  color: #22c55e;
+}
+
+.user-page-wrapper .success-message h1 {
+  color: #22c55e;
+  text-shadow: 0 0 10px rgba(34, 197, 94, 0.3);
 }
 
 .user-page-wrapper .error-message {
-  color: #b33a3a; /* 微紅棕，柔和錯誤提示色 */
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+}
+
+.user-page-wrapper .error-message h1 {
+  color: #ef4444;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 
+/* === 鏈接樣式 === */
 .user-page-wrapper a {
-  color: #6aad5b;
+  color: #64ffda;
   text-decoration: none;
+  transition: all 0.3s ease;
+  position: relative;
 }
 
 .user-page-wrapper a:hover {
-  text-decoration: underline;
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(100, 255, 218, 0.5);
 }
 
+.user-page-wrapper a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #64ffda;
+  transition: width 0.3s ease;
+}
+
+.user-page-wrapper a:hover::after {
+  width: 100%;
+}
+
+/* === 按鈕波紋效果 === */
 .user-page-wrapper .btn .ripple {
   position: absolute;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.6);
   border-radius: 50%;
   transform: scale(0);
-  animation: rippleEffect 0.6s linear;
+  animation: rippleEffect 0.6s ease-out;
 }
-
-.user-page-wrapper .auth-box .text-center,
-.user-page-wrapper .auth-box .text-end {
-  text-align: center !important;
-  margin-top: 15px; /* 往下移動 */
-  display: block;
-}
-
-
 
 @keyframes rippleEffect {
   to {
@@ -139,7 +257,15 @@
   }
 }
 
-/* === 登入/註冊結果頁 樣式優化 === */
+/* === 文字對齊工具類 === */
+.user-page-wrapper .auth-box .text-center,
+.user-page-wrapper .auth-box .text-end {
+  text-align: center !important;
+  margin-top: 15px;
+  display: block;
+}
+
+/* === 登入/註冊結果頁優化 === */
 .success-message h1,
 .error-message h1 {
   font-size: 28px;
@@ -152,6 +278,7 @@
   font-size: 18px;
   margin-bottom: 24px;
   color: inherit;
+  opacity: 0.9;
 }
 
 .success-message .btn-success,
@@ -161,81 +288,36 @@
   display: block;
 }
 
-/* === 深色模式（dark-mode 類別啟用） === */
-body.dark-mode .user-page-wrapper {
-  background: linear-gradient(to bottom right, #0a1c2b, #1a3c5a);
-  color: #e6f0fa;
+/* === Alert 訊息框 === */
+.alert {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  backdrop-filter: blur(10px);
+  animation: fadeInUp 0.4s ease-out;
 }
 
-body.dark-mode .user-page-wrapper .auth-box {
-  background: rgba(10, 28, 43, 0.85);
-  box-shadow: 0 0 20px rgba(42, 75, 124, 0.3);
+.alert-danger {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #ef4444;
 }
 
-body.dark-mode .user-page-wrapper h2,
-body.dark-mode .user-page-wrapper h1 {
-  color: #e6f0fa;
-}
-
-body.dark-mode .user-page-wrapper label {
-  color: #a7c0db;
-}
-
-body.dark-mode .user-page-wrapper input.form-control {
-  background: rgba(0, 0, 0, 0.3);
-  border-color: #2a4b7c;
-  color: #e6f0fa;
-}
-
-body.dark-mode .user-page-wrapper input.form-control:focus {
-  border-color: #4a7b9d;
-  box-shadow: 0 0 5px #4a7b9d;
-}
-
-body.dark-mode .user-page-wrapper .btn {
-  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
-  color: #ffffff;
-}
-
-body.dark-mode .user-page-wrapper .btn:hover {
-  filter: brightness(1.1);
-}
-
-body.dark-mode .user-page-wrapper .btn-success {
-  background: linear-gradient(135deg, #4c8da2, #6daec7);
-  color: #ffffff;
-}
-
-body.dark-mode .user-page-wrapper .btn-danger {
-  background: linear-gradient(135deg, #c75252, #e57373);
-  color: #ffffff;
-}
-
-body.dark-mode .user-page-wrapper a {
-  color: #a7c0db;
-}
-
-body.dark-mode .user-page-wrapper .success-message {
-  color: #9bd4e1; /* 淡藍綠，代表成功 */
-}
-
-body.dark-mode .user-page-wrapper .error-message {
-  color: #f28b82; /* 淺紅色，錯誤風格與按鈕一致 */
-}
-
-/* === 密碼強度指示器樣式 === */
+/* === 密碼強度指示器 - 玻璃擬態風格 === */
 .password-strength-indicator,
 .password-match-indicator {
   margin: 10px 0 20px 0;
   padding: 15px;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.7);
-  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 255, 218, 0.2);
+  transition: all 0.3s ease;
 }
 
 .strength-title {
   font-weight: bold;
-  color: #4b6a3e;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 8px;
   font-size: 14px;
 }
@@ -245,8 +327,8 @@ body.dark-mode .user-page-wrapper .error-message {
   align-items: center;
   margin-bottom: 4px;
   font-size: 13px;
-  color: #666;
-  transition: color 0.3s ease;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.3s ease;
 }
 
 .check-icon {
@@ -254,66 +336,86 @@ body.dark-mode .user-page-wrapper .error-message {
   font-weight: bold;
   width: 16px;
   text-align: center;
-  transition: color 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 /* 未滿足要求的樣式 */
 .strength-requirement:not(.valid) .check-icon {
-  color: #e57373;
+  color: #ef4444;
 }
 
 .strength-requirement:not(.valid) {
-  color: #666;
+  color: rgba(255, 255, 255, 0.6);
 }
 
-/* 滿足要求的樣式 */
+/* 滿足要求的樣式 - 使用青綠色 */
 .strength-requirement.valid .check-icon {
-  color: #6aad5b;
+  color: #64ffda;
+  text-shadow: 0 0 5px rgba(100, 255, 218, 0.5);
 }
 
 .strength-requirement.valid {
-  color: #4b6a3e;
+  color: #64ffda;
   font-weight: 500;
 }
 
-/* 暗色模式 */
-body.dark-mode .password-strength-indicator,
-body.dark-mode .password-match-indicator {
-  background: rgba(45, 55, 65, 0.8);
-  border-color: #4a5a6a;
+/* === 深色模式樣式（已移除，統一使用玻璃擬態風格） === */
+/* 新設計不需要分離的深色模式，因為玻璃擬態本身就適合深色背景 */
+
+/* === 響應式設計 === */
+@media (max-width: 768px) {
+  .user-page-wrapper {
+    padding-top: 80px;
+    padding-bottom: 40px;
+  }
+
+  .user-page-wrapper .auth-box {
+    padding: 30px 20px;
+    margin: 0 15px;
+  }
+
+  .user-page-wrapper h2,
+  .user-page-wrapper h1 {
+    font-size: 24px;
+  }
+
+  .success-message h1,
+  .error-message h1 {
+    font-size: 22px;
+  }
+
+  .verification-email .container {
+    padding: 30px 20px;
+  }
+
+  .verification-email .header {
+    font-size: 24px;
+  }
 }
 
-body.dark-mode .strength-title {
-  color: #a7c0db;
+@media (max-width: 480px) {
+  .user-page-wrapper .auth-box {
+    padding: 25px 15px;
+  }
+
+  .user-page-wrapper input.form-control {
+    font-size: 16px; /* 防止iOS自動縮放 */
+  }
 }
 
-body.dark-mode .strength-requirement {
-  color: #a0a0a0;
-}
-
-body.dark-mode .strength-requirement.valid {
-  color: #9bd4e1;
-}
-
-body.dark-mode .strength-requirement:not(.valid) .check-icon {
-  color: #f28b82;
-}
-
-body.dark-mode .strength-requirement.valid .check-icon {
-  color: #9bd4e1;
-}
-
-/* 密碼顯示/隱藏按鈕美術風格 */
+/* === 密碼顯示/隱藏按鈕 === */
 .password-wrapper {
   position: relative;
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 }
+
 .password-wrapper input.form-control {
   padding-right: 45px;
   margin-bottom: 0;
 }
+
 .toggle-password {
   position: absolute;
   right: 15px;
@@ -323,37 +425,29 @@ body.dark-mode .strength-requirement.valid .check-icon {
   height: 20px;
   background: none;
   border: none;
-  color: #6aad5b;
+  color: #64ffda;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   opacity: 0.7;
-}
-.toggle-password:hover, .toggle-password:focus {
-  opacity: 1;
-  color: #388e3c;
-  transform: translateY(-50%) scale(1.1);
-}
-.toggle-password:before {
-  content: '🔒';
-}
-.toggle-password.hidden:before {
-  content: '🔓';
-}
-body.dark-mode .toggle-password {
-  color: #9bd4e1;
-}
-body.dark-mode .toggle-password:hover, body.dark-mode .toggle-password:focus {
-  color: #6daec7;
+  padding: 0;
 }
 
-/* === 驗證信件樣式（移植自 verification_email.html） === */
+.toggle-password:hover,
+.toggle-password:focus {
+  opacity: 1;
+  color: #ffffff;
+  transform: translateY(-50%) scale(1.2);
+  text-shadow: 0 0 8px rgba(100, 255, 218, 0.6);
+}
+
+/* === 驗證郵件樣式 - 玻璃擬態風格 === */
 .verification-email {
   font-family: 'Segoe UI', 'Noto Sans TC', sans-serif;
-  background-color: #d9f2d9;
+  background: transparent;
   margin: 0;
   padding: 20px;
   min-height: 100vh;
@@ -362,23 +456,26 @@ body.dark-mode .toggle-password:hover, body.dark-mode .toggle-password:focus {
 .verification-email .container {
   max-width: 600px;
   margin: 0 auto;
-  background: rgba(240, 255, 240, 0.95);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(15px);
+  border: 2px solid rgba(100, 255, 218, 0.3);
   padding: 40px;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(45, 100, 45, 0.35);
-  backdrop-filter: blur(10px);
+  border-radius: 25px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+  animation: fadeInUp 0.6s ease-out;
 }
 
 .verification-email .header {
   text-align: center;
-  color: #6aad5b;
+  color: #64ffda;
+  text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
   margin-bottom: 30px;
   font-size: 28px;
   font-weight: bold;
 }
 
 .verification-email .content {
-  color: #4b6a3e;
+  color: rgba(255, 255, 255, 0.9);
   line-height: 1.6;
   margin-bottom: 30px;
   font-size: 16px;
@@ -386,30 +483,37 @@ body.dark-mode .toggle-password:hover, body.dark-mode .toggle-password:focus {
 
 .verification-email .verify-button {
   display: inline-block;
-  background: linear-gradient(135deg, #6aad5b, #89cc7c);
-  color: white;
+  background: linear-gradient(135deg, 
+    rgba(100, 255, 218, 0.3), 
+    rgba(100, 255, 218, 0.2));
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(100, 255, 218, 0.5);
+  color: #64ffda;
   padding: 15px 40px;
   text-decoration: none;
-  border-radius: 8px;
+  border-radius: 25px;
   font-weight: bold;
   text-align: center;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(106, 173, 91, 0.3);
+  box-shadow: 0 4px 15px rgba(100, 255, 218, 0.3);
 }
 
 .verification-email .verify-button:hover {
-  background: linear-gradient(135deg, #5a9d4b, #79bc6c);
+  background: linear-gradient(135deg, 
+    rgba(100, 255, 218, 0.4), 
+    rgba(100, 255, 218, 0.3));
+  border-color: #64ffda;
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(106, 173, 91, 0.4);
-  color: white;
+  box-shadow: 0 6px 20px rgba(100, 255, 218, 0.4);
+  color: #ffffff;
   text-decoration: none;
 }
 
 .verification-email .footer {
   margin-top: 30px;
   padding-top: 20px;
-  border-top: 1px solid #8fcf8c;
-  color: #6a8a5d;
+  border-top: 1px solid rgba(100, 255, 218, 0.2);
+  color: rgba(255, 255, 255, 0.6);
   font-size: 14px;
   text-align: center;
   line-height: 1.5;
@@ -417,50 +521,12 @@ body.dark-mode .toggle-password:hover, body.dark-mode .toggle-password:focus {
 
 .verification-email .url-box {
   word-break: break-all;
-  background-color: rgba(143, 207, 140, 0.2);
+  background: rgba(100, 255, 218, 0.1);
   padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #8fcf8c;
-  color: #4b6a3e;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 255, 218, 0.3);
+  color: rgba(255, 255, 255, 0.8);
   font-family: 'Courier New', monospace;
   font-size: 14px;
 }
 
-/* 深色模式下的驗證信件樣式 */
-body.dark-mode .verification-email {
-  background-color: #0a1c2b;
-}
-
-body.dark-mode .verification-email .container {
-  background: rgba(10, 28, 43, 0.95);
-  box-shadow: 0 8px 24px rgba(42, 75, 124, 0.4);
-}
-
-body.dark-mode .verification-email .header {
-  color: #9bd4e1;
-}
-
-body.dark-mode .verification-email .content {
-  color: #a7c0db;
-}
-
-body.dark-mode .verification-email .verify-button {
-  background: linear-gradient(135deg, #2a4b7c, #4a7b9d);
-  box-shadow: 0 4px 15px rgba(42, 75, 124, 0.3);
-}
-
-body.dark-mode .verification-email .verify-button:hover {
-  background: linear-gradient(135deg, #1a3b6c, #3a6b8d);
-  box-shadow: 0 6px 20px rgba(42, 75, 124, 0.4);
-}
-
-body.dark-mode .verification-email .footer {
-  border-top-color: #4a7b9d;
-  color: #7a9abf;
-}
-
-body.dark-mode .verification-email .url-box {
-  background-color: rgba(74, 123, 157, 0.2);
-  border-color: #4a7b9d;
-  color: #a7c0db;
-}

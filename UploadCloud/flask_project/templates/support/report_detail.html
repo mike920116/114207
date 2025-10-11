@@ -3,11 +3,19 @@
 {% block title %}意見回饋- 支援中心{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet"
       href="{{ url_for('static', filename='css/modules/support/report.css') }}">
 {% endblock %}
 
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
+<script src="{{ url_for('static', filename='js/modules/support/report.js') }}"></script>
+{% endblock %}
+
 {% block content %}
+{% include 'components/starry_background.html' %}
+
 <div class="support-wrapper">
   <div class="support-container">
 
@@ -33,15 +41,21 @@
 
     <!-- ② 舉報內容 -->
     <section class="report-detail-section">
-      <h2 class="section-title">意見回饋</h2>
+      <h2 class="section-title">
+        <i class="fas fa-comment-dots"></i> 意見回饋
+      </h2>
       <div class="detail-card">
         <div class="detail-row">
-          <div class="detail-label">主題</div>
+          <div class="detail-label">
+            <i class="fas fa-heading"></i> 主題
+          </div>
           <div class="detail-value">{{ report.theme }}</div>
         </div>
 
         <div class="detail-row">
-          <div class="detail-label">問題類型</div>
+          <div class="detail-label">
+            <i class="fas fa-tags"></i> 問題類型
+          </div>
           <div class="detail-value">
             {% for opt in report.options %}
               <span class="type-tag">{{ opt }}</span>
@@ -51,7 +65,9 @@
 
         {% if report.post_id %}
         <div class="detail-row">
-          <div class="detail-label">相關貼文</div>
+          <div class="detail-label">
+            <i class="fas fa-link"></i> 相關貼文
+          </div>
           <div class="detail-value">
             <a href="#" class="link">貼文 #{{ report.post_id }}</a>
           </div>
@@ -59,7 +75,9 @@
         {% endif %}
 
         <div class="detail-row">
-          <div class="detail-label">詳細說明</div>
+          <div class="detail-label">
+            <i class="fas fa-align-left"></i> 詳細說明
+          </div>
           <div class="detail-value">
             <div class="content-text">{{ report.context }}</div>
           </div>
@@ -70,7 +88,9 @@
     <!-- ③ 管理員回覆 -->
     {% if report.staff_reply %}
     <section class="report-detail-section">
-      <h2 class="section-title">管理員回覆</h2>
+      <h2 class="section-title">
+        <i class="fas fa-reply"></i> 管理員回覆
+      </h2>
       <div class="detail-card staff-reply-card">
         <div class="reply-content">{{ report.staff_reply }}</div>
         <div class="reply-time">
@@ -83,11 +103,21 @@
     <!-- ④ 處理歷程 -->
     {% if audit_logs %}
     <section class="report-detail-section">
-      <h2 class="section-title">處理歷程</h2>
+      <h2 class="section-title">
+        <i class="fas fa-list-check"></i> 處理歷程
+      </h2>
       <div class="timeline">
         {% for log in audit_logs %}
         <div class="timeline-item">
-          <div class="timeline-marker {{ log.Action }}"></div>
+          <div class="timeline-marker {{ log.Action }}">
+            {% if log.Action == 'ai_check' %}
+              <i class="fas fa-robot"></i>
+            {% elif log.Action == 'manual_review' %}
+              <i class="fas fa-user-check"></i>
+            {% elif log.Action == 'notify_user' %}
+              <i class="fas fa-bell"></i>
+            {% endif %}
+          </div>
           <div class="timeline-content">
             <div class="timeline-header">
               <span class="action-name">
@@ -114,9 +144,13 @@
     <!-- ⑤ 操作按鈕 -->
     <div class="action-buttons">
       <a href="{{ url_for('support.report_history') }}"
-         class="btn btn-secondary">返回列表</a>
+         class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> 返回列表
+      </a>
       {% if report.status == 'pending' %}
-      <button class="btn btn-outline" id="cancel-btn">撤銷回饋</button>
+      <button class="btn btn-outline" id="cancel-btn">
+        <i class="fas fa-times-circle"></i> 撤銷回饋
+      </button>
       {% endif %}
     </div>
   </div>
@@ -133,8 +167,4 @@
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="{{ url_for('static', filename='js/modules/support/report.js') }}"></script>
 {% endblock %}

@@ -3,11 +3,16 @@
 {% block title %}日記之森 | 心理日記{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/diary/diary_form.css') }}">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/diary/diary_form.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
+
 <!-- 日記表單容器 -->
 <div class="form-container">
     <h2 class="form-title">我的心理日記</h2>
@@ -32,7 +37,7 @@
         <!-- 日期 -->
         <div class="form-group">
             <div class="input-wrapper">
-                <label for="diary-date">日期</label>
+                <label for="diary-date"><i class="fas fa-calendar-alt"></i> 日期</label>
                 <input type="date" id="diary-date" class="form-control" value="{{ today_date }}" required>
             </div>
         </div>
@@ -40,7 +45,7 @@
         <!-- 內容 -->
         <div class="form-group">
             <div class="input-wrapper">
-                <label for="diary-content">今天的心情...</label>
+                <label for="diary-content"><i class="fas fa-pen-fancy"></i> 今天的心情...</label>
                 <textarea id="diary-content" class="form-control textarea-control"
                           placeholder="今天發生了什麼？感受如何？詳細地描述您的情緒、成因，想法..." rows="8"></textarea>
             </div>
@@ -49,7 +54,7 @@
         <!-- 情緒選擇 -->
         <div class="form-group">
             <div class="input-wrapper">
-                <label>您今天的主要情緒是？</label>
+                <label><i class="fas fa-heart"></i> 您今天的主要情緒是？</label>
                 <div class="emotion-box">
                     <div class="emotion-option" data-emotion="快樂">快樂 😊</div>
                     <div class="emotion-option" data-emotion="平靜">平靜 😌</div>
@@ -70,7 +75,7 @@
                 <button id="submit-diary"
                         class="btn-submit"
                         data-save-url="{{ url_for('diary.save_diary') }}">
-                    儲存日記
+                    <i class="fas fa-save"></i> 儲存日記
                 </button>
             </div>
         </div>

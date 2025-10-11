@@ -5,8 +5,10 @@ Socket.IO 初始化與事件處理模組
 2025-05-16  update:  統一 session_id 為 str
 2025-05-17  fix   :  _delete_chat_session() 以 int 查 DB
 2025-05-18  feat  :  區分 user / admin 連線；user 斷線即廣播離開
+2025-01-15  feat  :  新增卡片邀請WebSocket支援
 """
 
+import time
 from flask_socketio import SocketIO
 from flask import request, current_app
 from utils import db
@@ -95,6 +97,36 @@ def init_socketio(app):
         current_app.logger.info(f"[WS] default send_message: {socket_data}")
         socketio.emit("receive_message", socket_data, broadcast=True)
 
+    # ─────────────────────── card_invitation events
+    @socketio.on("subscribe_to_invitations", namespace="/invitations")
+    def handle_invitation_subscribe(socket_data):
+        """用戶訂閱邀請通知"""
+        sid = request.sid
+        user_email = socket_data.get("user_email")
+        
+        if not user_email:
+            current_app.logger.error("[WS] invitation subscribe 無 user_email")
+            return
+        
+        # 記錄用戶的邀請訂閱
+        current_app.invitation_connections = getattr(current_app, 'invitation_connections', {})
+        current_app.invitation_connections[sid] = user_email
+        
+        current_app.logger.info(f"[WS] sid={sid} 訂閱邀請通知 email={user_email}")
+
+    @socketio.on("disconnect", namespace="/invitations")
+    def handle_invitation_disconnect():
+        """邀請通知斷線處理"""
+        sid = request.sid
+        user_email = getattr(current_app, 'invitation_connections', {}).pop(sid, None)
+        current_app.logger.info(f"[WS] invitation disconnect sid={sid} email={user_email}")
+
+    @socketio.on("connect", namespace="/invitations")
+    def handle_invitation_connect():
+        """邀請通知連線處理"""
+        current_app.logger.info(f"[WS] invitation connect sid={request.sid}")
+        return True
+
 
 # ──────────────────────────────────────────────────────────────
 #                      Helper  Function
@@ -179,3 +211,103 @@ def _delete_chat_session(session_id: str):
             database_connection.close()
 
     current_app.dify_paused_sessions.discard(session_id)
+
+
+# ──────────────────────────────────────────────────────────────
+#                    Card Invitation Helper Functions
+# ──────────────────────────────────────────────────────────────
+
+def send_invitation_notification(receiver_email, invitation_data):
+    """發送邀請通知到特定用戶"""
+    try:
+        invitation_connections = getattr(current_app, 'invitation_connections', {})
+        
+        # 找到該用戶的所有連線
+        target_sids = [sid for sid, email in invitation_connections.items() 
+                      if email == receiver_email]
+        
+        if target_sids:
+            notification = {
+                'type': 'new_invitation',
+                'data': invitation_data,
+                'timestamp': str(int(time.time() * 1000))
+            }
+            
+            for sid in target_sids:
+                socketio.emit(
+                    'invitation_received', 
+                    notification, 
+                    room=sid,
+                    namespace='/invitations'
+                )
+            
+            current_app.logger.info(
+                f"[WS] 發送邀請通知到 {receiver_email}, sids={target_sids}"
+            )
+        else:
+            current_app.logger.info(
+                f"[WS] 用戶 {receiver_email} 未在線，暫不發送通知"
+            )
+            
+    except Exception as e:
+        current_app.logger.error(f"[WS] 發送邀請通知失敗: {e}")
+
+
+def send_invitation_response_notification(sender_email, response_data):
+    """發送邀請回應通知到邀請者"""
+    try:
+        invitation_connections = getattr(current_app, 'invitation_connections', {})
+        
+        # 找到邀請者的所有連線
+        target_sids = [sid for sid, email in invitation_connections.items() 
+                      if email == sender_email]
+        
+        if target_sids:
+            notification = {
+                'type': 'invitation_response',
+                'data': response_data,
+                'timestamp': str(int(time.time() * 1000))
+            }
+            
+            for sid in target_sids:
+                socketio.emit(
+                    'invitation_response', 
+                    notification, 
+                    room=sid,
+                    namespace='/invitations'
+                )
+            
+            current_app.logger.info(
+                f"[WS] 發送回應通知到 {sender_email}, sids={target_sids}"
+            )
+        else:
+            current_app.logger.info(
+                f"[WS] 邀請者 {sender_email} 未在線，暫不發送通知"
+            )
+            
+    except Exception as e:
+        current_app.logger.error(f"[WS] 發送回應通知失敗: {e}")
+
+
+def broadcast_invitation_update(invitation_id, status):
+    """廣播邀請狀態更新"""
+    try:
+        update_data = {
+            'type': 'invitation_update',
+            'invitation_id': invitation_id,
+            'status': status,
+            'timestamp': str(int(time.time() * 1000))
+        }
+        
+        socketio.emit(
+            'invitation_updated',
+            update_data,
+            namespace='/invitations'
+        )
+        
+        current_app.logger.info(
+            f"[WS] 廣播邀請更新 id={invitation_id}, status={status}"
+        )
+        
+    except Exception as e:
+        current_app.logger.error(f"[WS] 廣播邀請更新失敗: {e}")

@@ -3,15 +3,20 @@
 {% block title %}日記之森 | 日記列表{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/diary/diary_list.css') }}">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="{{ url_for('static', filename='js/modules/diary/diary_list.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+    <!-- 統一星空背景系統 -->
+    {% include 'components/starry_background.html' %}
+
     <!-- 成長樹系統 - 獨立區塊 -->
     <div class="growth-tree-section">
         <div class="growth-header">
-            <h3 class="growth-title">🌳 我的日記之森</h3>
+            <h3 class="growth-title"><i class="fas fa-tree"></i> 我的日記之森</h3>
             <div class="level-display">
                 <span class="level-text">等級 <span id="current-level">1</span></span>
             </div>
@@ -80,8 +85,14 @@
             
             <div class="search-box">
                 <input type="text" class="search-input" placeholder="搜尋日記內容..." id="search-diary">
-                <span class="search-icon">🔍</span>
+                <span class="search-icon"><i class="fas fa-search"></i></span>
             </div>
+            
+            <!-- 佈局切換按鈕 -->
+            <button class="layout-toggle-btn" id="layoutToggleBtn" title="切換顯示模式">
+                <i class="fas fa-th" id="layoutIcon"></i>
+                <span id="layoutText">網格模式</span>
+            </button>
         </div>
         
         <!-- 錯誤訊息提示 -->
@@ -98,26 +109,34 @@
                     <div class="diary-item" data-emotion="{{ diary.analysis.split(':')[0] if diary.analysis and ':' in diary.analysis else diary.analysis }}">
                         <div class="diary-actions">
                             <button class="export-single-btn" data-diary-id="{{ diary.id }}" title="匯出此篇日記為PDF">
-                                <span class="btn-emoji">📄</span> 匯出
+                                <i class="fas fa-file-pdf"></i> 匯出
                             </button>
                             <button class="delete-diary-btn" data-diary-id="{{ diary.id }}" title="刪除日記">
-                                <span class="btn-emoji">🗑️</span> 刪除
+                                <i class="fas fa-trash-alt"></i> 刪除
                             </button>
                         </div>
                         <div class="diary-header">
                             <div class="diary-date">
-                                <i>📅</i> {{ diary.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                <i class="fas fa-calendar-alt"></i> {{ diary.created_at.strftime('%Y-%m-%d %H:%M') }}
                             </div>
                         </div>
-                        <div class="diary-content">{{ diary.content }}</div>
+                        
+                        <!-- 用戶日記內容區塊 -->
+                        <div class="diary-user-content">
+                            {{ diary.content }}
+                        </div>
+                        
+                        <!-- AI 分析回應區塊 -->
                         {% if diary.analysis %}
-                            <div class="diary-emotion">{{ diary.analysis }}</div>
+                            <div class="diary-ai-analysis">
+                                {{ diary.analysis }}
+                            </div>
                         {% endif %}
                     </div>
                 {% endfor %}
             {% else %}
                 <div class="empty-message">
-                    <div class="empty-icon">📝</div>
+                    <div class="empty-icon"><i class="fas fa-edit"></i></div>
                     <h3>您的日記旅程還未開始</h3>
                     <p>記錄您的情緒和感受，開始追蹤您的心理健康。</p>
                     <p>每天幾分鐘的心情筆記，就能幫助您更好地了解自己。</p>
@@ -129,9 +148,9 @@
 
         <!-- 操作按鈕 -->
         <div class="action-buttons">
-            <a href="{{ url_for('diary.diary_form') }}" class="btn-add">新增日記</a>
+            <a href="{{ url_for('diary.diary_form') }}" class="btn-add"><i class="fas fa-plus"></i> 新增日記</a>
             {% if diaries and diaries|length > 0 %}
-                <button class="btn-export" onclick="exportAllDiaries()">匯出全部PDF</button>
+                <button class="btn-export" onclick="exportAllDiaries()"><i class="fas fa-file-export"></i> 匯出全部PDF</button>
             {% endif %}
         </div>
     </div>

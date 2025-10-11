@@ -31,11 +31,12 @@ from services.socketio_manager import socketio, init_socketio
 from services.user import user_bp, load_user as user_load_user, settings_bp
 from services.diary import diary_bp
 from services.admin import admin_bp, admin_chat_bp, admin_announcement_bp
-from services.ai import ai_chat_bp, emotion_ai_bp
+from services.ai import ai_chat_bp, emotion_ai_bp, emo_stats_bp
 from services.line import line_webhook_bp
 from services.support import support_bp
 from services.social import social_bp
 from services.announcement import announcement_bp
+from services.coopcard import coopcard_bp
 # ─────────────────────────────────────────
 
 # ── 建立 Flask App ────────────────────────
@@ -60,12 +61,14 @@ app.register_blueprint(admin_bp,        url_prefix="/admin")
 app.register_blueprint(admin_chat_bp,   url_prefix="/admin/chat")
 app.register_blueprint(ai_chat_bp,      url_prefix="/ai")
 app.register_blueprint(emotion_ai_bp,   url_prefix="/ai")
+app.register_blueprint(emo_stats_bp,    url_prefix="/ai")
 app.register_blueprint(user_bp,         url_prefix="/user")
 app.register_blueprint(diary_bp,        url_prefix="/diary")
 app.register_blueprint(settings_bp,     url_prefix="/settings")
 app.register_blueprint(support_bp,      url_prefix="/support") 
 app.register_blueprint(line_webhook_bp)
 app.register_blueprint(social_bp,       url_prefix="/social")
+app.register_blueprint(coopcard_bp)                   # 移除重複的url_prefix，已在Blueprint定義中設定
 app.register_blueprint(announcement_bp)               # frontend API
 app.register_blueprint(admin_announcement_bp)         # admin CRUD
 

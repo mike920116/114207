@@ -1,0 +1,1743 @@
+/* 
+CoopCard 內聯編輯功能專用樣式
+用於任務卡片的內聯編輯、提交和列表顯示功能
+
+參考設計風格：emotion_ai.css 的 goal-item-recommended
+*/
+
+/* ===== 任務卡片清單顯示區域 ===== */
+.task-cards-list-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    border: 2px solid rgba(100, 255, 218, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.task-cards-list-section .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(100, 255, 218, 0.2);
+    position: relative;
+}
+
+/* 標題區域容器 */
+.task-cards-list-section .section-title-area {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.task-cards-list-section .section-header h3 {
+    color: #64ffda;
+    font-size: 1.5rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.task-cards-list-section .cards-count {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    padding: 5px 12px;
+    background: rgba(100, 255, 218, 0.1);
+    border-radius: 15px;
+    border: 1px solid rgba(100, 255, 218, 0.3);
+}
+
+/* 刪除拖拽區域 */
+.delete-drop-zone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #dc3545;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: visible; /* 改為 visible 讓 tooltip 可以顯示 */
+    margin-left: 10px;
+}
+
+.delete-drop-zone:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.delete-drop-zone i {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.delete-drop-zone:hover i {
+    transform: scale(1.1);
+}
+
+/* 隱藏文字，只顯示 icon */
+.delete-drop-zone span {
+    position: absolute;
+    bottom: -40px; /* 顯示在按鈕下方 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, bottom 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* tooltip 箭頭 */
+.delete-drop-zone span::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid rgba(0, 0, 0, 0.9);
+}
+
+/* hover 時顯示 tooltip */
+.delete-drop-zone:hover span {
+    opacity: 1;
+    bottom: -45px; /* 向下移動一點，增加動畫效果 */
+}
+
+/* 拖拽激活狀態 */
+.delete-drop-zone.drag-over {
+    background: #a71e2a;
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.6);
+    animation: deleteZonePulse 1s infinite ease-in-out;
+}
+
+@keyframes deleteZonePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* 邀請拖拽區域 */
+.invite-drop-zone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: rgba(59, 130, 246, 0.8);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: visible; /* 改為 visible 讓 tooltip 可以顯示 */
+    margin-left: 10px; /* 從 10px 增加到 30px */
+}
+
+.invite-drop-zone:hover {
+    background: rgba(37, 99, 235, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.invite-drop-zone i {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.invite-drop-zone:hover i {
+    transform: scale(1.1);
+}
+
+/* 隱藏文字，只顯示 icon */
+.invite-drop-zone span {
+    position: absolute;
+    bottom: -40px; /* 顯示在按鈕下方 */
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, bottom 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* tooltip 箭頭 */
+.invite-drop-zone span::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid rgba(0, 0, 0, 0.9);
+}
+
+/* hover 時顯示 tooltip */
+.invite-drop-zone:hover span {
+    opacity: 1;
+    bottom: -45px; /* 向下移動一點，增加動畫效果 */
+}
+
+/* 拖拽激活狀態 */
+.invite-drop-zone.drag-over {
+    background: rgba(29, 78, 216, 1);
+    border-color: #fff;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+    animation: inviteZonePulse 1s infinite ease-in-out;
+}
+
+@keyframes inviteZonePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* 結算卡片拖拽區域 */
+.store-drop-zone {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: visible;
+    margin-left: 10px;
+}
+
+.store-drop-zone:hover {
+    background: linear-gradient(135deg, #e67e22, #d35400);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.4);
+}
+
+.store-drop-zone i {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.store-drop-zone:hover i {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* 隱藏文字，只顯示 icon */
+.store-drop-zone span {
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, bottom 0.3s ease;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* tooltip 箭頭 */
+.store-drop-zone span::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-bottom: 6px solid rgba(0, 0, 0, 0.9);
+}
+
+/* hover 時顯示 tooltip */
+.store-drop-zone:hover span {
+    opacity: 1;
+    bottom: -45px;
+}
+
+/* 拖拽激活狀態 */
+.store-drop-zone.drag-over {
+    background: linear-gradient(135deg, #d35400, #ca6f1e);
+    border-color: #fff;
+    box-shadow: 0 0 25px rgba(243, 156, 18, 0.7);
+    animation: storeZonePulse 1s infinite ease-in-out;
+}
+
+@keyframes storeZonePulse {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 0 25px rgba(243, 156, 18, 0.7);
+    }
+    50% { 
+        transform: scale(1.05); 
+        box-shadow: 0 0 35px rgba(243, 156, 18, 0.9);
+    }
+}
+
+.store-drop-zone.drag-ready {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.task-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    min-height: 80px;
+}
+
+.task-card-item {
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(100, 255, 218, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 200px; /* 統一最小高度 */
+    height: auto; /* 允許自動調整高度 */
+}
+
+.task-card-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(100, 255, 218, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.15);
+}
+
+/* ===== 卡片顏色主題區分 ===== */
+
+/* 自己主持的卡片（綠色調） */
+.task-card-item.own-card {
+    background: rgba(45, 212, 191, 0.08);
+    border-color: rgba(45, 212, 191, 0.25);
+}
+
+.task-card-item.own-card:hover {
+    background: rgba(45, 212, 191, 0.12);
+    border-color: rgba(45, 212, 191, 0.4);
+    box-shadow: 0 8px 25px rgba(45, 212, 191, 0.15);
+}
+
+.task-card-item.own-card .card-stamp {
+    background: rgba(45, 212, 191, 0.15);
+    color: #2dd4bf;
+}
+
+/* 好友主持的卡片（藍色調） */
+.task-card-item.friend-card {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.25);
+}
+
+.task-card-item.friend-card:hover {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+}
+
+.task-card-item.friend-card .card-stamp {
+    background: rgba(59, 130, 246, 0.15);
+    color: #3b82f6;
+}
+
+/* 好友卡片內部元素改為白色 */
+.task-card-item.friend-card .card-icon {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.task-card-item.friend-card .card-details h4 {
+    color: #ffffff;
+}
+
+.task-card-item .card-stamp {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 60px;
+    height: 60px;
+    background: rgba(100, 255, 218, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5em;
+    color: #64ffda;
+    opacity: 0.6;
+    transform: rotate(15deg);
+}
+
+.task-card-item .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 5px;
+    flex: 1; /* 讓header區域擴展填滿可用空間 */
+    min-height: 120px; /* 統一header的最小高度 */
+    position: relative;
+}
+
+/* 新增：icon容器，包含圖標和打勾按鈕 */
+.task-card-item .card-icon-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.task-card-item .card-icon {
+    font-size: 1.5em;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(100, 255, 218, 0.1);
+    border-radius: 50%;
+    flex-shrink: 0;
+    color: #64ffda;
+}
+
+.task-card-item .card-details h4 {
+    color: #64ffda;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin: 0 0 6px 0;
+    line-height: 1.3;
+}
+
+.task-card-item .card-details p {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3; /* 標準屬性 */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.task-card-item .card-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto; /* 將footer推到底部 */
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    flex-shrink: 0; /* 防止被壓縮 */
+    gap: 8px;
+}
+
+/* 統計項目容器 */
+.task-card-item .meta-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* 放大間距，增加可視性 */
+}
+
+/* 統計文字樣式 */
+.task-card-item .meta-text {
+    text-align: center;
+    line-height: 1.25;
+    font-size: 0.7rem; /* 放大 meta 文字 */
+}
+
+/* 統計數字亮綠色樣式 */
+.task-card-item .stat-numbers {
+    color: #64ffda;
+    font-weight: 600;
+    text-shadow: 0 0 8px rgba(100, 255, 218, 0.3);
+    font-size: 0.9rem; /* 放大數字顯示，但保留顏色 */
+}
+
+/* ===== 進度條相關樣式 ===== */
+
+/* 迷你進度條（執行次數） */
+.mini-progress-bar {
+    width: 100%;
+    height: 12px; /* 放大進度條高度 */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.mini-progress-bar .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #64ffda, #4fd1c7);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 6px rgba(100, 255, 218, 0.4);
+}
+
+/* 迷你時間線條（持續天數） */
+.mini-timeline-bar {
+    width: 100%;
+    height: 12px; /* 放大時間軸高度 */
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.mini-timeline-bar .timeline-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700, #ffb347);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+    box-shadow: 0 0 6px rgba(255, 215, 0, 0.4);
+}
+
+/* ===== 參與者頭像區域 ===== */
+.mini-avatars {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 3px; /* 增加頭像間距 */
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.mini-avatar {
+    width: 20px; /* 放大頭像尺寸 */
+    height: 20px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid rgba(100, 255, 218, 0.3);
+    position: relative;
+}
+
+.mini-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+}
+
+.mini-avatar:hover {
+    transform: scale(1.2);
+    border-color: #64ffda;
+    z-index: 2;
+}
+
+.mini-avatar:hover img {
+    transform: scale(1.1);
+}
+
+/* ===== 打勾功能相關樣式 ===== */
+
+/* 打勾區域容器 - 改為相對定位，在icon容器內自然流動 */
+.card-checkbox-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+}
+
+/* 打勾框基本樣式 */
+.task-checkbox {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    backdrop-filter: blur(5px);
+}
+
+.task-checkbox i {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+}
+
+/* 打勾框懸停效果 */
+.task-checkbox:hover {
+    border-color: #64ffda;
+    background: rgba(100, 255, 218, 0.1);
+    transform: scale(1.1);
+}
+
+.task-checkbox:hover i {
+    color: #64ffda;
+    text-shadow: 0 0 6px rgba(100, 255, 218, 0.5);
+}
+
+/* 打勾框處理中狀態 */
+.task-checkbox.processing {
+    pointer-events: none;
+    opacity: 0.7;
+    animation: processing-pulse 1s infinite;
+}
+
+@keyframes processing-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 0.4; }
+}
+
+/* 打勾框已完成狀態 */
+.task-checkbox.checked {
+    border-color: #64ffda;
+    background: #64ffda;
+    animation: check-success 0.5s ease-out;
+}
+
+.task-checkbox.checked i {
+    color: #000;
+    transform: scale(1.2);
+}
+
+@keyframes check-success {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+        box-shadow: 0 0 15px rgba(100, 255, 218, 0.7);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0;
+    }
+}
+
+/* 新打勾框滑入動畫 */
+.task-checkbox.new-checkbox {
+    animation: slide-in-from-bottom 0.4s ease-out;
+}
+
+@keyframes slide-in-from-bottom {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* ===== 任務卡片撰寫區域 ===== */
+.card-writing-area {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.task-card-editor {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+    border: 2px solid rgba(100, 255, 218, 0.3);
+    backdrop-filter: blur(15px);
+    padding: 30px;
+    position: relative;
+    transition: all 0.3s ease;
+    animation: slideInFromRight 0.8s ease-out;
+}
+
+.task-card-editor:hover {
+    border-color: rgba(100, 255, 218, 0.5);
+    box-shadow: 0 10px 30px rgba(100, 255, 218, 0.2);
+}
+
+/* 郵戳圖標選擇 */
+.stamp-selector {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stamp-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1.4em;
+}
+
+.stamp-icon:hover {
+    background: rgba(100, 255, 218, 0.1);
+    border-color: rgba(100, 255, 218, 0.3);
+    color: #64ffda;
+    transform: scale(1.1);
+}
+
+.stamp-icon.active {
+    background: rgba(100, 255, 218, 0.2);
+    border-color: #64ffda;
+    color: #64ffda;
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(100, 255, 218, 0.3);
+}
+
+/* 可編輯內容區域 */
+.editable-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.card-title-input, .card-content-input {
+    position: relative;
+}
+
+.input-label {
+    color: #64ffda;
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.editable-title, .editable-content {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 15px;
+    color: #e0f9f2;
+    font-size: 1rem;
+    line-height: 1.5;
+    outline: none;
+    transition: all 0.3s ease;
+    min-height: 40px;
+    word-wrap: break-word;
+    cursor: text;
+}
+
+.editable-title[data-placeholder]:empty:before,
+.editable-content[data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: rgba(255, 255, 255, 0.4);
+    font-style: italic;
+}
+
+.editable-title:focus, .editable-content:focus {
+    background: rgba(100, 255, 218, 0.1);
+    border-color: #64ffda;
+    box-shadow: 0 0 15px rgba(100, 255, 218, 0.2);
+    color: #ffffff;
+}
+
+.editable-title.editing {
+    background: rgba(100, 255, 218, 0.1);
+    border-color: #64ffda;
+    box-shadow: 0 0 15px rgba(100, 255, 218, 0.2);
+}
+
+.editable-content.editing {
+    background: rgba(100, 255, 218, 0.1);
+    border-color: #64ffda;
+    box-shadow: 0 0 15px rgba(100, 255, 218, 0.2);
+}
+
+.editable-title {
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+.editable-content {
+    min-height: 80px;
+    resize: vertical;
+}
+
+/* 任務設定選項 */
+.task-settings {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.setting-group label {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.setting-select {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #e0f9f2;
+    font-size: 0.9rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.setting-select:focus {
+    border-color: #64ffda;
+    background: rgba(100, 255, 218, 0.1);
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.2);
+}
+
+.setting-select option {
+    background: #1a1a2e;
+    color: #e0f9f2;
+}
+
+/* 提交按鈕 */
+.submit-section {
+    text-align: center;
+    margin-top: 25px;
+}
+
+.submit-card-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 15px 35px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.submit-card-btn:hover {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.submit-card-btn:active {
+    transform: translateY(0);
+}
+
+.submit-card-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ===== 卡片動畫效果 ===== */
+@keyframes slideInFromRight {
+    0% {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutToLeft {
+    0% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+.task-card-editor.slide-out {
+    animation: slideOutToLeft 0.6s ease-in;
+}
+
+.task-card-editor.slide-in {
+    animation: slideInFromRight 0.8s ease-out;
+}
+
+/* 提交成功動畫 */
+@keyframes submitSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.submit-card-btn.success {
+    animation: submitSuccess 0.6s ease;
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* ===== 空狀態樣式 ===== */
+.empty-cards-state {
+    text-align: center;
+    padding: 40px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.empty-cards-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    opacity: 0.6;
+}
+
+.empty-cards-state h4 {
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 10px;
+}
+
+.empty-cards-state p {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+}
+
+/* ===== 響應式設計增強 ===== */
+@media (max-width: 768px) {
+    .task-cards-list-section {
+        margin: 0 10px 20px 10px;
+        padding: 15px;
+    }
+    
+    .task-cards-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .task-card-editor {
+        padding: 20px;
+        margin: 0 10px;
+    }
+    
+    .stamp-selector {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .stamp-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2em;
+    }
+    
+    .task-settings {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .submit-card-btn {
+        padding: 12px 25px;
+        font-size: 1rem;
+    }
+    
+    .editable-title {
+        font-size: 1.1rem;
+    }
+    
+    .editable-content {
+        min-height: 60px;
+    }
+}
+
+@media (max-width: 480px) {
+    .task-card-item {
+        padding: 12px;
+    }
+    
+    .task-card-item .card-stamp {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2em;
+    }
+    
+    .stamp-selector {
+        padding: 10px;
+    }
+    
+    .task-settings {
+        padding: 15px;
+    }
+}
+
+/* ===== 拖拽功能樣式 ===== */
+
+/* 卡片拖拽狀態 - 增強HTML5拖拽體驗 */
+.task-card-item {
+    cursor: grab;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.task-card-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(100, 255, 218, 0.2);
+}
+
+/* 拖拽開始狀態 */
+.task-card-item.dragging {
+    opacity: 0.3;
+    transform: scale(0.95);
+    cursor: grabbing;
+    transition: all 0.2s ease;
+    filter: brightness(0.7);
+}
+
+/* HTML5 拖拽即將開始狀態 */
+.task-card-item[draggable="true"]:active {
+    cursor: grabbing;
+    transform: scale(0.98);
+}
+
+.task-card-item.drag-forbidden {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* 視覺輔助元素 - 跟隨游標的拖拽預覽 */
+.drag-visual-helper {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+    /* 複製原卡片樣式，添加增強的視覺效果 */
+    display: flex;
+    flex-direction: column;
+    padding: 16px;
+    background: rgba(100, 255, 218, 0.15);
+    border-radius: 12px;
+    border: 2px solid rgba(100, 255, 218, 0.6);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 
+                0 0 20px rgba(100, 255, 218, 0.3);
+    backdrop-filter: blur(10px);
+    transform: scale(0.95) rotate(3deg);
+    transition: none;
+    opacity: 0.95;
+    max-width: 280px;
+}
+
+/* 拖拽佔位符 - 增強動畫效果 */
+.drag-placeholder {
+    background: linear-gradient(135deg, 
+                rgba(100, 255, 218, 0.1) 0%,
+                rgba(100, 255, 218, 0.2) 50%,
+                rgba(100, 255, 218, 0.1) 100%);
+    border: 2px dashed rgba(100, 255, 218, 0.6);
+    border-radius: 12px;
+    opacity: 0.8;
+    transform: scale(0.98);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(100, 255, 218, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+    min-height: 120px;
+    animation: placeholderPulse 2s infinite ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.drag-placeholder::before {
+    content: "📍 放置卡片位置";
+    z-index: 1;
+    position: relative;
+}
+
+.drag-placeholder::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+                transparent 0%,
+                rgba(100, 255, 218, 0.2) 50%,
+                transparent 100%);
+    animation: placeholderShimmer 2s infinite linear;
+}
+
+@keyframes placeholderPulse {
+    0%, 100% { 
+        transform: scale(0.98);
+        border-color: rgba(100, 255, 218, 0.6);
+    }
+    50% { 
+        transform: scale(1.02);
+        border-color: rgba(100, 255, 218, 0.9);
+    }
+}
+
+@keyframes placeholderShimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* 拖拽區域狀態 - 增強視覺反饋 */
+.task-cards-grid {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.task-cards-grid.drag-over {
+    background: rgba(100, 255, 218, 0.05);
+    border-radius: 12px;
+    box-shadow: inset 0 0 20px rgba(100, 255, 218, 0.1);
+    transition: all 0.3s ease;
+}
+
+/* 拖拽活躍狀態 */
+.task-cards-grid.drag-active {
+    border: 2px dashed rgba(100, 255, 218, 0.4);
+    border-radius: 12px;
+    background: rgba(100, 255, 218, 0.02);
+}
+
+/* 卡片重新排序動畫 - 流暢的移動效果 */
+.task-card-item {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.task-card-item.reordering {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateY(-2px);
+}
+
+/* 其他卡片在拖拽時的狀態 */
+.task-card-item.drag-sibling {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: brightness(0.9);
+}
+
+/* 拖拽進入區域的卡片動畫 */
+.task-card-item.drag-target-nearby {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 6px 20px rgba(100, 255, 218, 0.15);
+}
+
+/* 刪除區域拖拽動畫 */
+.delete-drop-zone.drag-ready {
+    animation: deleteZoneGlow 2s infinite ease-in-out;
+}
+
+@keyframes deleteZoneGlow {
+    0%, 100% { 
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.4); 
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(220, 53, 69, 0.8); 
+    }
+}
+
+/* 拖拽提示 - 增強用戶引導 */
+.drag-hint {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(100, 255, 218, 0.9);
+    color: #000;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.task-card-item:hover .drag-hint {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 全屏拖拽遮罩 - 提供更好的拖拽體驗 */
+.drag-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 9998;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.drag-overlay.active {
+    opacity: 1;
+}
+
+/* 拖拽成功動畫 */
+@keyframes dragSuccess {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.task-card-item.drag-success {
+    animation: dragSuccess 0.5s ease;
+}
+
+/* 拖拽取消動畫 */
+@keyframes dragCancel {
+    0% { transform: translateX(0) rotate(0deg); }
+    25% { transform: translateX(-10px) rotate(-2deg); }
+    75% { transform: translateX(10px) rotate(2deg); }
+    100% { transform: translateX(0) rotate(0deg); }
+}
+
+.task-card-item.drag-cancel {
+    animation: dragCancel 0.4s ease;
+}
+
+/* ===== 任務設定新樣式 - 優化版本 ===== */
+
+/* 數字輸入框容器 */
+.number-input-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.number-input {
+    width: 80px;
+    padding: 10px 12px;
+    border: 2px solid rgba(100, 255, 218, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.number-input:focus {
+    outline: none;
+    border-color: #64ffda;
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+    transform: scale(1.02);
+}
+
+.number-input:hover {
+    border-color: rgba(100, 255, 218, 0.5);
+}
+
+.input-suffix {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* 日期輸入框容器 */
+.date-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.date-picker {
+    padding: 10px 12px;
+    border: 2px solid rgba(100, 255, 218, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.date-picker:focus {
+    outline: none;
+    border-color: #64ffda;
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+    transform: scale(1.02);
+}
+
+.date-picker:hover {
+    border-color: rgba(100, 255, 218, 0.5);
+}
+
+.date-helper {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 4px 8px;
+    background: rgba(100, 255, 218, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+/* Rating Scale 圓圈容器 */
+.rating-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.rating-circles {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
+    justify-items: center;
+    width: 100%; /* 改為100%寬度，隨容器調整 */
+    max-width: 100%; /* 移除固定的最大寬度限制 */
+    margin: 0 auto;
+}
+
+.rating-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid rgba(100, 255, 218, 0.3);
+    background: rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.rating-circle:hover {
+    transform: scale(1.15);
+    border-color: #64ffda;
+    box-shadow: 0 0 8px rgba(100, 255, 218, 0.4);
+}
+
+.rating-circle.active {
+    background: linear-gradient(135deg, #64ffda, #1de9b6);
+    border-color: #64ffda;
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 12px rgba(100, 255, 218, 0.5);
+}
+
+.rating-circle.active:hover {
+    transform: scale(1.2);
+    box-shadow: 0 0 16px rgba(100, 255, 218, 0.6);
+}
+
+.rating-display {
+    text-align: center;
+    padding: 8px 16px;
+    background: rgba(100, 255, 218, 0.1);
+    border-radius: 12px;
+    border: 1px solid rgba(100, 255, 218, 0.3);
+}
+
+.selected-count {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #64ffda;
+    text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+}
+
+.max-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-left: 4px;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .rating-circles {
+        gap: 6px;
+    }
+    
+    .rating-circle {
+        width: 28px;
+        height: 28px;
+        font-size: 0.7rem;
+    }
+    
+    .number-input {
+        width: 70px;
+        font-size: 0.9rem;
+    }
+    
+    .selected-count {
+        font-size: 1.2rem;
+    }
+}
+
+/* ===== 簡化數字輸入框樣式 ===== */
+.simple-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.simple-number-input {
+    width: 100%;
+    max-width: 150px;
+    padding: 12px 16px;
+    border: 2px solid rgba(100, 255, 218, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.simple-number-input:focus {
+    outline: none;
+    border-color: #64ffda;
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+    transform: scale(1.02);
+}
+
+.simple-number-input:hover {
+    border-color: rgba(100, 255, 218, 0.5);
+}
+
+.input-hint {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 4px 8px;
+    background: rgba(100, 255, 218, 0.1);
+    border-radius: 4px;
+    border: 1px solid rgba(100, 255, 218, 0.2);
+}
+
+/* ===== 修復日期選擇器樣式 ===== */
+.date-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.date-picker {
+    width: 100%;
+    max-width: 200px;
+    padding: 12px 16px;
+    border: 2px solid rgba(100, 255, 218, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.date-picker:focus {
+    outline: none;
+    border-color: #64ffda;
+    box-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+    transform: scale(1.02);
+}
+
+.date-picker:hover {
+    border-color: rgba(100, 255, 218, 0.5);
+}
+
+/* 修復WebKit日期選擇器的顏色 */
+.date-picker::-webkit-datetime-edit {
+    color: white;
+}
+
+.date-picker::-webkit-datetime-edit-fields-wrapper {
+    color: white;
+}
+
+.date-picker::-webkit-datetime-edit-month-field {
+    color: white;
+}
+
+.date-picker::-webkit-datetime-edit-day-field {
+    color: white;
+}
+
+.date-picker::-webkit-datetime-edit-year-field {
+    color: white;
+}
+
+.date-picker::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+}
+
+.date-helper {
+    color: rgba(100, 255, 218, 0.8);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 6px 12px;
+    background: rgba(100, 255, 218, 0.1);
+    border-radius: 6px;
+    border: 1px solid rgba(100, 255, 218, 0.3);
+}
+
+/* ===== 修復圓圈佈局為一排5個 ===== */
+.rating-circles {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 10px;
+    justify-items: center;
+    max-width: 220px;
+    margin: 0 auto;
+}
+
+/* ===== 已結算任務樣式 ===== */
+.stored-cards-section {
+    width: 100%;
+}
+
+.stored-cards-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(243, 156, 18, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(243, 156, 18, 0.3);
+    margin-bottom: 16px;
+}
+
+.stored-stats {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+}
+
+.stored-count {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #f39c12;
+    text-shadow: 0 0 10px rgba(243, 156, 18, 0.3);
+}
+
+.stored-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+}
+
+.refresh-stored-btn {
+    background: rgba(243, 156, 18, 0.2);
+    border: 1px solid rgba(243, 156, 18, 0.4);
+    color: #f39c12;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.refresh-stored-btn:hover {
+    background: rgba(243, 156, 18, 0.3);
+    transform: rotate(180deg);
+}
+
+.stored-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+
+/* 自定義滾動條 */
+.stored-cards-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.stored-cards-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.stored-cards-list::-webkit-scrollbar-thumb {
+    background: rgba(243, 156, 18, 0.5);
+    border-radius: 3px;
+}
+
+.stored-cards-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(243, 156, 18, 0.7);
+}
+
+.stored-cards-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.stored-cards-loading i {
+    font-size: 2rem;
+    color: #f39c12;
+}
+
+.stored-card-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(243, 156, 18, 0.2);
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.stored-card-item:hover {
+    background: rgba(243, 156, 18, 0.1);
+    border-color: rgba(243, 156, 18, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(243, 156, 18, 0.2);
+}
+
+.stored-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.stored-card-icon {
+    font-size: 1.2rem;
+    color: #f39c12;
+}
+
+.stored-card-title {
+    font-weight: 600;
+    color: white;
+    font-size: 0.95rem;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stored-card-content {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.stored-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.stored-date {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.revive-hint {
+    color: #f39c12;
+    font-weight: 500;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.stored-card-item:hover .revive-hint {
+    opacity: 1;
+}
+
+.stored-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.stored-empty i {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.3;
+}
+
+.stored-empty p {
+    margin: 8px 0;
+    line-height: 1.6;
+}

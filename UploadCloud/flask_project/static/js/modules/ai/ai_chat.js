@@ -33,7 +33,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const appendMsg = (txt, role) => {
       const div = document.createElement("div");
       div.className = `chat-msg ${role === "user" ? "user-msg" : "ai-msg"}`;
-      div.innerText = txt;
+      
+      // 如果是用戶訊息，則分別創建訊息文字和用戶名稱元素
+      if (role === "user") {
+        const messageText = document.createElement("span");
+        messageText.className = "message-text";
+        messageText.innerText = txt;
+        
+        const userName = document.createElement("div");
+        userName.className = "user-name";
+        userName.innerText = typeof USER_NAME !== 'undefined' ? USER_NAME : '你';
+        
+        div.appendChild(messageText);
+        div.appendChild(userName);
+      } else {
+        div.innerText = txt;
+      }
+      
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
     };
