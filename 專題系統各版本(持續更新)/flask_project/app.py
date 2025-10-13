@@ -22,24 +22,38 @@ from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template
 from flask_login import LoginManager, current_user
+from werkzeug.middleware.proxy_fix import ProxyFix  # 處理反向代理 headers
+
+# ─── 優先載入環境變數 ─────────────────────────────
+load_dotenv()  # 必須在導入自訂模組之前執行！
 
 # ─── 自訂模組 ─────────────────────────────
 from services.socketio_manager import socketio, init_socketio
 from services.user import user_bp, load_user as user_load_user, settings_bp
 from services.diary import diary_bp
 from services.admin import admin_bp, admin_chat_bp, admin_announcement_bp
-from services.ai import ai_chat_bp
+from services.ai import ai_chat_bp, emotion_ai_bp, emo_stats_bp
 from services.line import line_webhook_bp
 from services.support import support_bp
 from services.social import social_bp
 from services.announcement import announcement_bp
+from services.coopcard import coopcard_bp
 # ─────────────────────────────────────────
-
-load_dotenv()
 
 # ── 建立 Flask App ────────────────────────
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+
+# ── 配置反向代理支援 ──────────────────────
+# 當應用運行在 Nginx/Apache 等反向代理後面時，需要此配置
+# 正確處理 X-Forwarded-* headers，避免 URL 重複或錯誤問題
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,      # 處理 X-Forwarded-For (客戶端真實 IP)
+    x_proto=1,    # 處理 X-Forwarded-Proto (http/https)
+    x_host=1,     # 處理 X-Forwarded-Host (原始 Host，解決域名重複問題)
+    x_prefix=1    # 處理 X-Forwarded-Prefix (URL 前綴)
+)
 
 # 中文編碼設定
 app.config['JSON_AS_ASCII'] = False
@@ -58,12 +72,15 @@ init_socketio(app)
 app.register_blueprint(admin_bp,        url_prefix="/admin")
 app.register_blueprint(admin_chat_bp,   url_prefix="/admin/chat")
 app.register_blueprint(ai_chat_bp,      url_prefix="/ai")
+app.register_blueprint(emotion_ai_bp,   url_prefix="/ai")
+app.register_blueprint(emo_stats_bp,    url_prefix="/ai")
 app.register_blueprint(user_bp,         url_prefix="/user")
 app.register_blueprint(diary_bp,        url_prefix="/diary")
 app.register_blueprint(settings_bp,     url_prefix="/settings")
 app.register_blueprint(support_bp,      url_prefix="/support") 
 app.register_blueprint(line_webhook_bp)
 app.register_blueprint(social_bp,       url_prefix="/social")
+app.register_blueprint(coopcard_bp)                   # 移除重複的url_prefix，已在Blueprint定義中設定
 app.register_blueprint(announcement_bp)               # frontend API
 app.register_blueprint(admin_announcement_bp)         # admin CRUD
 
@@ -125,4 +142,5 @@ def inject_today_date():
 # ── 啟動 ───────────────────────────────────
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, host='0.0.0.0', port=5000,
+                 debug=True, use_reloader=False)

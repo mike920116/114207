@@ -3,14 +3,16 @@
 {% block title %}情緒AI聊天助手{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/ai/emotion_ai.css') }}">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 {% endblock %}
 
 {% block content %}
-<!-- 原型C的背景動畫系統 -->
-<div class="particle-background" id="particleBackground"></div>
-<div class="rainbow-overlay"></div>
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
 
 <!-- 三欄布局容器 -->
 <div class="emotion-three-column-container">
@@ -163,7 +165,7 @@
         <img src="{{ url_for('static', filename='icons/avatars/ai_avatar.png') }}" alt="AI頭像" class="avatar" onerror="this.src='https://placehold.co/40x40/4facfe/ffffff?text=AI'">
         <div class="message-content">
           <div class="name">情緒AI助手</div>
-          <p>你好，{{ current_user.username }}，我是您的情緒AI助手！我將分析您的情緒並與您進行深入對話。分享您的想法和感受吧～</p>
+          <p>你好呀 {{ current_user.username }}！您有沒有想討論什麼主題，或是怎麼開始嗎？</p>
           <div class="time" id="welcome-time"></div>
         </div>
       </div>
@@ -296,11 +298,22 @@
 <div id="emotion-analysis-panel" class="emotion-panel" style="display: none;">
   <div class="emotion-panel-header">
     <h3>📊 情緒分析</h3>
+    <div class="chart-controls">
+      <button id="chart-type-bar" class="chart-toggle-btn active" title="直方圖顯示">
+        <i class="fas fa-chart-bar"></i>
+      </button>
+      <button id="chart-type-pie" class="chart-toggle-btn" title="圓餅圖顯示">
+        <i class="fas fa-chart-pie"></i>
+      </button>
+    </div>
     <button id="close-emotion-panel" class="close-btn">×</button>
   </div>
   <div class="emotion-panel-content">
     <div id="emotion-summary" class="emotion-summary">
       <p>開始對話後會顯示情緒分析結果</p>
+    </div>
+    <div id="emotion-chart-container" class="emotion-chart-container" style="display: none;">
+      <canvas id="emotion-chart"></canvas>
     </div>
   </div>
 </div>

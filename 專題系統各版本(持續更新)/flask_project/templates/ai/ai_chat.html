@@ -2,18 +2,23 @@
 {% block title %}AI 助手聊天{% endblock %}
 
 {% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/ai/ai_chat.css') }}">
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
 <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.min.js"></script>
 <script>
     const USER_EMAIL = "{{ current_user.id }}"; //  <-- 在這裡定義 USER_EMAIL
+    const USER_NAME = "{{ current_user.username }}"; //  <-- 在這裡定義 USER_NAME
 </script>
 <script src="{{ url_for('static', filename='js/modules/ai/ai_chat.js') }}"></script>
 {% endblock %}
 
 {% block content %}
+{% include 'components/starry_background.html' %}
+
 <div class="ai-chat-wrapper">
   <div class="chat-box" id="chat-box">
     <!-- 預設 AI 提示 -->
@@ -25,12 +30,14 @@
   <!-- 操作列 -------------------------------------------------------->
   <div class="chat-input-area">
     <input type="text" id="user-input" placeholder="請輸入訊息...">
-    <button id="send-btn">送出</button>
+    <button id="send-btn">
+      <i class="fas fa-paper-plane"></i> 送出
+    </button>
 
     <!-- 叫真人客服按鈕 -->
     <button id="call-human-btn" title="請真人客服"
             class="call-human">
-      🙋‍♂️ 求助
+      <i class="fas fa-headset"></i> 求助
     </button>
   </div>
 </div>

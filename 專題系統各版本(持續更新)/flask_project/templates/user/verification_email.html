@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>電子信箱驗證</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/modules/user/user.css') }}">
 </head>
 <body class="verification-email">
     <div class="container">
         <div class="header">
-            <h1>🌟 歡迎加入日記之森！</h1>
+            <h1><i class="fas fa-star"></i> 歡迎加入日記之森！</h1>
         </div>
         
         <div class="content">
@@ -18,14 +19,14 @@
             
             <div style="text-align: center; margin: 30px 0;">
                 <a href="{{ verification_link }}" class="verify-button">
-                    ✅ 驗證我的電子信箱
+                    <i class="fas fa-check-circle"></i> 驗證我的電子信箱
                 </a>
             </div>
             
             <p>如果上方按鈕無法點擊，請複製以下連結到瀏覽器中：</p>
             <p class="url-box">{{ verification_link }}</p>
             
-            <p><strong>⚠️ 注意：</strong>此驗證連結將在 1 小時後失效。</p>
+            <p><strong><i class="fas fa-exclamation-triangle"></i> 注意：</strong>此驗證連結將在 1 小時後失效。</p>
         </div>
         
         <div class="footer">

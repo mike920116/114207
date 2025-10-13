@@ -22,6 +22,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from flask import Flask, render_template
 from flask_login import LoginManager, current_user
+from werkzeug.middleware.proxy_fix import ProxyFix  # 處理反向代理 headers
 
 # ─── 優先載入環境變數 ─────────────────────────────
 load_dotenv()  # 必須在導入自訂模組之前執行！
@@ -42,6 +43,17 @@ from services.coopcard import coopcard_bp
 # ── 建立 Flask App ────────────────────────
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
+
+# ── 配置反向代理支援 ──────────────────────
+# 當應用運行在 Nginx/Apache 等反向代理後面時，需要此配置
+# 正確處理 X-Forwarded-* headers，避免 URL 重複或錯誤問題
+app.wsgi_app = ProxyFix(
+    app.wsgi_app,
+    x_for=1,      # 處理 X-Forwarded-For (客戶端真實 IP)
+    x_proto=1,    # 處理 X-Forwarded-Proto (http/https)
+    x_host=1,     # 處理 X-Forwarded-Host (原始 Host，解決域名重複問題)
+    x_prefix=1    # 處理 X-Forwarded-Prefix (URL 前綴)
+)
 
 # 中文編碼設定
 app.config['JSON_AS_ASCII'] = False

@@ -1,4 +1,4 @@
-﻿<header class="header">
+<header class="header">
   <nav class="nav">
     <div class="nav-item"><a href="{{ url_for('index') }}">首頁</a></div>
 
@@ -7,16 +7,15 @@
       <div class="dropdown">
         <a href="/diary/form" class="auth-required">新增日記</a>
         <a href="/diary/list" class="auth-required">日記列表</a>
-        <a href="#" class="auth-required">情緒分析</a>
       </div>
     </div>
 
     <div class="nav-item">
-      <a href="#ai" data-scroll="#ai">AI 助手</a>
+      <a href="#ai" data-scroll="#ai">AI 助手</a>
       <div class="dropdown">
-        <a href="/ai/chat" class="auth-required">AI 助手</a>
-        <a href="#" class="auth-required">情緒 AI</a>
-        <a href="#" class="auth-required">心理測驗</a>
+        <a href="/ai/chat" class="auth-required">AI 助手</a>
+        <a href="/ai/emotion" class="auth-required">情緒 AI</a>
+        <a href="/ai/emo_stats" class="auth-required">情緒洞察</a>
       </div>
     </div>
 
@@ -24,8 +23,7 @@
       <a href="#community" data-scroll="#community">社群互動</a>
       <div class="dropdown">
         <a href="/social/main" class="auth-required">心情討論區</a>
-        <a href="#" class="auth-required">好友聊天</a>
-        <a href="#" class="auth-required">線上活動</a>
+  <a href="/coopcard" class="auth-required">任務卡片</a>
       </div>
     </div>
 

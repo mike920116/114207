@@ -1,10 +1,17 @@
 /* ========== 等級指南頁面樣式 ========== */
 
+/* 背景透明設定（用於顯示星空背景） */
+body {
+  background: transparent;
+}
+
 /* 繼承基礎樣式 */
 .level-guide-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
+  position: relative;
+  z-index: 10;
 }
 
 /* ========== 頁首樣式 ========== */
