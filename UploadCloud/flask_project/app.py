@@ -44,6 +44,9 @@ from services.coopcard import coopcard_bp
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 
+# ── 全域配置：禁用自動斜線重定向 ──────────────────
+app.url_map.strict_slashes = False
+
 # ── 配置反向代理支援 ──────────────────────
 # 修復 URL 重複問題：只處理必要的 headers，避免處理會導致重複的 x_host
 app.wsgi_app = ProxyFix(
