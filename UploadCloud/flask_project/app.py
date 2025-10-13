@@ -51,8 +51,8 @@ app.wsgi_app = ProxyFix(
     app.wsgi_app,
     x_for=1,      # 處理 X-Forwarded-For (客戶端真實 IP)
     x_proto=1,    # 處理 X-Forwarded-Proto (http/https)
-    x_host=1,     # 處理 X-Forwarded-Host (原始 Host，解決域名重複問題)
-    x_prefix=1    # 處理 X-Forwarded-Prefix (URL 前綴)
+    x_host=1      # 處理 X-Forwarded-Host (原始 Host，解決域名重複問題)
+    # 移除 x_prefix=1，因為它會導致 URL 前綴重複問題
 )
 
 # 中文編碼設定
