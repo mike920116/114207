@@ -104,8 +104,12 @@ def coopcard_main():
                              
     except Exception as e:
         logger.error(f"載入好友互動主頁失敗: {e}")
-        flash('載入頁面失敗，請稍後再試', 'error')
-        return redirect(url_for('index'))
+        # 改為顯示錯誤頁面而不是重定向到首頁
+        # 這樣可以保持在 coopcard 路由下，讓用戶知道問題所在
+        return render_template('coopcard/coopcard_main.html',
+                             pending_requests_count=0,
+                             friends_count=0,
+                             error_message="資料載入失敗，請稍後再試或聯絡客服")
 
 
 

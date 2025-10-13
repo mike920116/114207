@@ -110,6 +110,19 @@
       <p class="page-subtitle">與好友一起探索、成長與完成任務挑戰</p>
     </div>
 
+    <!-- 錯誤訊息顯示區域 -->
+    {% if error_message %}
+    <div class="error-message-container">
+      <div class="error-message alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>{{ error_message }}</span>
+        <button onclick="location.reload()" class="retry-btn">
+          <i class="fas fa-redo"></i> 重試
+        </button>
+      </div>
+    </div>
+    {% endif %}
+
     <!-- 任務卡片清單顯示區域 -->
     <div class="task-cards-list-section" id="taskCardsListSection">
       <div class="section-header">
