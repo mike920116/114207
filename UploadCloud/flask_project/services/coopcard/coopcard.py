@@ -73,7 +73,8 @@ def get_avatar_url(user_avatar):
 
 # ===== 路由定義 =====
 
-@coopcard_bp.route('/')
+@coopcard_bp.route('/', strict_slashes=False)
+@coopcard_bp.route('', strict_slashes=False)  # 處理無尾部斜線的情況
 @login_required
 def coopcard_main():
     """好友互動主頁"""

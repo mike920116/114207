@@ -45,14 +45,13 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
 
 # ── 配置反向代理支援 ──────────────────────
-# 當應用運行在 Nginx/Apache 等反向代理後面時，需要此配置
-# 正確處理 X-Forwarded-* headers，避免 URL 重複或錯誤問題
+# 修復 URL 重複問題：只處理必要的 headers，避免處理會導致重複的 x_host
 app.wsgi_app = ProxyFix(
     app.wsgi_app,
     x_for=1,      # 處理 X-Forwarded-For (客戶端真實 IP)
     x_proto=1,    # 處理 X-Forwarded-Proto (http/https)
-    x_host=1      # 處理 X-Forwarded-Host (原始 Host，解決域名重複問題)
-    # 移除 x_prefix=1，因為它會導致 URL 前綴重複問題
+    x_host=0      # 不處理 X-Forwarded-Host，避免域名重複問題
+    # x_prefix 保持未設置，避免路徑前綴問題
 )
 
 # 中文編碼設定
