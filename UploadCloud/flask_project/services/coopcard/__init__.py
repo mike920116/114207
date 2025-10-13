@@ -8,7 +8,6 @@ from flask import Blueprint
 # 建立好友互動藍圖
 coopcard_bp = Blueprint(
     "coopcard", __name__,
-    url_prefix="/coopcard",
     template_folder="../../templates/coopcard"
 )
 
