@@ -30,7 +30,7 @@ import uuid
 from . import social_bp  # 從 __init__.py 導入 Blueprint
 
 # 圖片上傳設定
-UPLOAD_FOLDER = '0706_flask_/static/uploads'
+UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
