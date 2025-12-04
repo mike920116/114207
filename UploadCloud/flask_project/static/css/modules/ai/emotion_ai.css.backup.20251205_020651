@@ -1,62 +1,62 @@
-/* ?��?AI?�天?��?�?? - ?�於ai_chat.css?��??�設�?*/
-/* ?�景系統已移??common/starry_background.css */
+/* 情緒AI聊天助手樣式 - 基於ai_chat.css的一致設計 */
+/* 背景系統已移至 common/starry_background.css */
 
-/* ===== 三�?布�?容器 ===== */
+/* ===== 三欄布局容器 ===== */
 .emotion-three-column-container {
     position: relative;
-    z-index: 10; /* 確�??��??��??��?�?*/
+    z-index: 10; /* 確保在背景動畫之上 */
     width: 100%;
     margin: 0;
     padding: 20px;
     display: grid;
     grid-template-columns: 320px 1fr 320px;
     gap: 20px;
-    height: calc(100vh - 60px); /* 增�?空�?，避?�被footer?�到 */
+    height: calc(100vh - 60px); /* 增加空間，避免被footer切到 */
     box-sizing: border-box;
-    transition: grid-template-columns 0.3s ease-in-out; /* ?��?欄�?變�??��???*/
+    transition: grid-template-columns 0.3s ease-in-out; /* 只對欄位變化做動畫 */
 }
 
-/* 左側?�板?�起?��?布�? */
+/* 左側面板收起時的布局 */
 .emotion-three-column-container.left-collapsed {
     grid-template-columns: 60px 1fr 320px;
 }
 
-/* ?�側?�板?�起?��?布�? */
+/* 右側面板收起時的布局 */
 .emotion-three-column-container.right-collapsed {
     grid-template-columns: 320px 1fr 60px;
 }
 
-/* ?�側?�板?�收起�??��?局 */
+/* 兩側面板都收起時的布局 */
 .emotion-three-column-container.both-collapsed {
     grid-template-columns: 60px 1fr 60px;
 }
 
-/* 確�??�起?�?��??�板?��?小寬�?*/
+/* 確保收起狀態下面板的最小寬度 */
 .glass-panel.collapsed {
     min-width: 60px;
     max-width: 60px;
 }
 
-/* ?�面?�樣�?*/
+/* 側面板樣式 */
 .glass-panel {
     background: rgba(0, 0, 0, 0.4);
     border-radius: 25px;
-    padding: 0; /* 移除?��?padding，改?�內?��?素�??�設�?*/
+    padding: 0; /* 移除整體padding，改為內部元素各自設定 */
     backdrop-filter: blur(15px);
     border: 2px solid rgba(100, 255, 218, 0.3);
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
     position: relative;
     z-index: 10;
-    height: calc(90vh); /* ?�容?��?度�?調�??��?被�? */
+    height: calc(90vh); /* 與容器高度協調，避免被切 */
     min-height: calc(100vh - 140px);
     box-sizing: border-box;
-    transition: all 0.3s ease-in-out; /* ?�速�??��??��?視�?調整?��?延遲 */
+    transition: all 0.3s ease-in-out; /* 加速動畫，避免視窗調整時的延遲 */
     overflow: hidden;
     display: flex;
-    flex-direction: column; /* 使用flex布�?以便?�制header?�content */
+    flex-direction: column; /* 使用flex布局以便控制header和content */
 }
 
-/* ?��?欄收�?展�??��? */
+/* 側邊欄收起/展開按鈕 */
 .panel-toggle-btn {
     position: absolute;
     top: 15px;
@@ -89,12 +89,12 @@
     transform: scale(1.1);
 }
 
-/* ?�起?�??*/
+/* 收起狀態 */
 .glass-panel.collapsed {
     width: 60px;
     padding: 15px 5px;
     min-width: 60px;
-    display: block; /* ?�起?�恢復block布�? */
+    display: block; /* 收起時恢復block布局 */
 }
 
 .glass-panel.collapsed .autonomous-left-header,
@@ -120,7 +120,7 @@
     transform: rotate(180deg);
 }
 
-/* 確�?展�??��??��??�正確�?�?*/
+/* 確保展開時按鈕回到正確位置 */
 .glass-panel:not(.collapsed) .panel-toggle-btn {
     position: absolute;
     top: 15px;
@@ -142,16 +142,16 @@
     transform: none;
 }
 
-/* ?�天模�??�面??*/
+/* 白天模式側面板 */
 body.day-theme .glass-panel {
     background: rgba(255, 255, 255, 0.3);
     border-color: rgba(255, 223, 0, 0.4);
     box-shadow: 0 8px 32px rgba(255, 165, 0, 0.2);
 }
 
-/* ?��?主�?header規�?已移??- ?�在使用?��?系統 */
+/* 舊的主題header規則已移除 - 現在使用獨立系統 */
 
-/* 黑�?模�??�面??*/
+/* 黑夜模式側面板 */
 body.night-theme .glass-panel {
     background: rgba(15, 15, 80, 0.6);
     border-color: rgba(173, 216, 230, 0.4);
@@ -159,48 +159,48 @@ body.night-theme .glass-panel {
     backdrop-filter: blur(20px);
 }
 
-/* ?��?夜�?主�?header規�?已移??*/
+/* 舊的夜晚主題header規則已移除 */
 
-/* 黃�?模�??�面??*/
+/* 黃昏模式側面板 */
 body.sunset-theme .glass-panel {
     background: rgba(255, 69, 0, 0.3);
     border-color: rgba(255, 140, 0, 0.5);
     box-shadow: 0 8px 32px rgba(255, 99, 71, 0.25);
 }
 
-/* ?��?黃�?主�?header規�?已移??*/
+/* 舊的黃昏主題header規則已移除 */
 
-/* ===== 完全?��??�Header系統 ===== */
-/* 不�?Grid?�padding?�主題�?任�?外部?��??�制 */
+/* ===== 完全獨立的Header系統 ===== */
+/* 不受Grid、padding、主題或任何外部因素控制 */
 .autonomous-left-header,
 .autonomous-right-header {
-    /* ?��?寬度?�制 - 完全?�自�?*/
-    width: 200px; /* 你可以隨?�調?�這個�?*/
+    /* 獨立寬度控制 - 完全可自訂 */
+    width: 200px; /* 你可以隨意調整這個值 */
     
-    /* ?��?居中 - 不�?賴父容器 */
+    /* 自動居中 - 不依賴父容器 */
     margin: 15px auto 10px auto;
     
-    /* ?��??�部?��? */
+    /* 獨立內部間距 */
     padding: 12px 20px;
     
-    /* ?��?視覺�?? */
+    /* 獨立視覺樣式 */
     background: transparent !important;
     backdrop-filter: blur(15px);
     border: 2px solid rgba(100, 255, 218, 0.3);
     border-radius: 20px;
     
-    /* 確�?尺寸計�?�?�� */
+    /* 確保尺寸計算正確 */
     box-sizing: border-box;
     
-    /* ?��?定�?系統 */
+    /* 獨立定位系統 */
     position: relative;
     z-index: 25;
     
-    /* ?��?�?? */
+    /* 文字樣式 */
     text-align: center;
     color: #ffffff;
     
-    /* ?�渡?��? */
+    /* 過渡效果 */
     transition: all 0.3s ease;
 }
 
@@ -213,27 +213,27 @@ body.sunset-theme .glass-panel {
     color: inherit;
 }
 
-/* ?��??�hover?��? */
+/* 獨立的hover效果 */
 .glass-panel:hover .autonomous-left-header,
 .glass-panel:hover .autonomous-right-header {
     border-color: rgba(79, 172, 254, 0.6);
     box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
 }
 
-/* ?�起?�?��???*/
+/* 收起狀態處理 */
 .glass-panel.collapsed .autonomous-left-header,
 .glass-panel.collapsed .autonomous-right-header {
     display: none;
 }
 
 .panel-content {
-  flex: 1; /* 佔�??��?空�? */
-  overflow-y: auto; /* ?�許?�容滾�? */
+  flex: 1; /* 佔據剩餘空間 */
+  overflow-y: auto; /* 允許內容滾動 */
   scrollbar-gutter: stable;
-  padding: 20px 5px 25px 17px; /* ?�側?��?12px空�?給滾?��? */
+  padding: 20px 5px 25px 17px; /* 右側預留12px空間給滾動條 */
   color: rgba(255, 255, 255, 0.8);
-  box-sizing: border-box; /* 確�?padding計�??�內 */
-  text-align: center; /* 確�??�容居中對�? */
+  box-sizing: border-box; /* 確保padding計算在內 */
+  text-align: center; /* 確保內容居中對齊 */
 /* Fallback for browsers not supporting scrollbar-gutter */
 @supports not (scrollbar-gutter: stable) {
   .panel-content {
@@ -242,10 +242,10 @@ body.sunset-theme .glass-panel {
 }
 }
 
-/* 左側?�索?�能?�??*/
+/* 左側探索功能區域 */
 .exploration-section {
     margin-bottom: 15px;
-    text-align: left; /* ?�置?�左對�?，�??�父容器?�center對�? */
+    text-align: left; /* 重置為左對齊，覆蓋父容器的center對齊 */
 }
 
 .exploration-item {
@@ -275,39 +275,39 @@ body.sunset-theme .glass-panel {
 
 .exploration-item .placeholder-area {
     width: 100%;
-    height: 60px; /* ?�復?��?來�?高度 */
-    background: rgba(255, 255, 255, 0.03); /* ?�復?��?來�??�景??*/
-    border: 1px dashed rgba(100, 255, 218, 0.2); /* ?�復?��?來�?細�?�?*/
-    border-radius: 8px; /* ?�復?��?來�??��? */
+    height: 60px; /* 回復到原來的高度 */
+    background: rgba(255, 255, 255, 0.03); /* 回復到原來的背景色 */
+    border: 1px dashed rgba(100, 255, 218, 0.2); /* 回復到原來的細邊框 */
+    border-radius: 8px; /* 回復到原來的圓角 */
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 0.8em;
-    color: rgba(255, 255, 255, 0.5); /* ?�復?��?來�??��?顏色 */
+    color: rgba(255, 255, 255, 0.5); /* 回復到原來的文字顏色 */
     font-style: italic;
 }
 
 .exploration-item:hover .placeholder-area {
-    border-color: rgba(100, 255, 218, 0.4); /* ?�復?��?來�?hover顏色 */
+    border-color: rgba(100, 255, 218, 0.4); /* 回復到原來的hover顏色 */
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* ?�薦?��??��?�?? - 保�??��?設�? */
+/* 推薦目標特殊樣式 - 保持新的設計 */
 .exploration-item.recommended-goals .placeholder-area {
-    height: 120px; /* 保�??��?高度 */
-    background: rgba(255, 255, 255, 0.05); /* 保�??��??�景??*/
-    border: 2px dashed rgba(100, 255, 218, 0.3); /* 保�??��?粗�?�?*/
-    border-radius: 10px; /* 保�??��??��? */
-    color: rgba(255, 255, 255, 0.6); /* 保�??��??��?顏色 */
+    height: 120px; /* 保持新的高度 */
+    background: rgba(255, 255, 255, 0.05); /* 保持新的背景色 */
+    border: 2px dashed rgba(100, 255, 218, 0.3); /* 保持新的粗邊框 */
+    border-radius: 10px; /* 保持新的圓角 */
+    color: rgba(255, 255, 255, 0.6); /* 保持新的文字顏色 */
     transition: all 0.3s ease;
 }
 
 .exploration-item.recommended-goals:hover .placeholder-area {
-    border-color: rgba(100, 255, 218, 0.6); /* 保�??��?hover顏色 */
+    border-color: rgba(100, 255, 218, 0.6); /* 保持新的hover顏色 */
     background: rgba(255, 255, 255, 0.1);
 }
 
-/* ===== 洞�?補�??�板�?? - 仿AI訊息泡泡風格 ===== */
+/* ===== 洞察補充面板樣式 - 仿AI訊息泡泡風格 ===== */
 .insight-panel {
     margin-bottom: 12px;
     padding: 12px;
@@ -331,7 +331,7 @@ body.sunset-theme .glass-panel {
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(100, 255, 218, 0.3) transparent;
-    transition: height 0.3s ease; /* 添�?高度變�??��?渡�???*/
+    transition: height 0.3s ease; /* 添加高度變化的過渡動畫 */
 }
 
 .insight-content::-webkit-scrollbar {
@@ -362,16 +362,16 @@ body.sunset-theme .glass-panel {
     font-style: italic;
 }
 
-/* 洞�?訊息 - 仿AI訊息泡泡風格 */
+/* 洞察訊息 - 仿AI訊息泡泡風格 */
 .insight-message-bubble {
     display: flex;
-    flex-direction: column; /* ?�為?�直?��? */
+    flex-direction: column; /* 改為垂直排列 */
     margin-bottom: 12px;
     animation: fadeInUp 0.5s ease;
-    transition: all 0.3s ease; /* 添�?平�??�渡?��? */
+    transition: all 0.3s ease; /* 添加平滑過渡效果 */
 }
 
-/* ?��?：�?察�??�頭?��??��?+?�稱?��?行�? */
+/* 新增：洞察訊息頭部（頭像+名稱同一行） */
 .insight-header {
     display: flex;
     align-items: center;
@@ -399,22 +399,22 @@ body.sunset-theme .glass-panel {
     margin: 0;
 }
 
-/* 調整?��??��?察�??�內容樣�?*/
+/* 調整原有的洞察訊息內容樣式 */
 .insight-message-content {
     display: flex;
     flex-direction: column;
-    width: 100%; /* ?�滿寬度 */
+    width: 100%; /* 占滿寬度 */
 }
 
-/* ?�設訊息泡泡?��?�?? */
+/* 預設訊息泡泡特殊樣式 */
 .default-insight-message {
-    border: 2px solid rgba(255, 223, 0, 0.3); /* ?�色?��?以�???*/
+    border: 2px solid rgba(255, 223, 0, 0.3); /* 金色邊框以區別 */
     border-radius: 15px;
     padding: 6px;
-    background: rgba(255, 223, 0, 0.05); /* 淡�??��???*/
+    background: rgba(255, 223, 0, 0.05); /* 淡金色背景 */
 }
 
-/* ?�設訊息?��??��??�畫 */
+/* 預設訊息文字切換動畫 */
 .default-insight-text {
     transition: opacity 0.5s ease-in-out;
     opacity: 1;
@@ -442,7 +442,7 @@ body.sunset-theme .glass-panel {
     flex-shrink: 0;
 }
 
-/* ?��?�??保�?不�?，�?添�??�註說�??�是?��??�樣�?*/
+/* 原有樣式保持不變，但添加備註說明這是舊版本樣式 */
 
 .insight-message-content {
     flex: 1;
@@ -468,20 +468,20 @@ body.sunset-theme .glass-panel {
     position: relative;
     color: #ffffff;
     margin-bottom: 8px;
-    width: 100%; /* 確�??�滿寬度 */
-    box-sizing: border-box; /* 確�?padding計�??�內 */
+    width: 100%; /* 確保占滿寬度 */
+    box-sizing: border-box; /* 確保padding計算在內 */
 }
 
 .insight-summary {
     color: rgba(255, 255, 255, 0.9);
     font-size: 0.85em;
     line-height: 1.4;
-    margin-bottom: 5px; /* 減�??��?，�??�容?��?�?*/
+    margin-bottom: 5px; /* 減少間距，讓內容更緊湊 */
     font-weight: 500;
 }
 
 .insight-time {
-    display: none; /* ?��??��?顯示以�??�空??*/
+    display: none; /* 隱藏時間顯示以節省空間 */
     font-size: 0.7em;
     color: rgba(255, 255, 255, 0.6);
     margin-bottom: 8px;
@@ -572,8 +572,8 @@ body.sunset-theme .glass-panel {
     color: inherit;
     margin: 0;
     line-height: 1.2;
-    white-space: normal; /* ?�許標�??��? */
-    word-wrap: break-word; /* 強制?��??�單�?*/
+    white-space: normal; /* 允許標題換行 */
+    word-wrap: break-word; /* 強制換行長單詞 */
 }
 
 .reco-desc {
@@ -581,11 +581,11 @@ body.sunset-theme .glass-panel {
     opacity: 0.8;
     line-height: 1.2;
     margin: 0;
-    white-space: normal; /* ?�許?�述?��? */
-    word-wrap: break-word; /* 強制?��??�單�?*/
-    overflow: visible; /* 顯示?�?�內�?*/
-    text-overflow: initial; /* 移除?�略??*/
-    max-width: 180px; /* ?�當增�?寬度?�制 */
+    white-space: normal; /* 允許描述換行 */
+    word-wrap: break-word; /* 強制換行長單詞 */
+    overflow: visible; /* 顯示所有內容 */
+    text-overflow: initial; /* 移除省略號 */
+    max-width: 180px; /* 適當增加寬度限制 */
 }
 
 .add-to-favorites {
@@ -621,7 +621,7 @@ body.sunset-theme .glass-panel {
     transform: none;
 }
 
-/* AI?��??�形變�? - ?�AI?�薦?�目 */
+/* AI情緒矩形變體 - 為AI推薦項目 */
 .reco-item.ai-type {
     background: rgba(99, 102, 241, 0.2);
     border-color: #6366f1;
@@ -634,7 +634,7 @@ body.sunset-theme .glass-panel {
     box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-/* ===== ?��?小抽屜樣�?- 增強?�本?�援?��??��???===== */
+/* ===== 收藏小抽屜樣式 - 增強版本支援無限制功能 ===== */
 .favorites-drawer {
     margin-bottom: 12px;
     padding: 12px;
@@ -652,7 +652,7 @@ body.sunset-theme .glass-panel {
     transform: translateX(3px);
 }
 
-/* ?��?工具�?*/
+/* 收藏工具欄 */
 .favorites-toolbar {
     margin-bottom: 1px;
     padding: 4px;
@@ -744,7 +744,7 @@ body.sunset-theme .glass-panel {
     background: rgba(255, 107, 107, 0.5);
 }
 
-/* ?��?統�? */
+/* 收藏統計 */
 .favorites-stats {
     display: flex;
     justify-content: space-between;
@@ -765,14 +765,14 @@ body.sunset-theme .glass-panel {
 
 .favorites-content {
     min-height: 60px;
-    /* 移除max-height?�制，�?高度?��??�容?��?調整 */
+    /* 移除max-height限制，讓高度根據內容動態調整 */
     overflow-y: visible;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 107, 107, 0.3) transparent;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    /* 添�??�渡?�畫讓�?度�??�更流暢 */
+    /* 添加過渡動畫讓高度變化更流暢 */
     transition: height 0.3s ease;
 }
 
@@ -822,7 +822,7 @@ body.sunset-theme .glass-panel {
     opacity: 0.7;
 }
 
-/* 主�?群�?�?? - ?�援?��?高度調整 */
+/* 主題群組樣式 - 支援動態高度調整 */
 .favorite-type-group {
     border: 1px solid rgba(255, 107, 107, 0.2);
     border-radius: 8px;
@@ -830,7 +830,7 @@ body.sunset-theme .glass-panel {
     overflow: hidden;
     transition: all 0.4s ease;
     margin-bottom: 8px;
-    /* 確�?群�??�根?�內容�??�調?��?�?*/
+    /* 確保群組能根據內容動態調整高度 */
 }
 
 .favorite-type-header {
@@ -908,7 +908,7 @@ body.sunset-theme .glass-panel {
     flex-direction: column;
     gap: 6px;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    /* 使用?�大?�max-height來容納更多�???*/
+    /* 使用更大的max-height來容納更多項目 */
     max-height: 2000px;
     overflow: hidden;
     opacity: 1;
@@ -920,7 +920,7 @@ body.sunset-theme .glass-panel {
     max-height: 0;
     padding: 0 8px;
     opacity: 0;
-    /* ?��??��??��??��? */
+    /* 更流暢的折疊效果 */
     transform: scaleY(0);
     transform-origin: top;
 }
@@ -1083,7 +1083,7 @@ body.sunset-theme .glass-panel {
     border-color: rgba(255, 107, 107, 0.5);
 }
 
-/* ?��??��??�樣�?*/
+/* 搜尋無結果樣式 */
 .search-no-results {
     text-align: center;
     padding: 20px;
@@ -1113,7 +1113,7 @@ body.sunset-theme .glass-panel {
     opacity: 0.7;
 }
 
-/* 對話框樣�?*/
+/* 對話框樣式 */
 .custom-theme-dialog,
 .edit-favorite-dialog {
     position: fixed;
@@ -1313,7 +1313,7 @@ body.sunset-theme .glass-panel {
     box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
 }
 
-/* ?��??�單�?? */
+/* 排序選單樣式 */
 .sort-menu {
     position: fixed;
     top: 0;
@@ -1389,7 +1389,7 @@ body.sunset-theme .glass-panel {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* 主�??�容?�單�?? */
+/* 主題內容選單樣式 */
 .theme-context-menu {
     position: fixed;
     z-index: 1001;
@@ -1428,7 +1428,7 @@ body.sunset-theme .glass-panel {
     background: rgba(255, 107, 107, 0.3);
 }
 
-/* ?�誤?�?�樣�?*/
+/* 錯誤狀態樣式 */
 .favorites-error {
     text-align: center;
     padding: 20px;
@@ -1458,7 +1458,7 @@ body.sunset-theme .glass-panel {
     background: rgba(255, 107, 107, 0.3);
 }
 
-/* ?�畫?��? */
+/* 動畫效果 */
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -1474,12 +1474,12 @@ body.sunset-theme .glass-panel {
     animation: glow 0.6s ease-in-out;
 }
 
-/* ?��?：�?察�??�滾?��??��? */
+/* 新增：洞察補充滾動條優化 */
 .insight-content {
-    scroll-behavior: smooth; /* 平�?滾�? */
+    scroll-behavior: smooth; /* 平滑滾動 */
 }
 
-/* ?��?：�?察�??�面?��??��?度調??*/
+/* 新增：洞察補充面板動態高度調整 */
 .insight-panel {
     transition: all 0.3s ease;
 }
@@ -1499,21 +1499,21 @@ body.sunset-theme .glass-panel {
     }
 }
 
-/* ===== ?��?完�??�畫系統 ===== */
-/* 1. ?�目完�??�??- 變為?�色�?*/
+/* ===== 目標完成動畫系統 ===== */
+/* 1. 項目完成狀態 - 變為白色底 */
 .goal-item.goal-completed {
     background: rgba(255, 255, 255, 0.95) !important;
     border-color: rgba(200, 200, 200, 0.8) !important;
     transition: all 0.4s ease;
 }
 
-/* 2. ?�容淡出?�畫 */
+/* 2. 內容淡出動畫 */
 .goal-content.goal-content-fade {
     opacity: 0;
     transition: opacity 0.4s ease;
 }
 
-/* 3. ?�勾移到中�?並�??�樣�?*/
+/* 3. 勾勾移到中間並變化樣式 */
 .goal-check-btn.goal-check-center {
     position: absolute;
     left: 50%;
@@ -1527,7 +1527,7 @@ body.sunset-theme .glass-panel {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-/* 4. ?�目消失?�畫 */
+/* 4. 項目消失動畫 */
 .goal-item.goal-item-disappear {
     opacity: 0;
     height: 0;
@@ -1539,7 +1539,7 @@ body.sunset-theme .glass-panel {
     overflow: hidden;
 }
 
-/* ?�勾?��??�畫 */
+/* 勾勾脈衝動畫 */
 @keyframes checkPulse {
     0%, 100% {
         transform: translate(-50%, -50%) scale(1);
@@ -1553,7 +1553,7 @@ body.sunset-theme .glass-panel {
     animation: checkPulse 0.8s ease-in-out;
 }
 
-/* ===== ?�知彈出系統 ===== */
+/* ===== 通知彈出系統 ===== */
 .notification-popup {
     position: fixed;
     top: 20px;
@@ -1583,14 +1583,14 @@ body.sunset-theme .glass-panel {
     transform: translateX(100%);
 }
 
-/* ?�知?�示 */
+/* 通知圖示 */
 .notification-popup::before {
-    content: '??';
+    content: '🎉';
     margin-right: 8px;
     font-size: 1.2em;
 }
 
-/* ?�知?��??��? */
+/* 通知脈衝效果 */
 @keyframes notificationPulse {
     0% {
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
@@ -1615,9 +1615,9 @@ body.sunset-theme .glass-panel {
     font-style: italic;
 }
 
-/* ===== ?�側?�板專用�?? ===== */
+/* ===== 右側面板專用樣式 ===== */
 
-/* ?��??�畫?�??*/
+/* 插圖動畫區域 */
 .illustration-area {
     width: 100%;
     height: 200px;
@@ -1650,7 +1650,7 @@ body.sunset-theme .glass-panel {
     color: rgba(100, 255, 218, 0.6);
 }
 
-/* ?��??�模式顯�?*/
+/* 日期和模式顯示 */
 .date-mode-display {
     text-align: center;
     margin-bottom: 25px;
@@ -1675,7 +1675,7 @@ body.sunset-theme .glass-panel {
     text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
 }
 
-/* ?��?設�??��? */
+/* 時間設定按鈕 */
 .time-settings-btn {
     position: absolute;
     top: 8px;
@@ -1700,11 +1700,11 @@ body.sunset-theme .glass-panel {
     transform: scale(1.1);
 }
 
-/* 主�??�制?�??*/
+/* 主題控制區域 */
 .theme-controls {
     margin-bottom: 20px;
     position: relative;
-    text-align: left; /* ?�置?�左對�?，�??�父容器?�center對�? */
+    text-align: left; /* 重置為左對齊，覆蓋父容器的center對齊 */
 }
 
 .theme-controls h4 {
@@ -1785,17 +1785,17 @@ body.sunset-theme .glass-panel {
     box-shadow: 0 0 20px rgba(100, 255, 218, 0.6);
 }
 
-/* ?��??�能?�??*/
+/* 未來功能區域 */
 .future-features {
     margin-top: 20px;
     padding: 15px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 10px;
     border: 1px solid rgba(100, 255, 218, 0.15);
-    text-align: left; /* ?�置?�左對�?，�??�父容器?�center對�? */
+    text-align: left; /* 重置為左對齊，覆蓋父容器的center對齊 */
 }
 
-/* ?��?序�??�??*/
+/* 目標序列區域 */
 .goal-sequence-area {
     margin-bottom: 12px;
     padding: 12px;
@@ -1804,7 +1804,7 @@ body.sunset-theme .glass-panel {
     border-radius: 10px;
     transition: all 0.3s ease;
     cursor: pointer;
-    text-align: left; /* ?�置?�左對�?，�??�父容器?�center對�? */
+    text-align: left; /* 重置為左對齊，覆蓋父容器的center對齊 */
 }
 
 .goal-sequence-area:hover {
@@ -1929,7 +1929,7 @@ body.sunset-theme .glass-panel {
     color: rgba(100, 255, 218, 0.6);
 }
 
-/* ===== ?��?設�?模�?視�? ===== */
+/* ===== 時間設定模態視窗 ===== */
 .time-settings-modal {
     position: fixed;
     top: 0;
@@ -2104,75 +2104,60 @@ body.sunset-theme .glass-panel {
     box-shadow: 0 5px 15px rgba(100, 255, 218, 0.4);
 }
 
-/* ?��?式設�?- 平板?��?機�? */
+/* 響應式設計 - 平板版：由上到下排序 */
 @media (max-width: 1100px) {
     .emotion-three-column-container,
     .emotion-three-column-container.left-collapsed,
     .emotion-three-column-container.right-collapsed,
     .emotion-three-column-container.both-collapsed {
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
+        grid-template-rows: auto auto 1fr;
         gap: 15px;
         padding: 15px;
         height: auto;
-        min-height: auto;
+        min-height: calc(100vh - 60px);
     }
 
-    /* 調整?��?：中央�?天�??��?上面 */
+    /* 調整順序：中央聊天區域在最上面 */
     .chat-container {
         order: 1;
         height: auto;
         min-height: 60vh;
     }
 
-    /* 左側?�板?�中??- 例�??�索 */
+    /* 左側面板在中間 */
     .left-panel {
         order: 2;
         width: 100%;
         max-width: 100%;
         min-width: 100%;
         height: auto;
-        min-height: 400px;
-        max-height: none;
-        overflow-y: visible;
+        max-height: 70vh;
+        overflow-y: auto;
     }
 
-    /* ?�側?�板?��?下面 - 今日導覽 */
+    /* 右側面板在最下面 */
     .right-panel {
         order: 3;
         width: 100%;
         max-width: 100%;
         min-width: 100%;
         height: auto;
-        min-height: 350px;
-        max-height: none;
-        overflow-y: visible;
+        max-height: 70vh;
+        overflow-y: auto;
     }
 
-    /* ?��??��??��? */
+    /* 側邊欄按鈕調整 */
     .panel-toggle-btn {
-        display: none; /* 平板?��?不�?要收起�???*/
+        display: none; /* 平板版不需要收起按鈕 */
     }
 
-    /* 確�??�板寬度設�? */
+    /* 側邊面板寬度設定 */
     .glass-panel,
     .glass-panel.collapsed {
         width: 100%;
         min-width: 100%;
         max-width: 100%;
-    }
-
-    /* ?�板?�容?�?�自?��?高度 */
-    .left-panel .panel-content,
-    .right-panel .panel-content {
-        max-height: none;
-        overflow-y: visible;
-    }
-
-    /* ?�索?�塊�??�顯�?*/
-    .exploration-section {
-        max-height: none;
-        overflow-y: visible;
     }
 }
 
@@ -2186,15 +2171,9 @@ body.sunset-theme .glass-panel {
         min-height: 50vh;
     }
 
-    /* ?��??�面?��?度自?��??�容 */
-    .left-panel {
-        min-height: 350px;
-        max-height: none;
-    }
-
+    .left-panel,
     .right-panel {
-        min-height: 300px;
-        max-height: none;
+        max-height: 300px;
     }
 }
 
@@ -2209,20 +2188,20 @@ body.sunset-theme .glass-panel {
     box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
     display: flex;
     flex-direction: column;
-    height: calc(90vh); /* ?�側?��?高度一?��??��?被�? */
+    height: calc(90vh); /* 與側邊欄高度一致，避免被切 */
     min-height: calc(100vh - 140px);
-    /* 移除max-height?�制，確保�??��?欄�?度�???*/
-    transition: all 0.3s ease-in-out; /* ?�速�???*/
+    /* 移除max-height限制，確保與側邊欄高度一致 */
+    transition: all 0.3s ease-in-out; /* 加速動畫 */
 }
 
-/* ?�天模�??�天容器 */
+/* 白天模式聊天容器 */
 body.day-theme .chat-container {
     background: rgba(255, 255, 255, 0.4);
     border-color: rgba(255, 223, 0, 0.4);
     box-shadow: 0 8px 32px rgba(255, 165, 0, 0.2);
 }
 
-/* 黑�?模�??�天容器 */
+/* 黑夜模式聊天容器 */
 body.night-theme .chat-container {
     background: rgba(15, 15, 80, 0.6);
     border-color: rgba(173, 216, 230, 0.4);
@@ -2230,7 +2209,7 @@ body.night-theme .chat-container {
     backdrop-filter: blur(20px);
 }
 
-/* 黃�?模�??�天容器 */
+/* 黃昏模式聊天容器 */
 body.sunset-theme .chat-container {
     background: rgba(255, 69, 0, 0.3);
     border-color: rgba(255, 140, 0, 0.5);
@@ -2245,7 +2224,7 @@ body.sunset-theme .chat-container {
     position: relative;
 }
 
-/* ?��?義滾?��?�?? */
+/* 自定義滾動條樣式 */
 .chat-box::-webkit-scrollbar {
     width: 8px;
 }
@@ -2278,28 +2257,28 @@ body.sunset-theme .chat-container {
     margin: 0;
     font-size: 1.5em;
     text-shadow: 0 0 10px rgba(100, 255, 218, 0.5);
-    transition: all 0.3s ease-in-out; /* 統�???.3s，�??��??��??�步 */
+    transition: all 0.3s ease-in-out; /* 統一為0.3s，與其他元素同步 */
 }
 
-/* ?�天模�?�?? */
+/* 白天模式樣式 */
 body.day-theme .chat-header h2 {
     color: #1a365d;
     text-shadow: 0 0 10px rgba(255, 223, 0, 0.6);
 }
 
-/* 黑�?模�?�?? */
+/* 黑夜模式樣式 */
 body.night-theme .chat-header h2 {
     color: #e2e8f0;
     text-shadow: 0 0 10px rgba(173, 216, 230, 0.8);
 }
 
-/* 黃�?模�?�?? */
+/* 黃昏模式樣式 */
 body.sunset-theme .chat-header h2 {
     color: #2d3748;
     text-shadow: 0 0 10px rgba(255, 165, 0, 0.8);
 }
 
-/* 輸入?�?�樣�?*/
+/* 輸入區域樣式 */
 .chat-input-area {
     padding: 20px;
     border-top: 2px solid rgba(100, 255, 218, 0.3);
@@ -2382,7 +2361,7 @@ body.sunset-theme .chat-header h2 {
     border-color: #64ffda;
 }
 
-/* 訊息?��?�?? */
+/* 訊息基礎樣式 */
 .message {
     display: flex;
     align-items: flex-start;
@@ -2456,7 +2435,7 @@ body.sunset-theme .chat-header h2 {
     color: #ffffff;
 }
 
-/* 訊息泡泡顏色 - ?�戶訊息 */
+/* 訊息泡泡顏色 - 用戶訊息 */
 .message.user .message-content p {
     background: rgba(255, 107, 107, 0.1);
     border: 2px solid rgba(255, 107, 107, 0.3);
@@ -2482,7 +2461,7 @@ body.sunset-theme .chat-header h2 {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ===== ?��??�示?��?等�??�畫 ===== */
+/* ===== 打字指示器和等待動畫 ===== */
 
 .typing-indicator {
     display: none;
@@ -2504,7 +2483,7 @@ body.sunset-theme .chat-header h2 {
     gap: 10px;
 }
 
-/* 載入?�畫 - ?��??��? */
+/* 載入動畫 - 旋轉圓圈 */
 .loading {
     display: inline-block;
     width: 20px;
@@ -2519,9 +2498,9 @@ body.sunset-theme .chat-header h2 {
     to { transform: rotate(360deg); }
 }
 
-/* ===== ?��??��?�?? - backup_chatbot風格 ===== */
+/* ===== 情緒分析樣式 - backup_chatbot風格 ===== */
 
-/* ?��??��?主容??*/
+/* 情緒分析主容器 */
 .analysis-box {
     margin-top: 10px;
     padding: 8px 12px;
@@ -2538,13 +2517,13 @@ body.sunset-theme .chat-header h2 {
     flex-basis: 100%;
 }
 
-/* 彈跳淡入?�畫 */
+/* 彈跳淡入動畫 */
 .analysis-box.pop-in {
     transform: translateY(0);
     opacity: 1;
 }
 
-/* ?��?標籤容器 */
+/* 情緒標籤容器 */
 .emotions-container {
     display: flex;
     flex-wrap: wrap;
@@ -2553,7 +2532,7 @@ body.sunset-theme .chat-header h2 {
     align-items: center;
 }
 
-/* ?�個�?緒�?�?*/
+/* 單個情緒標籤 */
 .emotion-badge {
     display: inline-block;
     padding: 3px 8px;
@@ -2572,7 +2551,7 @@ body.sunset-theme .chat-header h2 {
     transform: scale(1.1);
 }
 
-/* ?�� 等�??�畫�?? - ?��? */
+/* 🎭 等待動畫樣式 - 新增 */
 .emotion-badge.waiting {
     background: #1a365d !important;
     color: white !important;
@@ -2594,7 +2573,7 @@ body.sunset-theme .chat-header h2 {
     50% { opacity: 1; }
 }
 
-/* 等�??��??�?��??��??��? */
+/* 等待分析狀態的分析盒子 */
 .analysis-box.waiting-analysis {
     opacity: 1;
 }
@@ -2603,7 +2582,7 @@ body.sunset-theme .chat-header h2 {
     gap: 8px;
 }
 
-/* ?? ?��??��?�?? - ?��? */
+/* 🌟 白光特效樣式 - 新增 */
 .analysis-box .emotion-badge.shine-flash {
     animation: shine-flash var(--shine-flash-duration) ease-out forwards;
 }
@@ -2629,7 +2608,7 @@ body.sunset-theme .chat-header h2 {
     }
 }
 
-/* ?? 磁場波�??�畫�?? - ?��? */
+/* 🌊 磁場波動動畫樣式 - 新增 */
 @keyframes magneticWave {
     0% { 
         transform: scale(0); 
@@ -2658,13 +2637,13 @@ body.sunset-theme .chat-header h2 {
     }
 }
 
-/* ?�畫完�??�?��?�?*/
+/* 動畫完成狀態標記 */
 .emotion-badge.animation-complete {
     transform: scale(1) !important;
     opacity: 1 !important;
 }
 
-/* 確�?hover?��??�在?�畫完�?後正常工�?*/
+/* 確保hover效果能在動畫完成後正常工作 */
 .emotion-badge.animation-complete:hover {
     transform: scale(1.1) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
@@ -2672,12 +2651,12 @@ body.sunset-theme .chat-header h2 {
     transition: all 0.2s ease;
 }
 
-/* ?��??�畫?��? - ?��??�戶體�? */
+/* 特殊動畫效果 - 提升用戶體驗 */
 .emotion-badge:active {
     animation: emotionPulse 0.6s ease-in-out;
 }
 
-/* ?�數?�容??*/
+/* 元數據容器 */
 .emotion-meta {
     display: flex;
     gap: 12px;
@@ -2702,19 +2681,19 @@ body.sunset-theme .chat-header h2 {
     transform: translateY(-1px);
 }
 
-/* ===== 覆�??�樣式�?確�??��?backup_chatbot風格?��? ===== */
+/* ===== 覆蓋舊樣式，確保新的backup_chatbot風格生效 ===== */
 
-/* ?�置?��?訊息�?? */
+/* 重置舊的訊息樣式 */
 .chat-msg, .ai-msg, .user-msg {
-    display: none !important; /* ?��??�格式�?訊息 */
+    display: none !important; /* 隱藏舊格式的訊息 */
 }
 
-/* 確�??��?訊息?��?顯示 */
+/* 確保新的訊息格式顯示 */
 .message {
     display: flex !important;
 }
 
-/* ?�置輸入?�?�樣式優?��? */
+/* 重置輸入區域樣式優先級 */
 .chat-input-area {
     padding: 20px !important;
     border-top: 2px solid rgba(100, 255, 218, 0.3) !important;
@@ -2728,10 +2707,10 @@ body.sunset-theme .chat-header h2 {
 }
 
 .chat-input-area::before {
-    display: none !important; /* 移除?��??�畫?��? */
+    display: none !important; /* 移除舊的動畫效果 */
 }
 
-/* ?�置輸入框樣�?*/
+/* 重置輸入框樣式 */
 .chat-input-area textarea,
 .chat-input-area #user-input {
     flex: 1 !important;
@@ -2761,7 +2740,7 @@ body.sunset-theme .chat-header h2 {
     color: rgba(255, 255, 255, 0.5) !important;
 }
 
-/* ?�置?��?�?? */
+/* 重置按鈕樣式 */
 .chat-input-area button,
 .chat-input-area #send-btn {
     width: 50px !important;
@@ -2791,7 +2770,7 @@ body.sunset-theme .chat-header h2 {
     transform: scale(0.95) !important;
 }
 
-/* 不�??�戶類�??��??��??�樣�?*/
+/* 不同用戶類型的分析區域樣式 */
 .analysis-user {
     border-left: 3px solid rgba(255, 107, 107, 0.4);
     background: rgba(0, 0, 0.4);
@@ -2804,7 +2783,7 @@ body.sunset-theme .chat-header h2 {
     border: 1px solid rgba(100, 255, 218, 0.3);
 }
 
-/* ?��?式設計適??- ?��??��? */
+/* 響應式設計適配 - 情緒分析 */
 @media (max-width: 768px) {
     .analysis-box {
         padding: 10px;
@@ -2882,19 +2861,19 @@ body.dark-mode .ai-chat-wrapper {
   background: linear-gradient(to bottom, rgba(12, 30, 51, 0.95), rgba(30, 55, 82, 0.95));
 }
 
-/* ?�天標�??�??- ?��?步縮減�?度�???*/
+/* 聊天標題區域 - 進一步縮減高度版本 */
 .chat-header {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 16px;
-  padding: 12px 18px; /* ?��?步縮減padding */
+  padding: 12px 18px; /* 進一步縮減padding */
   text-align: center;
   box-shadow: 0 0 14px rgba(0,0,0,0.15);
 }
 
 .chat-header h2 {
-  margin: 0; /* 移除下�?�?*/
+  margin: 0; /* 移除下邊距 */
   color: #4c684c;
-  font-size: 20px; /* ?��?步縮小�?�?*/
+  font-size: 20px; /* 進一步縮小字體 */
 }
 
 .chat-header p {
@@ -2903,7 +2882,7 @@ body.dark-mode .ai-chat-wrapper {
   font-size: 14px;
 }
 
-/* 移除????�?�相?�樣式�?簡�?設�? */
+/* 移除連線狀態相關樣式，簡化設計 */
 
 body.dark-mode .chat-header {
   background: rgba(28, 38, 58, 0.95);
@@ -2917,7 +2896,7 @@ body.dark-mode .chat-header p {
   color: #8db3a8;
 }
 
-/* ?�天�?*/
+/* 聊天框 */
 .chat-box {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 16px;
@@ -2936,7 +2915,7 @@ body.dark-mode .chat-box {
   background: rgba(28, 38, 58, 0.95);
 }
 
-/* 訊息�???�用 */
+/* 訊息樣式通用 */
 .chat-msg {
   max-width: 75%;
   padding: 14px 20px;
@@ -2948,7 +2927,7 @@ body.dark-mode .chat-box {
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* 訊息?��? */
+/* 訊息時間 */
 .msg-time {
   display: block;
   margin-top: 8px;
@@ -2957,7 +2936,7 @@ body.dark-mode .chat-box {
   text-align: right;
 }
 
-/* ?�戶訊息 */
+/* 用戶訊息 */
 .user-msg {
   align-self: flex-end;
   background: linear-gradient(145deg, #d5f8e2, #b1eacb);
@@ -2966,7 +2945,7 @@ body.dark-mode .chat-box {
 }
 
 .user-msg::before {
-  content: "?�� �?;
+  content: "👤 你";
   font-size: 13px;
   font-weight: bold;
   display: block;
@@ -2992,7 +2971,7 @@ body.dark-mode .user-msg::before {
 }
 
 .ai-msg::before {
-  content: "?�� ?��?AI?��?";
+  content: "🎭 情緒AI助手";
   font-size: 13px;
   font-weight: bold;
   display: block;
@@ -3009,7 +2988,7 @@ body.dark-mode .ai-msg::before {
   color: #b5d2ff;
 }
 
-/* ?��?標籤?�??*/
+/* 情緒標籤區域 */
 .emotion-tags {
   margin: 12px 0 0 0;
   padding: 12px 0 0 0;
@@ -3065,8 +3044,8 @@ body.dark-mode .emotion-tag.ai {
   border-color: #818cf8;
 }
 
-/* ===== 增強?�輸?��???(prototype_c 設�?) ===== */
-/* 超�?輸入?�??- 完全複製 prototype_c ?�設�?*/
+/* ===== 增強的輸入區域 (prototype_c 設計) ===== */
+/* 超級輸入區域 - 完全複製 prototype_c 的設計 */
 .chat-input-area {
   display: flex;
   gap: 1rem;
@@ -3106,11 +3085,11 @@ body.dark-mode .emotion-tag.ai {
   background: rgba(0, 0, 0, 0.5);
   color: white;
   transition: all 0.3s ease;
-  resize: none; /* 禁用?��?調整大�? */
-  min-height: 54px; /* 調整?��?似backup-chatbot?�單行�?�?*/
-  max-height: 200px; /* ?�大�?�?- ?�在此調??*/
-  overflow-y: hidden; /* ?�設?��?滾�?條�?JavaScript?�制顯示 */
-  line-height: 1.5; /* 行�?設�? */
+  resize: none; /* 禁用手動調整大小 */
+  min-height: 54px; /* 調整為類似backup-chatbot的單行高度 */
+  max-height: 200px; /* 最大高度 - 可在此調整 */
+  overflow-y: hidden; /* 預設隱藏滾動條，JavaScript控制顯示 */
+  line-height: 1.5; /* 行高設定 */
 }
 
 .chat-input-area textarea:focus {
@@ -3123,7 +3102,7 @@ body.dark-mode .emotion-tag.ai {
   color: rgba(255, 255, 255, 0.5);
 }
 
-/* 超�??�出?��? */
+/* 超級送出按鈕 */
 .chat-input-area button {
   padding: 1.2rem 2rem;
   background: linear-gradient(45deg, #4facfe, #00f2fe);
@@ -3179,7 +3158,7 @@ body.dark-mode .chat-input-area button:disabled {
   background: rgba(60, 60, 60, 0.5);
 }
 
-/* ?��??��??��? */
+/* 情緒切換按鈕 */
 .emotion-toggle {
   padding: 14px 16px;
   background: linear-gradient(135deg, #f59e0b, #d97706);
@@ -3200,7 +3179,7 @@ body.dark-mode .emotion-toggle {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
 }
 
-/* ?��??��?浮�??�板 */
+/* 情緒分析浮動面板 */
 .emotion-panel {
   position: fixed;
   top: 50%;
@@ -3403,9 +3382,9 @@ body.dark-mode .chart-error {
   color: rgba(245, 101, 101, 0.9);
 }
 
-/* ?�圾�?��已移?��??��??�dark-mode?��?規�? */
+/* 垃圾代碼已移除：過時的dark-mode相關規則 */
 
-/* ?��?端響?��?設�? */
+/* 手機端響應式設計 */
 @media (max-width: 768px) {
   .ai-chat-wrapper {
     padding: 60px 5% 0 5%;
@@ -3456,8 +3435,8 @@ body.dark-mode .chart-error {
     border-radius: 8px;
     min-width: 0;
     flex: 1;
-    min-height: 40px; /* ?��??��?小�?�?- 調整?�更?��??�本設�? */
-    max-height: 120px; /* ?��??��?大�?�?*/
+    min-height: 40px; /* 手機版最小高度 - 調整為更接近原本設計 */
+    max-height: 120px; /* 手機版最大高度 */
   }
 
   .chat-input-area button {
@@ -3505,28 +3484,28 @@ body.dark-mode .chart-error {
   }
 }
 
-/* ===== ?��?定義已移?��??��?覆�??��? ===== */
-/* 請�??��?案�??��? .emotion-three-column-container 定義 */
+/* ===== 重複定義已移除，避免覆蓋問題 ===== */
+/* 請參考檔案開頭的 .emotion-three-column-container 定義 */
 
-/* ?��??��??�已移除，避?�CSS衝�? */
+/* 重複的規則已移除，避免CSS衝突 */
 
-/* ?��?hover規�?已移??- ?�在使用?��?系統 */
+/* 舊的hover規則已移除 - 現在使用獨立系統 */
 
-/* ?��??�panel-content定義已移?��??��?�??覆�? */
+/* 重複的panel-content定義已移除，避免樣式覆蓋 */
 
 .placeholder-text {
   color: #ccc;
   text-align: center;
   font-style: italic;
   padding: 40px 20px;
-  transition: color 0.3s ease; /* 添�??��?顏色?�渡 */
+  transition: color 0.3s ease; /* 添加文字顏色過渡 */
 }
 
 .glass-panel:hover .placeholder-text {
-  color: rgba(255, 255, 255, 0.8); /* ?�浮?��?強�?字�?�?*/
+  color: rgba(255, 255, 255, 0.8); /* 懸浮時增強文字對比 */
 }
 
-/* 中央?�天容器 (增強?��??��?局) */
+/* 中央聊天容器 (增強的彈性佈局) */
 .chat-container {
   background: rgba(0, 0, 0, 0.5);
   border-radius: 25px;
@@ -3537,20 +3516,20 @@ body.dark-mode .chart-error {
   display: flex;
   flex-direction: column;
   position: relative;
-  min-height: calc(100vh - 140px); /* ?��?計�?高度，�?�?ai_chat.css */
+  min-height: calc(100vh - 140px); /* 動態計算高度，類似 ai_chat.css */
 }
 
-/* ?�天框�???*/
+/* 聊天框區域 */
 .chat-box {
-  flex: 1; /* ?��?填滿?��?空�? */
+  flex: 1; /* 自動填滿剩餘空間 */
   overflow-y: auto;
-  max-height: calc(100vh - 280px); /* ?��??�大�?�?*/
-  min-height: 200px; /* ?��?�?�?*/
+  max-height: calc(100vh - 280px); /* 動態最大高度 */
+  min-height: 200px; /* 最小高度 */
   margin-bottom: 15px;
 }
 
-/* ===== 統�?滾�?條樣�?- ?�backup-chatbot一??===== */
-/* ?��?義滾?��? - ?��??��?風格 */
+/* ===== 統一滾動條樣式 - 與backup-chatbot一致 ===== */
+/* 自定義滾動條 - 透明優雅風格 */
 ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -3571,9 +3550,9 @@ body.dark-mode .chart-error {
     background: linear-gradient(180deg, rgba(100, 255, 218, 0.8), rgba(0, 188, 212, 0.6));
 }
 
-/* ?��??�板專用滾�?條設�?- 標�?滾�?條在?��??�?�內 */
+/* 側邊面板專用滾動條設置 - 標準滾動條在預留區域內 */
 .glass-panel .panel-content::-webkit-scrollbar {
-    width: 8px; /* 滾�?條寬度匹?��??�空??*/
+    width: 8px; /* 滾動條寬度匹配預留空間 */
 }
 
 .glass-panel .panel-content::-webkit-scrollbar-track {
@@ -3591,7 +3570,7 @@ body.dark-mode .chart-error {
   background: #e0fffa;
 }
 
-/* 完全?��?滾�?條箭??- ?�強??*/
+/* 完全隱藏滾動條箭頭 - 加強版 */
 ::-webkit-scrollbar-button:start:decrement,
 ::-webkit-scrollbar-button:end:increment {
     display: none !important;
@@ -3608,7 +3587,7 @@ body.dark-mode .chart-error {
     background: transparent !important;
 }
 
-/* ?��??��??��?強制?��?滾�?條箭??*/
+/* 針對特定元素強制隱藏滾動條箭頭 */
 .chat-box::-webkit-scrollbar-button,
 .left-panel::-webkit-scrollbar-button,
 .right-panel::-webkit-scrollbar-button,
@@ -3618,24 +3597,24 @@ body.dark-mode .chart-error {
     width: 0 !important;
 }
 
-/* ?��?滾�?條�???*/
+/* 隱藏滾動條角落 */
 ::-webkit-scrollbar-corner {
     background: transparent;
 }
 
-/* Firefox 滾�?條支??*/
+/* Firefox 滾動條支援 */
 .left-panel, .right-panel, .chat-box {
     scrollbar-width: thin;
     scrollbar-color: rgba(100, 255, 218, 0.6) rgba(255, 255, 255, 0.05);
 }
 
-/* ?��??�板Firefox滾�?�?*/
+/* 側邊面板Firefox滾動條 */
 .glass-panel .panel-content {
     scrollbar-width: thin;
     scrollbar-color: rgba(100, 255, 218, 0.6) rgba(255, 255, 255, 0.02);
 }
 
-/* textarea專用滾�?條樣�?*/
+/* textarea專用滾動條樣式 */
 .chat-input-area textarea::-webkit-scrollbar {
     width: 6px;
 }
@@ -3655,7 +3634,7 @@ body.dark-mode .chart-error {
     background: linear-gradient(180deg, rgba(100, 255, 218, 0.8), rgba(0, 188, 212, 0.6));
 }
 
-/* ===== ?�薦?��?�?? ===== */
+/* ===== 推薦目標樣式 ===== */
 .recommended-goals-content {
     padding: 8px 0;
 }
@@ -3789,7 +3768,7 @@ body.dark-mode .chart-error {
     transform: scale(0.95);
 }
 
-/* 編輯模�?�?? */
+/* 編輯模式樣式 */
 .goal-item-recommended.editing {
     border-color: #64ffda;
     background: rgba(100, 255, 218, 0.1);
@@ -3801,7 +3780,7 @@ body.dark-mode .chart-error {
     border: 1px solid #64ffda;
 }
 
-/* 已添?�到?��?序�??�樣�?*/
+/* 已添加到目標序列的樣式 */
 .goal-item-recommended.added {
     opacity: 0.6;
     background: rgba(16, 185, 129, 0.1);
@@ -3813,7 +3792,7 @@ body.dark-mode .chart-error {
 }
 
 .goal-item-recommended.added::after {
-    content: "??已添??;
+    content: "✓ 已添加";
     position: absolute;
     bottom: 8px;
     left: 50%;
@@ -3826,7 +3805,7 @@ body.dark-mode .chart-error {
     border-radius: 12px;
 }
 
-/* ===== 每日?�示�?? ===== */
+/* ===== 每日提示樣式 ===== */
 .daily-tips-content {
     padding: 8px 0;
 }
@@ -3882,7 +3861,7 @@ body.dark-mode .chart-error {
     word-wrap: break-word;
 }
 
-/* ?��?式設�?*/
+/* 響應式設計 */
 @media (max-width: 768px) {
     .goal-item-recommended {
         padding: 10px;
@@ -3909,7 +3888,7 @@ body.dark-mode .chart-error {
         min-width: 35px;
     }
     
-    /* 每日?�示?��?�?*/
+    /* 每日提示響應式 */
     .tip-item {
         padding: 8px;
         gap: 8px;
@@ -3930,8 +3909,8 @@ body.dark-mode .chart-error {
     }
 }
 
-/* ?��?式設�?*/
-/* ?��??��?從�??��??��? */
+/* 響應式設計 */
+/* 手機版：從上到下排列 */
 @media (max-width: 768px) {
   .emotion-three-column-container,
   .emotion-three-column-container.left-collapsed,
@@ -3944,7 +3923,7 @@ body.dark-mode .chart-error {
     height: auto !important;
   }
 
-  /* ?�天?�?�在?��???*/
+  /* 聊天區域在最上方 */
   .chat-container {
     order: 1 !important;
     min-height: 50vh !important;
@@ -3952,7 +3931,7 @@ body.dark-mode .chart-error {
     width: 100% !important;
   }
 
-  /* 左側?�板?�中??*/
+  /* 左側面板在中間 */
   .left-panel {
     order: 2 !important;
     display: flex !important;
@@ -3964,7 +3943,7 @@ body.dark-mode .chart-error {
     overflow-y: auto !important;
   }
 
-  /* ?�側?�板?��?下方 */
+  /* 右側面板在最下方 */
   .right-panel {
     order: 3 !important;
     display: flex !important;
@@ -3976,7 +3955,7 @@ body.dark-mode .chart-error {
     overflow-y: auto !important;
   }
 
-  /* ?��??�板?�內容�??�調??*/
+  /* 側邊面板的內容區域調整 */
   .glass-panel,
   .glass-panel.collapsed {
     min-height: 200px !important;
@@ -3985,19 +3964,19 @@ body.dark-mode .chart-error {
     max-width: 100% !important;
   }
 
-  /* ?��??�起?��? */
+  /* 隱藏收起按鈕 */
   .panel-toggle-btn {
     display: none !important;
   }
 
-  /* 確�?header?�content?�顯�?*/
+  /* 確保header和content都顯示 */
   .autonomous-left-header,
   .autonomous-right-header,
   .panel-content {
     display: block !important;
   }
 
-  /* 調整?�天輸入?�??*/
+  /* 調整聊天輸入區域 */
   .chat-input-area {
     padding: 10px !important;
   }
@@ -4007,12 +3986,12 @@ body.dark-mode .chart-error {
   }
 }
 
-/* 調整?��?�??以適?�新結�? */
+/* 調整原有樣式以適應新結構 */
 .ai-chat-wrapper {
-  display: none; /* ?��??��??��???*/
+  display: none; /* 隱藏舊的包裝器 */
 }
 
-/* ===== ?��?小抽屜�?強樣�?===== */
+/* ===== 收藏小抽屜增強樣式 ===== */
 .favorite-type-group {
     margin-bottom: 1px;
     border: 1px solid rgba(255, 255, 255, 0.1);
