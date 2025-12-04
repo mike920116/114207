@@ -3901,10 +3901,7 @@ body.dark-mode .chart-error {
 /* 響應式設計 */
 /* 手機版：從上到下排列 */
 @media (max-width: 768px) {
-  .emotion-three-column-container,
-  .emotion-three-column-container.left-collapsed,
-  .emotion-three-column-container.right-collapsed,
-  .emotion-three-column-container.both-collapsed {
+  .emotion-three-column-container {
     padding: 10px !important;
     gap: 15px !important;
     grid-template-columns: 1fr !important;
@@ -3945,12 +3942,8 @@ body.dark-mode .chart-error {
   }
 
   /* 側邊面板的內容區域調整 */
-  .glass-panel,
-  .glass-panel.collapsed {
+  .glass-panel {
     min-height: 200px !important;
-    width: 100% !important;
-    min-width: 100% !important;
-    max-width: 100% !important;
   }
 
   /* 隱藏收起按鈕 */
