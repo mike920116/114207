@@ -3473,45 +3473,8 @@ body.dark-mode .chart-error {
   }
 }
 
-/* ===== 三欄布局系統 (參考 prototype_c_rich.html) ===== */
-/* 主要容器 - 完全復刻 prototype_c 的設計 */
-.emotion-three-column-container {
-  position: relative;
-  z-index: 5;
-  display: grid;
-  grid-template-columns: 300px 1fr 300px; /* 比例：左300px, 右300px */
-  gap: 2rem; /* 32px間距 */
-  max-width: 1400px; /* 限制最大寬度 */
-  margin: 4rem auto 2rem auto; /* 增加上邊距到4rem避免頂到header */
-  padding: 0 1rem; /* 左右最小邊距 */
-  min-height: calc(100vh - 240px); /* 相應調整高度計算 */
-  box-sizing: border-box;
-}
-
-/* 玻璃面板基礎樣式 - 加強互動效果 */
-.glass-panel {
-  background: rgba(0, 0, 0, 0.4);
-  border-radius: 25px;
-  padding: 8px;
-  backdrop-filter: blur(15px);
-  border: 2px solid rgba(100, 255, 218, 0.2);
-  overflow-y: auto;
-  position: relative;
-  transition: all 0.3s ease; /* 添加平滑過渡效果 */
-  cursor: pointer; /* 添加指標效果 */
-}
-
-.glass-panel:hover {
-  border-color: rgba(79, 172, 254, 0.4); /* 懸浮時改變邊框顏色 */
-  box-shadow: 0 10px 30px rgba(79, 172, 254, 0.2); /* 添加懸浮陰影 */
-  transform: translateY(-2px); /* 輕微上浮效果 */
-}
-
-/* 側邊面板樣式 - 增強互動 */
-.left-panel, .right-panel {
-  display: flex;
-  flex-direction: column;
-}
+/* ===== 重複定義已移除，避免覆蓋問題 ===== */
+/* 請參考檔案開頭的 .emotion-three-column-container 定義 */
 
 /* 重複的規則已移除，避免CSS衝突 */
 

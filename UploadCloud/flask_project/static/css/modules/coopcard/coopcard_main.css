@@ -1,6 +1,20 @@
 /* 好友互動 CoopCard 主頁樣式 - 情緒AI風格設計 */
 /* 背景系統已移至 common/starry_background.css */
 
+/* ===== 隱藏導航元素 ===== */
+/* 任務卡片頁面不顯示 header 和 sidebar */
+.header {
+    display: none !important;
+}
+
+.sidebar {
+    display: none !important;
+}
+
+.hamburger {
+    display: none !important;
+}
+
 /* ===== 三欄布局容器 ===== */
 .coopcard-three-column-container {
     position: relative;

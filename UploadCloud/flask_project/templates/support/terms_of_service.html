@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+
+{% block title %}使用者服務條款與知情同意書 | 日記之森{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/common/starry_background.css') }}">
+<style>
+/* 服務條款頁面樣式 */
+.terms-container {
+    position: relative;
+    z-index: 10;
+    max-width: 900px;
+    margin: 80px auto 40px;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    line-height: 1.8;
+}
+
+body.dark-mode .terms-container {
+    background: rgba(26, 60, 90, 0.95);
+    color: #E6F0FA;
+}
+
+.terms-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid #5B7F47;
+}
+
+body.dark-mode .terms-header {
+    border-bottom-color: #64ffda;
+}
+
+.terms-header h1 {
+    color: #5B7F47;
+    font-size: 32px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+body.dark-mode .terms-header h1 {
+    color: #64ffda;
+}
+
+.terms-header p {
+    color: #666;
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+body.dark-mode .terms-header p {
+    color: #B8D4E8;
+}
+
+.terms-section {
+    margin-bottom: 35px;
+}
+
+.terms-section h2 {
+    color: #5B7F47;
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+body.dark-mode .terms-section h2 {
+    color: #64ffda;
+}
+
+.terms-section .important-tag {
+    background: #dc3545;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.terms-section h3 {
+    color: #7F9A65;
+    font-size: 18px;
+    margin: 20px 0 10px;
+    font-weight: 600;
+}
+
+body.dark-mode .terms-section h3 {
+    color: #88C9A1;
+}
+
+.terms-section p,
+.terms-section ul {
+    color: #333;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+
+body.dark-mode .terms-section p,
+body.dark-mode .terms-section ul {
+    color: #D0E0F0;
+}
+
+.terms-section ul {
+    padding-left: 30px;
+    list-style: disc;
+}
+
+.terms-section li {
+    margin-bottom: 8px;
+}
+
+.emergency-box {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 25px 0;
+    border-left: 5px solid #fff;
+}
+
+.emergency-box h4 {
+    font-size: 20px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.emergency-box p {
+    color: white !important;
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.resources-box {
+    background: linear-gradient(135deg, #5B7F47, #7F9A65);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin: 25px 0;
+}
+
+body.dark-mode .resources-box {
+    background: linear-gradient(135deg, #0f3d63, #164a75);
+}
+
+.resources-box h3 {
+    color: white !important;
+    font-size: 22px;
+    margin-bottom: 15px;
+}
+
+.resources-box ul {
+    list-style: none;
+    padding: 0;
+}
+
+.resources-box li {
+    color: white !important;
+    padding: 12px;
+    margin: 10px 0;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.resources-box li strong {
+    color: #FFD700;
+    min-width: 150px;
+}
+
+.back-button {
+    display: inline-block;
+    margin-top: 30px;
+    padding: 12px 30px;
+    background: linear-gradient(135deg, #5B7F47, #7F9A65);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.back-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(91, 127, 71, 0.3);
+}
+
+body.dark-mode .back-button {
+    background: linear-gradient(135deg, #2A4B7C, #4A7B9D);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .terms-container {
+        margin: 70px 15px 30px;
+        padding: 25px 20px;
+    }
+
+    .terms-header h1 {
+        font-size: 24px;
+    }
+
+    .terms-section h2 {
+        font-size: 20px;
+    }
+
+    .terms-section h3 {
+        font-size: 16px;
+    }
+
+    .terms-section p,
+    .terms-section ul,
+    .resources-box li {
+        font-size: 14px;
+    }
+
+    .resources-box li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .resources-box li strong {
+        min-width: auto;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 統一星空背景系統 -->
+{% include 'components/starry_background.html' %}
+
+<div class="terms-container">
+    <div class="terms-header">
+        <h1>📜 使用者服務條款與知情同意書</h1>
+        <p>歡迎使用 <strong>日記之森</strong>（以下簡稱「本系統」）</p>
+        <p>在使用本系統前，請務必詳細閱讀以下條款。</p>
+        <p>當您點擊「同意」或開始使用本系統，即代表您已充分理解並接受以下內容。</p>
+    </div>
+
+    <!-- 第1條：非醫療行為與免責聲明 -->
+    <div class="terms-section">
+        <h2>
+            1. 非醫療行為與免責聲明 (Disclaimer)
+            <span class="important-tag">重要</span>
+        </h2>
+
+        <h3>⚕️ 非醫療診斷</h3>
+        <p>
+            本系統提供之情緒分析、日記回饋或陪伴功能，僅基於演算法（或 AI 模型）進行輔助性支持，
+            <strong>絕不構成任何形式的醫療診斷、心理諮商或治療建議</strong>。
+        </p>
+
+        <h3>👨‍⚕️ 無法取代專業人員</h3>
+        <p>
+            本系統無法取代專業心理師、精神科醫師或其他醫療人員的專業判斷。
+            若您有嚴重的心理困擾、情緒障礙或精神疾病症狀，<strong>請務必尋求合格醫療機構的協助</strong>。
+        </p>
+
+        <div class="emergency-box">
+            <h4>🚨 緊急狀況</h4>
+            <p>
+                本系統<strong>不具備處理緊急危難</strong>（如自殺、自傷或傷害他人風險）的能力。
+            </p>
+            <p>
+                若您或您身邊的人處於緊急危難中，請立即撥打：
+            </p>
+            <p style="font-size: 20px; font-weight: bold; margin-top: 10px;">
+                📞 110（警察） | 🚑 119（消防救護） | 💚 1925（安心專線）
+            </p>
+        </div>
+    </div>
+
+    <!-- 第2條：資料隱私與安全性 -->
+    <div class="terms-section">
+        <h2>2. 資料隱私與安全性 (Data Privacy & Security)</h2>
+
+        <h3>📊 資料收集</h3>
+        <p>
+            本系統將收集您輸入的文字內容（日記）、情緒指數及使用紀錄，
+            主要用於系統功能運作及學術研究分析（若適用）。
+        </p>
+
+        <h3>🤖 AI 處理告知（若有使用 LLM）</h3>
+        <p>
+            您輸入的內容可能會經由大型語言模型（LLM）進行處理以生成回饋。
+            儘管我們已採取措施保護您的隱私，但<strong>請避免在日記中輸入真實姓名、身分證字號、地址等敏感個人識別資訊</strong>。
+        </p>
+
+        <h3>🔒 資料保護</h3>
+        <p>
+            作為資訊管理相關領域的開發團隊，我們承諾盡最大努力採取符合標準的資安措施（如傳輸加密）來保護您的資料安全。
+            然而，<strong>網際網路傳輸非絕對安全</strong>，使用者需自行承擔部分風險。
+        </p>
+    </div>
+
+    <!-- 第3條：系統限制與使用規範 -->
+    <div class="terms-section">
+        <h2>3. 系統限制與使用規範 (Limitations & Usage)</h2>
+
+        <h3>⚠️ 準確性限制</h3>
+        <p>
+            系統所生成之回應可能存在誤差（Hallucinations），
+            <strong>不保證內容的絕對正確性或適用性</strong>，請使用者自行斟酌參考。
+        </p>
+
+        <h3>🔬 學術/測試性質（若適用）</h3>
+        <p>
+            本系統目前處於 <strong>[開發測試 / 學術專題]</strong> 階段，
+            可能會不定時進行維護、更新或暫停服務，恕不另行通知。
+        </p>
+    </div>
+
+    <!-- 第4條：求助資源 -->
+    <div class="terms-section">
+        <h2>4. 求助資源 (Resources)</h2>
+        <p>若您感到情緒低落或需要專業協助，請參考以下資源：</p>
+
+        <div class="resources-box">
+            <h3>📞 24小時專業求助專線</h3>
+            <ul>
+                <li>
+                    <strong>衛福部安心專線</strong>
+                    <span>1925（依舊愛我）</span>
+                </li>
+                <li>
+                    <strong>生命線協談專線</strong>
+                    <span>1995</span>
+                </li>
+                <li>
+                    <strong>張老師專線</strong>
+                    <span>1980</span>
+                </li>
+                <li>
+                    <strong>緊急報案電話</strong>
+                    <span>110（警察）</span>
+                </li>
+                <li>
+                    <strong>緊急救護電話</strong>
+                    <span>119（消防救護）</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- 返回按鈕 -->
+    <div style="text-align: center;">
+        <a href="/" class="back-button">
+            <i class="fas fa-arrow-left"></i> 返回首頁
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/common/starry_background.js') }}"></script>
+{% endblock %}
