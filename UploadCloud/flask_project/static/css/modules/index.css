@@ -360,44 +360,102 @@ body.dark-mode .auth-buttons a:hover {
   }
 }
 
-/* 響應式設計 */
+/* 響應式設計 - 手機版 */
 @media(max-width:768px) {
-  .glass-feature .feature-content {
-    padding: 30px 20px;
+  /* Hero區塊優化 */
+  .hero {
+    padding: 100px 15px 40px 15px;
+    min-height: 80vh;
   }
-  
-  .feature-text h2 {
-    font-size: 26px;
-    gap: 8px;
+
+  .hero h1 {
+    font-size: 24px !important;
+    line-height: 1.4;
   }
-  
-  .feature-icon {
-    font-size: 60px;
-  }
-  
-  /* 按鈕組在手機版垂直排列 */
-  .feature-buttons-group {
-    flex-direction: column;
-    gap: 12px;
-    width: 100%;
-  }
-  
-  .feature-btn {
-    padding: 12px 25px !important;
+
+  .hero p {
     font-size: 15px !important;
+    line-height: 1.6;
+    padding: 0 10px;
+  }
+
+  /* Feature區塊優化 */
+  .glass-feature .feature-content {
+    padding: 25px 15px;
+    flex-direction: column !important;
+  }
+
+  .feature-text h2 {
+    font-size: 24px;
     gap: 8px;
-    width: 100%;
     justify-content: center;
   }
-  
-  .auth-buttons a {
-    padding: 15px 35px !important;
-    font-size: 18px !important;
-    gap: 10px;
+
+  .feature-text p {
+    font-size: 15px;
+    text-align: center;
   }
-  
+
+  .feature-icon {
+    font-size: 60px;
+    order: -1; /* 圖示移到上方 */
+    margin-bottom: 15px;
+  }
+
+  /* 按鈕組在手機版垂直排列並居中 */
+  .feature-buttons-group {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .feature-btn {
+    padding: 12px 25px !important;
+    font-size: 14px !important;
+    gap: 8px;
+    width: 90%;
+    max-width: 300px;
+    justify-content: center;
+  }
+
+  /* 認證區塊優化 */
+  .auth-section {
+    padding: 40px 15px;
+    min-height: 80vh;
+  }
+
+  .auth-section h2 {
+    font-size: 22px !important;
+    line-height: 1.4;
+    padding: 0 10px;
+  }
+
+  .auth-buttons {
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    align-items: center;
+  }
+
+  .auth-buttons a {
+    padding: 14px 30px !important;
+    font-size: 16px !important;
+    gap: 10px;
+    width: 90%;
+    max-width: 300px;
+    justify-content: center;
+  }
+
+  /* 公告區塊優化 */
   .announcement-board-home {
-    padding: 24px 20px 40px;
+    padding: 20px 15px 30px;
+    margin: 0 10px;
+    border-radius: 20px;
+  }
+
+  .announcement-title {
+    font-size: 22px;
   }
 }
 
