@@ -3936,20 +3936,72 @@ body.dark-mode .chart-error {
 }
 
 /* 響應式設計 */
-/* 手機版：隱藏側邊面板，只顯示聊天區域 */
+/* 手機版：從上到下排列 */
 @media (max-width: 768px) {
   .emotion-three-column-container {
-    padding: 10px;
-    gap: 10px;
-    grid-template-rows: 1fr;
+    padding: 10px !important;
+    gap: 15px !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto !important;
+    height: auto !important;
   }
 
+  /* 聊天區域在最上方 */
   .chat-container {
-    min-height: 70vh;
+    order: 1 !important;
+    min-height: 50vh !important;
+    height: auto !important;
+    width: 100% !important;
   }
 
-  .left-panel, .right-panel {
-    display: none; /* 在手機上隱藏側邊面板 */
+  /* 左側面板在中間 */
+  .left-panel {
+    order: 2 !important;
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+  }
+
+  /* 右側面板在最下方 */
+  .right-panel {
+    order: 3 !important;
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 100% !important;
+    height: auto !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+  }
+
+  /* 側邊面板的內容區域調整 */
+  .glass-panel {
+    min-height: 200px !important;
+  }
+
+  /* 隱藏收起按鈕 */
+  .panel-toggle-btn {
+    display: none !important;
+  }
+
+  /* 確保header和content都顯示 */
+  .autonomous-left-header,
+  .autonomous-right-header,
+  .panel-content {
+    display: block !important;
+  }
+
+  /* 調整聊天輸入區域 */
+  .chat-input-area {
+    padding: 10px !important;
+  }
+
+  .chat-input-area textarea {
+    font-size: 14px !important;
   }
 }
 
