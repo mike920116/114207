@@ -2106,7 +2106,10 @@ body.sunset-theme .glass-panel {
 
 /* 響應式設計 - 平板版：由上到下排序 */
 @media (max-width: 1100px) {
-    .emotion-three-column-container {
+    .emotion-three-column-container,
+    .emotion-three-column-container.left-collapsed,
+    .emotion-three-column-container.right-collapsed,
+    .emotion-three-column-container.both-collapsed {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto 1fr;
         gap: 15px;
@@ -2129,7 +2132,7 @@ body.sunset-theme .glass-panel {
         max-width: 100%;
         min-width: 100%;
         height: auto;
-        max-height: 400px;
+        max-height: 70vh;
         overflow-y: auto;
     }
 
@@ -2140,13 +2143,21 @@ body.sunset-theme .glass-panel {
         max-width: 100%;
         min-width: 100%;
         height: auto;
-        max-height: 400px;
+        max-height: 70vh;
         overflow-y: auto;
     }
 
     /* 側邊欄按鈕調整 */
     .panel-toggle-btn {
         display: none; /* 平板版不需要收起按鈕 */
+    }
+
+    /* 側邊面板寬度設定 */
+    .glass-panel,
+    .glass-panel.collapsed {
+        width: 100%;
+        min-width: 100%;
+        max-width: 100%;
     }
 }
 
@@ -3928,7 +3939,7 @@ body.dark-mode .chart-error {
     max-width: 100% !important;
     min-width: 100% !important;
     height: auto !important;
-    max-height: 300px !important;
+    max-height: 60vh !important;
     overflow-y: auto !important;
   }
 
@@ -3940,7 +3951,7 @@ body.dark-mode .chart-error {
     max-width: 100% !important;
     min-width: 100% !important;
     height: auto !important;
-    max-height: 300px !important;
+    max-height: 60vh !important;
     overflow-y: auto !important;
   }
 
