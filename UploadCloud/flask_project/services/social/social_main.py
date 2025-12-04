@@ -146,7 +146,7 @@ def create_post():
                         
                         # 儲存相對路徑到資料庫（用於網頁顯示）
                         # 使用 url_for 來生成正確的靜態檔案 URL
-                        image_url = f"/0706_flask_/static/uploads/{unique_filename}"
+                        image_url = f"/static/uploads/{unique_filename}"
                         
                     except Exception as e:
                         print(f"[ERROR] 圖片上傳失敗: {str(e)}")

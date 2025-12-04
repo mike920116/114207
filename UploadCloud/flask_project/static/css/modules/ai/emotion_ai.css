@@ -2104,41 +2104,49 @@ body.sunset-theme .glass-panel {
     box-shadow: 0 5px 15px rgba(100, 255, 218, 0.4);
 }
 
-/* 響應式設計 - 使用側邊欄收起機制而非摺疊 */
+/* 響應式設計 - 平板版：由上到下排序 */
 @media (max-width: 1100px) {
     .emotion-three-column-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
         gap: 15px;
         padding: 15px;
+        height: auto;
+        min-height: calc(100vh - 60px);
     }
-    
-    /* 自動收起左側面板 */
+
+    /* 調整順序：中央聊天區域在最上面 */
+    .chat-container {
+        order: 1;
+        height: auto;
+        min-height: 60vh;
+    }
+
+    /* 左側面板在中間 */
     .left-panel {
-        width: 60px;
-        min-width: 60px;
-        max-width: 60px;
+        order: 2;
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        height: auto;
+        max-height: 400px;
+        overflow-y: auto;
     }
-    
-    .left-panel .autonomous-left-header,
-    .left-panel .panel-content {
-        display: none;
+
+    /* 右側面板在最下面 */
+    .right-panel {
+        order: 3;
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        height: auto;
+        max-height: 400px;
+        overflow-y: auto;
     }
-    
-    .left-panel .panel-toggle-btn {
-        position: relative;
-        top: auto;
-        left: auto;
-        right: auto;
-        margin: 10px auto 0 auto;
-        display: flex;
-    }
-    
-    .left-panel .panel-toggle-btn i {
-        transform: rotate(180deg);
-    }
-    
-    /* 更新grid布局以適應收起的左側面板 */
-    .emotion-three-column-container {
-        grid-template-columns: 60px 1fr 320px;
+
+    /* 側邊欄按鈕調整 */
+    .panel-toggle-btn {
+        display: none; /* 平板版不需要收起按鈕 */
     }
 }
 
@@ -2146,32 +2154,15 @@ body.sunset-theme .glass-panel {
     .emotion-three-column-container {
         padding: 10px;
         gap: 10px;
-        grid-template-columns: 60px 1fr 60px;
     }
-    
-    /* 自動收起右側面板 */
+
+    .chat-container {
+        min-height: 50vh;
+    }
+
+    .left-panel,
     .right-panel {
-        width: 60px;
-        min-width: 60px;
-        max-width: 60px;
-    }
-    
-    .right-panel .autonomous-right-header,
-    .right-panel .panel-content {
-        display: none;
-    }
-    
-    .right-panel .panel-toggle-btn {
-        position: relative;
-        top: auto;
-        left: auto;
-        right: auto;
-        margin: 10px auto 0 auto;
-        display: flex;
-    }
-    
-    .right-panel .panel-toggle-btn i {
-        transform: rotate(180deg);
+        max-height: 300px;
     }
 }
 
@@ -3945,30 +3936,18 @@ body.dark-mode .chart-error {
 }
 
 /* 響應式設計 */
-@media (max-width: 1100px) {
-  .emotion-three-column-container {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto 1fr;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  .left-panel, .right-panel {
-    order: 2;
-    max-height: 200px;
-  }
-  
-  .chat-container {
-    order: 1;
-  }
-}
-
+/* 手機版：隱藏側邊面板，只顯示聊天區域 */
 @media (max-width: 768px) {
   .emotion-three-column-container {
     padding: 10px;
     gap: 10px;
+    grid-template-rows: 1fr;
   }
-  
+
+  .chat-container {
+    min-height: 70vh;
+  }
+
   .left-panel, .right-panel {
     display: none; /* 在手機上隱藏側邊面板 */
   }

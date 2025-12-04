@@ -15,30 +15,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateTitleCharCount() {
         const currentLength = titleInput.value.length;
         titleCharCount.textContent = currentLength;
-        
-        // 根據字數變化顏色
-        if (currentLength > 90) {
-            titleCharCount.style.color = '#dc3545';
-        } else if (currentLength > 80) {
-            titleCharCount.style.color = '#fd7e14';
-        } else {
-            titleCharCount.style.color = '#666';
-        }
     }
 
     // 內容字數計算
     function updateCharCount() {
         const currentLength = contentTextarea.value.length;
         charCount.textContent = currentLength;
-        
-        // 根據字數變化顏色
-        if (currentLength > 900) {
-            charCount.style.color = '#dc3545';
-        } else if (currentLength > 800) {
-            charCount.style.color = '#fd7e14';
-        } else {
-            charCount.style.color = '#666';
-        }
     }
 
     // 監聽標題輸入

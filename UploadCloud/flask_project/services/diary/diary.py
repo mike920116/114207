@@ -108,7 +108,7 @@ def save_diary():
             "Authorization": f"Bearer {DIFY_API_KEY_For_Diary}"
         }
 
-        dify_response = requests.post("http://35.221.193.74/v1/chat-messages", json=dify_payload, headers=dify_headers)
+        dify_response = requests.post("https://api.dify.ai/v1", json=dify_payload, headers=dify_headers)
 
         if dify_response.status_code != 200:
             print("Dify 錯誤狀態碼:", dify_response.status_code)
